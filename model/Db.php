@@ -30,15 +30,20 @@ class Db {
     
     private static function init(){
     	if(!self::$inited){
-    		self::$config=array_merge(Config::get("defaultdb","db",[]));
-    		self::$inited=true;	
+            self::$config=array_merge(self::$config,Config::get("defaultdb","db",[]));
+            self::$inited=true;	
     	}
-    	
     	return true;
     }
-    
+    public static function bycfg($cfgname){
+        self::init();
+        self::$objInstance=NULL;
+        self::$config=array_merge(self::$config,Config::get($cfgname,"db",[]));
+        return Db;
+    }
     public static function setup($cfg=[]){
     	self::init();
+        self::$objInstance=NULL;
         if(empty($cfg)){
             return self::$config;
         } else {
@@ -130,8 +135,6 @@ class Db {
     public static function getInstance(  ) {    
     	self::init();
         if(!self::$objInstance){ 
-        
-        
             if(empty(self::$config["dsn"])){
                 self::$config["dsn"]=self::$config["dbtype"].":host=".self::$config["host"].";dbname=".self::$config["dbname"];
             } 
@@ -155,10 +158,12 @@ class Db {
     public static function ok(  ) {    
         return !is_null(self::getInstance());
     }     
+    /*
+        调用简易存储过程时，参数是普通数组即可，一样可以带有输出参数，输出参数必须以_开头
+     *      */
     public static function simplecall($procname,$params){
     	$realparas=[];
     	$i=0;
-    	
     	foreach($params as $v){
     		if(preg_match("/^_/",$v)){$realparas[$v]=$v;} else {$realparas[$i]=$v;}
     		$i++;
@@ -180,6 +185,11 @@ class Db {
 			echo "<br>info:<br>";
 			var_dump(\Db::$info);
     }
+    
+    /*
+     *    在调用CallProc的时候，参数格式必须是一个关联数组，如果某个参数是输出参数，那么这个参数必须以_开头
+     *     
+     *      */
     public static function callproc ($procname,$params){
         $conn=self::getInstance();
         if(is_null($conn)){
