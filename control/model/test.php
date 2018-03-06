@@ -10,7 +10,7 @@ class test {
 		echo $arg3;
 	}
 	public function role(){
-		echo \User::getrole();
+            \Response::returntaskok("我是数据", "我是信息");
 	}
         public function fe(){
             var_dump(file_exists(null));

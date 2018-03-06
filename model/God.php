@@ -10,7 +10,7 @@ define('MODEL_PATH',__DIR__.'/');//模型库目录,命名空间的顶部空间
 define('FRAMEROOT_PATH',MODEL_PATH.'../');//框架根目录
 define('VIEW_PATH',FRAMEROOT_PATH.'view/');//VIEW目录(旧工厂目录)
 define('CONTROL_PATH',FRAMEROOT_PATH.'control/');//VIEW目录(旧工厂目录)
-define('STATIC_PATH',VIEW_PATH.'static/');
+define('STATIC_PATH',VIEW_PATH.'static/'); 
 define('COMMON_PATH',FRAMEROOT_PATH.'common/');
 define('3COM_PATH',COMMON_PATH.'3com/');
 define('CACHE_PATH',ENTRY_PATH.'cache/');
@@ -26,6 +26,7 @@ class Loader
 {
         /* 路径映射 */
         public static $namespaceroot = MODEL_PATH;
+        public static $usermodelroot = ENTRY_PATH;
         public static $loadlog =[];
         /**
         * 自动加载器
@@ -34,8 +35,11 @@ class Loader
         {
             //echo "<br>Request class:".$class;
             $file = self::findFile($class);
+            $userfile=self::finduserfile($class);
             //echo "<br>class file should be:".$file ;
-            if (file_exists($file)) {
+            if(file_exists($userfile)){
+                self::includeFile($userfile);
+            } else if (file_exists($file)) {
                 self::includeFile($file);
                 //echo "<br>loaded:".$file ;
             }
@@ -45,9 +49,19 @@ class Loader
         */
         private static function findFile($class)
         {
-        	$rsv=self::$namespaceroot.$class.".php";
-        	$rsv=strtr($rsv,"\\",DIRECTORY_SEPARATOR);
+            $rsv=self::$namespaceroot.$class.".php";
+            $rsv=strtr($rsv,"\\",DIRECTORY_SEPARATOR);
             return $rsv; // 文件标准路径
+        }
+        private static function finduserfile($class){
+            if(preg_match("/^model\\\\/",$class)){
+                $rsv=self::$usermodelroot.$class.".php";
+                $rsv=strtr($rsv,"\\",DIRECTORY_SEPARATOR);
+                return $rsv; // 文件标准路径
+            } else {
+                return null;
+            }
+            
         }
         /**
         * 引入文件
