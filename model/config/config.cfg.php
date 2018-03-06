@@ -6,6 +6,7 @@ return [
 	'CFGSUFFIX'=>".cfg.php",
 	'ROUTERULE_DOMAIN'=>"routerule",
 	'DEFAULT_MODELRIGHT'=>1,
+        'REQUEST_LIMIT'=>false,
 	'GUESTUSER'=>["uid"=>0,"uname"=>"请登录","nickname"=>"请登录","role"=>0],
 	'MODELFAIL_BASEPATH'=>ENTRY_PATH,
 	'ROUTEFAIL_BASEPATH'=>ENTRY_PATH,

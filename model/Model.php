@@ -22,7 +22,7 @@ class Model
 	is_null($this->accesslevel)&&($this->accesslevel=DEFAULT_MODELRIGHT);
 	User::checkright($this->accesslevel)||$this->noright();
    }
-   
+
 
    public function noright(){
        if(empty(include ENTRY_PATH.NOMODELRIGHT_PAGE)) {Response::returntaskfail('',1,'您没有权限执行此Model!');}

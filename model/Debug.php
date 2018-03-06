@@ -6,9 +6,9 @@
 *（2）有开关可以控制；
 */
 
-defined("DEBUG_ENABLE")||define("DEBUG_ENABLE",false);
-defined("DEBUG_ON")||define("DEBUG_ON",false);
-defined("LOG_GLUE")||define("LOG_GLUE","<br>\r\n");
+defined("DEBUG_ENABLE")||define("DEBUG_ENABLE",false); //是否使能Debug功能
+defined("DEBUG_ON")||define("DEBUG_ON",false);//记录日志的时候是否直接打印出来
+defined("LOG_GLUE")||define("LOG_GLUE","<br>\r\n");//打印的时候，每一条日志之间的
 class Debug
 {
     public static $on=DEBUG_ON;//on：记录+输出；off：只记录；

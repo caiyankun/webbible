@@ -39,6 +39,28 @@ class Response
         echo json_encode(self::$responseobj,JSON_UNESCAPED_UNICODE);
         exit(0);
     }
+    public static function returnnoright($info){
+        self::$code=100;  //约定100为没有权限？？
+        self::$info=$info;
+        self::$data=null;    
+        self::$_taskstat["code"]=self::$code;
+        self::$_taskstat["info"]=self::$info;
+	self::$responseobj["_taskresult"]=self::$data;
+        self::$responseobj["_taskstat"]=self::$_taskstat;
+        echo json_encode(self::$responseobj,JSON_UNESCAPED_UNICODE);
+        exit(0);
+    }
+    public static function irregrequest($info) {
+        self::$code=99;  //约定99为访问方式不正确
+        self::$info=$info;
+        self::$data=null;    
+        self::$_taskstat["code"]=self::$code;
+        self::$_taskstat["info"]=self::$info;
+	self::$responseobj["_taskresult"]=self::$data;
+        self::$responseobj["_taskstat"]=self::$_taskstat;
+        echo json_encode(self::$responseobj,JSON_UNESCAPED_UNICODE);
+        exit(0);
+    }
     public static function returnresult($data=""){
         self::$data=$data;    
 	if(is_object(self::$data)||is_array(self::$data)){

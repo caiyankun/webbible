@@ -3,6 +3,8 @@
 
 /*实现Request功能，负责解析Request请求：
 */
+
+!defined("REQUEST_LIMIT")&&define("REQUEST_LIMIT",Config::get('REQUEST_LIMIT',"",false));
 class Request
 {
    public static function ispost($postdatas=null){
@@ -21,6 +23,11 @@ class Request
             if(!isset($_REQUEST[$postdata])) {return false;}
         }
         return true;
+    }
+    public static function postlimit(){
+       // var_dump(REQUEST_LIMIT);
+        //var_dump(self::ispost());
+        return REQUEST_LIMIT&&(!self::ispost());
     }
     public static function post($dataname){
         return $_POST[$dataname];

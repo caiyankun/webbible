@@ -21,6 +21,9 @@ class test {
 	public function post(){
 		\Response::returntaskok($_REQUEST,"这是测试信息！");
 	}
+        public function testpost(){
+            \Request::postlimit()&&\Response::irregrequest("只有Post方式访问才可以！");
+        }
 	public function callproc($procname,$params){
 	
 		//if(\Db::callproc("user.login_check",["uname"=>"test@test.com","upass"=>md5("123456"),"_error"=>"3"])){
