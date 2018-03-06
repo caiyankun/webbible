@@ -1,6 +1,6 @@
 <?php
 
-define("MODELFAIL_BASEPATH",Config::get('MODELFAIL_BASEPATH',"",ENTRY_PATH));
+//define("MODELFAIL_BASEPATH",Config::get('MODELFAIL_BASEPATH',"",ENTRY_PATH));
 define("DEFAULT_MODELRIGHT",Config::get('DEFAULT_MODELRIGHT',"",1));
 define("LACKPARASTOP",Config::get('LACKPARASTOP',"",true));
 define("LACKPARARETURN",Config::get('LACKPARARETURN',"",false));

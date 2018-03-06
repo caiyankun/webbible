@@ -13,7 +13,7 @@ class test {
             \Response::returntaskok("我是数据", "我是信息");
 	}
         public function fe(){
-            var_dump(file_exists(null));
+            echo "我是用户fe";
         }
 
         public function testwarehouse(){

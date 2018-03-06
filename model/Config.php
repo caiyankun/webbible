@@ -9,7 +9,7 @@ class Config
         self::load(ENTRY_PATH."config/config.cfg.php");//加载用户配置变量
         //echo MODEL_PATH.MODELCFG_FILE;
         //echo ENTRY_PATH."config/config.cfg.php";
-        $cfg_userpath=MODEL_PATH.self::get("cfg_userpath","","");
+        $cfg_userpath=self::get("CFG_BASEPATH","",MODEL_PATH).self::get("cfg_userpath","","");
         $cfgfiles=self::get("CFG_AUTOLOAD","",[]);
         $cfgsuffix=self::get("CFGSUFFIX","",'.cfg.php');
         foreach ($cfgfiles as $cfgfile){
@@ -45,8 +45,6 @@ class Config
     public static function dumpcfg($domain=''){
         var_dump(self::$config[$domain]);
     }
-
-
     //array_merge(self::$config[$range], array_change_key_case($name,CASE_UPPER))
 }
 
