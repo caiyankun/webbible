@@ -1,8 +1,8 @@
 <?php
 return [
 	'CFG_BASEPATH'=>ENTRY_PATH,
-	'CFG_AUTOLOAD'=>["routerule","db"],
-	'CFG_USERPATH'=>"cfg/",
+	'CFG_AUTOLOAD'=>["routerule","db","userrole"],
+	'CFG_USERPATH'=>"config/",
 	'CFGSUFFIX'=>".cfg.php",
 ];
 /*

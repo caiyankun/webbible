@@ -16,6 +16,9 @@ class User
     public static function getrole(){
         return self::info()['role'];
     }
+    public static function uid(){
+        return self::info()['uid'];
+    }
     public static function checkright($rightlevel){
     	return self::getrole()>=$rightlevel;
     }
