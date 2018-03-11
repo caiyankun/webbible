@@ -64,4 +64,22 @@ class user
             \Response::returntaskok(\Db::arraydata());
         }
     }
+    public function upduserinfo() {
+        $content="";
+        foreach ($_GET as $key => $value){
+            if($key=='uid'){
+            } else {
+                if(empty($content)){
+                    $content=$content.$key."='".$value."'";
+                } else {
+                    $content=$content.",".$key."='".$value."'";
+                }
+            }
+        }
+        if(!\Db::simplecall("more.upduserinfo", array($content,\User::uid()))){
+            \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
+        } else {
+            \Response::returntaskok(\Db::arraydata());
+        }
+    }
 }
