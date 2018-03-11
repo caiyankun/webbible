@@ -76,7 +76,7 @@ class user
                 }
             }
         }
-        if(!\Db::simplecall("more.upduserinfo", array($content,\User::uid()))){
+        if(!\Db::simplecall("more.upduserinfo", array(\User::uid(),$content))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
             \Response::returntaskok(\Db::arraydata());

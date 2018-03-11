@@ -6,7 +6,7 @@ class Db {
     private static $config=[
         "dsn"=>"",//$dsn="$dbms:host=$host;dbname=$dbName";
         "host"=>"localhost",//数据库主机名
-        "dbname"=>"test",//使用的数据库
+        "dbname"=>"user",//使用的数据库
         "uname"=>"root",//数据库连接用户名
         "upass"=>"",//对应的密码
         "dbtype"=>"mysql",//数据库类型
