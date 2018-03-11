@@ -1,0 +1,443 @@
+/*sm.body.css*/
+/*
+重定义Body (边框，背景，前景)
+重定义全局超链接效果(边框，背景，前景)
+布局用的表格的样式
+文字大小，字体，颜色
+定义footer
+*/
+*{/*文字大小，字体，颜色*/
+    text-align:center;color:#666;font-size:14px;font-family:'Microsoft YaHei',Arial, Helvetica, sans-serif;
+    margin:0px;padding:0px;border:0px;
+}
+.clear{float:none;clear:both;}
+table.tableframe {/*布局用的表格*/
+    width:100%;height:100%;
+    table-layout:fixed;border-collapse:collapse;
+}
+table.tableframe td{overflow:hidden;}
+/*全局超链接样式以及按钮形式的超链接样式*/
+a:link,a:visited{text-decoration:none;;color:#00F}
+a:hover,a:active {text-decoration:underline;cursor:pointer;}
+a.button,p.button {
+    float:left;height:30px;line-height:30px; min-width:0px;
+    padding-left:15px;padding-right:15px;background-color:#fafafa;
+    white-space:nowrap; /*force no wrap*/ 
+    overflow:hidden; /*auto hide the overflow text */
+    text-overflow: ellipsis; /*add ... when hide some text*/ 
+    -o-text-overflow:ellipsis; /*suitale for opera browser*/
+}
+a.button:hover{/*background-position:7px 7px;line-height:32px;*/text-decoration:none;cursor:pointer;background-color:#ccc;}
+/*网页切片*/
+body{background-color: #ededed;}
+div#head{background-color: #ededed;width: 100%;position:relative;}
+div#body {
+    position:relative;width:100%;min-height: 400px;
+    background-color: #fafafa;
+}
+div#page {position: relative;background-color: #efefef;width:1100px;margin:auto;}
+div#footer{
+    position:relative;width:100%;height:90px;
+    background-color:#ededed;border-top:solid 1px #ddd;padding-top: 10px;
+    font-size:14px;text-align: center;color:#666;
+}
+/*sm.divdialog.css*/
+/*
+div.divdialog.mask
+div.divdialog.content
+    div.toolbar[.close]
+必须配合javascript使用
+*/
+div.divdialog.mask {
+    position:absolute;z-index:1001;left:0;top:0;width:100%;height:100%;
+    display:none;opacity:0.5;background:#808080;
+    overflow:hidden;	
+}
+div.divdialog.content {
+    position:absolute;z-index:1002;left:0;top:0;min-width:400px;min-height:300px;
+    display:none;background:#CCC;border:1px solid #3F3;
+}
+div.divdialog.content div.toolbar{
+    position:absolute;z-index:1003;height:20px;width:100%;right:0;top:0;
+    display:none;background:#808080;opacity:0.5;
+    cursor:pointer;font-size:18px;line-height:20px;	
+}
+div.divdialog.content div.toolbar.close{z-index:1004;width:20px;}
+div.divdialog.content:hover div.toolbar{display:block;}
+/*sm.tableframe.css*/
+/*
+table.tableframe
+    tr.singleframe
+        td[.leftpart_hide.leftpart_show]
+            div.togelmenue
+                a.title
+            div.contentdiv
+        td.rightpart
+*/
+
+table.tableframe {
+    border:none;margin:0px;padding:0px;border-collapse:collapse;
+    table-layout:fixed;width:100%;	height:100%;
+}
+table.tableframe tr.singleframe {padding:0px;border:0px;height:500px;}
+table.tableframe tr.singleframe td.leftpart_hide {
+    vertical-align:top;overflow:hidden;
+    width:30px;
+    padding:0px;border:1px solid #c6c6c6;background-color:#eeeeee;
+}
+table.tableframe tr.singleframe td.leftpart_show {
+    vertical-align:top;overflow:hidden;overflow-y:hidden;
+    padding:0px;border:1px solid #c6c6c6;background-color:#eeeeee;
+    width:200px;
+}
+table.tableframe tr.singleframe td.rightpart {padding-left:15px;border:none;vertical-align:top;}
+table.tableframe tr.singleframe td.leftpart_show .togelmenue {
+    height:20px;width:100%;
+    background:#dfdfdf url(Res/hideMenu1.gif) no-repeat;background-position:100% 50%;
+}
+table.tableframe tr.singleframe td.leftpart_hide .togelmenue {
+    height:20px;width:30px;
+    background: #dfdfdf url(Res/showMenu.gif) no-repeat;background-position:100% 50%;
+}
+table.tableframe tr.singleframe td.leftpart_hide a.title {display:none;}
+table.tableframe tr.singleframe td.leftpart_hide .contentdiv {display:none;width:100%;}
+/*sm.tabdiv.css*/
+/*
+div.tabdiv{+id}
+	div.tabshead
+		a.curtab{+id} a.tabs{+id} a.tabs{+id}
+	div.tabsbody{+id}
+		textarea.output
+	div.tabsbody{+id}
+	div.tabsbody{+id}
+*/
+
+/*整个tab层居中，最低高度为400px*/
+.tabdiv{
+    width:100%;min-height: 400px;
+    margin-top:5px;border: #c6c6c6 1px solid; background: #ffffff;
+}
+/*tab头的样式*/
+.tabdiv .tabshead {padding-left: 0px;border:0px;background-color: #eeeeee;}
+.tabdiv .tabshead a {
+    padding-top:4px;padding-bottom:4px;	padding-right: 10px;padding-left: 10px;	border-right: #b2c9d3 1px solid;
+    cursor: pointer; 
+    float: left;
+}
+/*已选tab头（超链接）的样式*/
+.tabdiv .tabshead .curtab {
+    border-bottom:1px solid #fff;background: #ffffff;
+    font-weight: bold;
+}
+/*未选tab头（超链接）的样式*/
+.tabdiv .tabshead .tabs{}
+.tabdiv .tabsbody .bodys{}
+.tabdiv .tabsbody textarea.output {
+    width:100%;	min-height:400px;
+    border:1px solid #aaa;
+}
+.tabdiv .tabsbody .bodys *{text-align:left;}
+/*sm.toglediv.css*/
+/* 
+div[.toglediv.toglediv_close]
+    a.toolbar
+    div.content
+        [textarea.output]  
+*/
+div.toglediv,div.toglediv_close {width:100%;border-bottom:1px solid #c6c6c6;margin-bottom:5px;}
+div.toglediv a.toolbar,div.toglediv_close a.toolbar {
+    float:left;
+    padding-left:15px;padding-right:5px;background:#c6c6c6 url(Res/expand_b.gif) no-repeat;background-position:0% 50%;
+    line-height:20px;font-weight:600;text-align:left;
+}
+div.toglediv_close a.toolbar {background:#c6c6c6 url(Res/hide_b.gif) no-repeat;background-position:0% 50%;}
+
+div.toglediv div.content,div.toglediv_close div.content {
+    float:left;clear:both;width:100%;min-height:300px;
+    border-top:1px solid #c6c6c6;	
+}
+div.toglediv div.content textarea.output {
+    float:left;clear:both;width:100%;min-height:300px;
+    border:1px solid #c6c6c6;	
+}
+div.toglediv_close div.content {display:none;}
+/*sm.avmenue.css*/
+/*
+div.avmenue{+id}
+	a.l1.pass
+	div.subdiv
+		a.l2
+		a.l2.showsub.pass
+		div.subdiv
+			a.l3.select
+			a.l3
+		a.l2
+	a.l1
+	a.l1
+	div.subdiv
+	a.l1
+*/
+div.avmenue {}
+div.avmenue a {
+    cursor:pointer;
+    white-space:nowrap; /*force no wrap*/
+    overflow:hidden; /*auto hide the overflow text */
+    text-overflow: ellipsis; /*add ... when hide some text*/
+    -o-text-overflow:ellipsis; /*suitale for opera browser*/
+}
+div.avmenue a + .subdiv{display:none;}
+div.avmenue a.showsub + .subdiv{display:block;}
+div.avmenue a.pass {background-image:url(res/expand_b.gif);background-repeat:no-repeat;	font-weight: bold;}
+div.avmenue a.select {background-image:url(res/hide_b.gif);background-repeat:no-repeat;	font-weight: bold;}
+div.avmenue a.l1 {
+    float:left;clear:left;width:100%;
+    padding-left:20px;background-color:#666666;color:#fff;
+    text-align:left;
+}
+div.avmenue a.l2 {
+    float:left;clear:left;width:100%;
+    padding-left:30px;background-position:10px center;background-color:#ccc;
+    text-align:left;
+}
+div.avmenue a.l3 {
+    float:left;clear:left;width:100%;
+    padding-left:40px;background-position:20px center;background-color:#fff;
+    text-align:left;
+}
+/*sm.w3table.css*/
+/*
+table.w3table[.addw3table]
+    tr
+        td.title
+        td.subtitle
+        td
+*/
+table.w3table,table.addw3table {
+    width:100%;
+    margin-top:0px;border-collapse:collapse;border:1px solid #c6c6c6; 
+}
+table.addw3table {margin-top:0px;border-top:0px;}
+table.addw3table td,table.w3table td {
+    text-align:left;vertical-align:central;color:#000;
+    border:1px solid #c6c6c6;padding:2px;background:#fff;	
+}
+table.addw3table td.title, table.w3table td.title {
+    font-weight:600;text-align:center;vertical-align:central;
+    background:#d5d5d5;
+}
+table.addw3table td.subtitle, table.w3table td.subtitle {
+    text-align:left;vertical-align:central;
+    background:#eeeeee;
+}
+table.addw3table td.button {
+    min-height: 50px;text-align: center;
+}
+/*sm.compbar.css*/
+/*
+div.compbar{+id}
+    ul.topmenue
+        li[.right]
+            a[.button[.icon].path]
+            a.virtualspliter
+            a
+        li.spliter
+        li.showsub
+            a
+            ul.submenue
+                li
+                    a[.button.inline.input]
+                li.showsub.right
+                    ul.submenue
+*/
+/*横向工具条设计，宽度100%，高度不设定，是由li撑起来的*/
+div.compbar{width:100%;	float:none;}
+ul.topmenue{list-style-type:none;padding:0px;margin:0px;border-bottom:1px solid #ccc;background-color:#ededed;}
+ul.topmenue>li {
+    position:relative;float:left;height:30px;
+    padding:0px;margin:0px;border:none;border-right:1px solid #ddd;
+}
+ul.topmenue>li:hover{background-color:#ddd;}
+ul.topmenue>li.spliter{width:0px;border-right:solid 1px #ddd;border-left:1px dashed #ddd;}/*大块的分割*/
+ul.topmenue>li.right {float:right;}
+ul.topmenue>li>a,ul.topmenue>li>p {
+    height:30px;line-height:30px;min-width:0px;float:left;
+    padding-left:15px;padding-right:15px;
+    white-space:nowrap; /*force no wrap*/ 
+    overflow:hidden; /*auto hide the overflow text */
+    text-overflow: ellipsis; /*add ... when hide some text*/ 
+    -o-text-overflow:ellipsis; /*suitale for opera browser*/ 
+}
+ul.topmenue>li>a.hh.u{height:15px;background-color:#0f0;}/*上下标*/
+ul.topmenue>li>a.hh.d{height:15px;background-color:#f00;}
+ul.topmenue>li>a.virtualspliter{border-right:1px #ccc dashed;}/*小块之间的分割*/
+ul.topmenue>li>a.path {
+    padding-left:5px;padding-right:10px;
+    background-image:url(res/title_arrow_right.png);background-repeat:no-repeat;background-position:right center;
+}
+ul.topmenue>li>a.button {
+    padding-left:30px;padding-right:15px;
+    background-color:#ededed;background-repeat:no-repeat;background-position:6px 6px;/*图片的长宽为18px,背景必须为透明*/
+}
+ul.topmenue a.button {
+    padding-left:30px;padding-right:15px;
+    background-color:#ededed;background-repeat:no-repeat;background-position:6px 6px;/*图片的长宽为18px,背景必须为透明*/
+}
+ul.topmenue>li>a.button.icon {padding-right:0px;}
+ul.topmenue>li>a:hover{
+    background-position:7px 7px;line-height:32px;/*创建下移动画*/
+    text-decoration:none;cursor:pointer;background-color:#ccc;
+}
+/*子菜单的设计*/
+ul.topmenue>li:hover>ul.submenue{display:block;top:29px;left:0px;}
+ul.topmenue>li.right:hover>ul.submenue{display:block;top:29px;left:auto;right:0px;}
+ul.submenue>li>ul.submenue{top:0px;left:59px;}
+ul.submenue>li:hover>ul.submenue{display:block;top:0px;left:100px;}
+ul.submenue{
+    display:none;list-style-type:none;background-color:#ddd;padding:0px;margin:0px;min-width:0px;
+    position:absolute;z-index:999;
+}
+ul.submenue>li {
+    text-align:left;
+    position:relative;height:30px;
+    padding:0px;margin:0px;border:none;border-bottom:1px solid #ccc;
+}
+ul.submenue>li.spliter {height:0px;border-top:1px dashed #ccc;border-bottom:1px solid #ccc;}
+ul.submenue>li:hover{background-color:#ccc;}
+ul.submenue>li>a {
+    clear:none;float:left;height:30px;line-height:30px;min-width:60px;align-self:left;text-align:left;
+    padding-left:30px;padding-right:30px;
+    white-space:nowrap; /*force no wrap*/ 
+    overflow:hidden; /*auto hide the overflow text */
+    text-overflow: ellipsis; /*add ... when hide some text*/ 
+    -o-text-overflow:ellipsis; /*suitale for opera browser*/ 
+}
+ul.submenue>li>a.button.controlbar.icon {
+    position:absolute;z-index:100;top:0px;right:0px;min-width:0px;
+    padding:0px 15px;background:#6fc;display:none;
+}
+ul.submenue>li:hover>a.button.controlbar.icon {display:block;}
+ul.submenue>li>a.button.inline{min-width:30px;padding:0px 15px;}
+ul.submenue>li>a.input.inline,ul.topmenue>li>a.input.inline{
+    min-width:30px;
+    padding:0px 5px;border:none;background-color:#FFF;border-left:1px solid #ddd;border-right:1px solid #ddd;
+}
+ul.submenue>li>a.input.inline:hover,ul.submenue>li>a.input.inline:focus,ul.topmenue>li>a.input.inline:hover,ul.topmenue>li>a.input.inline:focus{
+    background-color:#6c0;cursor:text;
+}
+ul.submenue>li>a:hover{
+    background-position:7px 7px;line-height:32px;
+    text-decoration:none;cursor:pointer;
+}
+ul.topmenue>li>a.path:hover{background-position:right center;}
+ul.topmenue>li>input,ul.submenue>li>input{
+    float:left;height:30px;min-width:50px;line-height:30px;
+    border:none;padding:0px;margin:0px;color:#555;
+}
+ul.topmenue>li>input:hover,ul.topmenue>li>input:focus,ul.submenue>li>input:hover,ul.submenue>li>input:focus{
+    background-color:#fafafa;
+}
+div.compbar   a.button.rootpath{/*rootmap*/
+    background-image:url(res/rootpath_n18.png);
+}
+div.compbar   a.button.dbserver {/*dbserver*/
+    background-image:url(res/dbserver_n18.png);
+}
+div.compbar   a.button.database {/*database*/
+    background-image:url(res/database_n18.png);
+}
+div.compbar   a.button.table {/*table*/
+    background-image:url(res/table_n18.png);
+}
+div.compbar   a.button.field {/*field*/
+    background-image:url(res/field_n18.png);
+}
+div.compbar   a.button.function {/*function*/
+    background-image:url(res/function_n18.png);
+}
+div.compbar   a.button.statusok{/*status ok*/
+    background-image:url(res/statusok_n18.png);
+}
+div.compbar   a.button.statusnok{/*status nok*/
+    background-image:url(res/statusnok_n18.png);
+}
+div.compbar  a.button.cut {/*cut*/
+    background-image:url(res/cut_n18.png);
+}
+div.compbar  a.button.reboot {/*reboot*/
+    background-image:url(res/reboot_n18.png);
+}
+div.compbar  a.button.info{/*info*/
+    background-image:url(res/info_n18.png);
+}
+div.compbar  a.button.help {/*help*/
+    background-image:url(res/help_n18.png);
+}
+div.compbar  a.button.key{/*key*/
+    background-image:url(res/key_n18.png);
+}
+div.compbar  a.button.announcement{/*announcement*/
+    background-image:url(res/announcement_n18.png);
+}
+div.compbar  a.button.close{/*close*/
+    background-image:url(res/close_n18.png);
+}
+div.compbar  a.button.quickcmd{/*close*/
+    background-image:url(res/quickcmd_n18.png);
+}
+div.compbar  a.button.cmd{/*close*/
+    background-image:url(res/cmd_n18.png);
+}
+div.compbar  a.button.user{/*close*/
+    background-image:url(res/user_n18.png);
+}
+div.compbar  a.button.option{/*close*/
+    background-image:url(res/option_n18.png);
+}
+div.compbar  a.button.navi{/*close*/
+    background-image:url(res/navi_n18.png);
+}
+div.compbar  a.button.copy{/*close*/
+    background-image:url(res/copy_n18.png);
+}
+div.compbar  a.button.paste{/*close*/
+    background-image:url(res/paste_n18.png);
+}
+div.compbar  a.button.delete{/*close*/
+    background-image:url(res/delete_n18.png);
+}
+div.compbar  a.button.batchdeal{/*close*/
+    background-image:url(res/batchdeal_n18.png);
+}
+div.compbar  a.button.execmd{/*close*/
+    background-image:url(res/execmd_n18.png);
+}
+div.compbar  a.button.exejs{/*close*/
+    background-image:url(res/exejs_n18.png);
+}
+div.compbar  a.button.backup{/*close*/
+    background-image:url(res/backup_n18.png);
+}
+div.compbar  a.button.upload{/*close*/
+    background-image:url(res/upload_n18.png);
+}
+div.compbar  a.button.openinbro{/*close*/
+    background-image:url(res/openinbro_n18.png);
+}
+div.compbar  a.button.save{/*close*/
+    background-image:url(res/save_n18.png);
+}
+div.compbar  a.button.supersave{/*close*/
+    background-image:url(res/supersave_n18.png);
+}
+div.compbar  a.button.close{/*close*/
+    background-image:url(res/close_n18.png);
+}
+div.compbar  a.button.folder{/*close*/
+    background-image:url(res/folder_n18.png);
+}
+div.compbar  a.button.download{/*close*/
+    background-image:url(res/download_n18.png);
+}
+div.compbar  a.button.smnavi {/*三满*/
+    background-image:url(res/smnavi_n18.png);
+}

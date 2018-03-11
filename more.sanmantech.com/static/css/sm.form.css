@@ -1,0 +1,67 @@
+div.form{position: relative;width:100%;min-height: 400px;}
+div.form div.title{
+    width:100%;min-height: 60px;
+    margin-left: 15px;margin-right: 15px;
+    font-size: 36px;color:#990;text-align: left;
+}
+div.form div.subtitle{
+    width:100%;min-height: 25px;
+    margin-left: 15px;margin-right: 15px;
+    font-size: 12px;color:#666;text-align: left;
+}
+div.form div.spliter{border-bottom: 1px dashed #666;margin: 15px;clear: both;}
+div.form div.foot{
+    width:100%;min-height: 60px;position:relative;
+    margin-left: 15px;margin-right: 15px;
+}
+div.form div.foottip{
+    width:100%;min-height: 60px;position:relative;
+    margin-left: 15px;margin-right: 15px;
+    color: #f00;text-align: left;
+}
+div.form div.foot div.centerpannel {
+    width: auto;margin: auto;
+}
+div.form div.formites{width: 500px;}
+div.form ul.formitem {
+    list-style-type:none;padding:0px;margin:0px 10px 10px 0px;border: none;
+    width: 100%;height: 30px;
+}
+ul.formitem li{
+    position:relative;float:left;height:30px;width: 50px;
+    line-height: 30px;overflow: hidden;
+    padding:0px;margin:0px;border:none;
+}
+ul.formitem li:nth-child(1){/*描述*/width: 120px;text-align: center;}
+ul.formitem li:nth-child(2){/*表单*/width: 200px;}
+ul.formitem li:nth-child(3){/*校验*/width: 30px;}
+div.form input{
+    float:left;height:30px;width:100%; line-height:30px;
+    border:none; padding:0px 5px 0px 5px; margin:0px;
+    color:#6e6e6e;text-align: left;
+}
+div.form input.half{width: 100px;}
+div.form a.button{
+    float:left;height:30px;width:120px; line-height:30px;
+    border:none; padding:0px; margin: 10px 0px 0px 10px;background-color:#ddd;
+    color:#6e6e6e;
+}
+div.form input[type=checkbox]{
+    width: auto;
+}
+div.form input[type=button]{
+    float:none;height:30px;width:120px; line-height:30px;
+    border:none; padding:0px; margin: 10px 0px 0px 10px;background-color:#ddd;
+    color:#6e6e6e;text-align: center;
+}
+div.form input[type=button]:hover{
+	background-color:#ccc;cursor:pointer;
+	font-size: 15px;
+	text-decoration:none;color:#00f;
+}
+div.form a.button:hover{
+	background-color:#ccc;cursor:pointer;
+	line-height:32px;
+	text-decoration:none;color:#00f;
+}
+div.form input:focus,div.form input:hover{background-color: #ffcc99;}

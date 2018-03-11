@@ -1,0 +1,53 @@
+/*常规无限级子菜单,菜单100px宽，30px高
+div.menue
+    ul.topmenue
+        li
+            a.submenue
+            ul
+                li
+                    a.submenue
+                    ul..
+                li
+                    a
+        li
+            a
+*/
+
+div.menue { /*菜单条样式*/
+    width:100%;
+    background:#c6c6c6;padding:0px;margin:0px;border:1px solid #990000;margin-bottom:5px;
+}
+div.menue ul.topmenue,div.menue ul.topmenue ul {list-style-type:none;padding:0px;margin:0px;}
+div.menue ul.topmenue li {/*所有li的样式*/
+    position:relative;float:left;width:100px;height:30px;
+    padding:0px;margin:0px;
+}
+div.menue ul.topmenue a { /*所有a的样式*/
+    clear:both;float:left;line-height:30px;width:100%;height:100%;
+    font-size:16px;
+    border-bottom:1px #990000 solid;
+}
+div.menue ul.topmenue a.submenue { /*含有子菜单的条目右边加一个小三角*/
+    background-image:url(res/title_arrow_right.png);
+    background-repeat:no-repeat;background-position:right center;
+}
+div.menue ul.topmenue a:hover {background-color:#009;}/*所有a hover的样式*/
+div.menue ul.topmenue>li {width:100px;}/*顶级菜单li的样式*/
+div.menue ul.topmenue>li>a {/*顶级菜单a的样式*/
+    float:left;height:100%;
+    font-size:20px;
+    border-right:1px solid #990000;
+}
+div.menue ul.topmenue li>ul {display:none;width:100px;clear:both;}/*所有子菜单的样式，初始时隐藏*/
+div.menue ul.topmenue>li:hover>ul {/*一级子菜单的展开样式*/
+    display:block;top:29px;clear:both;position:absolute;z-index:1000;width:100px;
+    background:#c6c6c6;border:1px solid #990000;
+}
+div.menue ul.topmenue>li li:hover>ul {/*所有二级子菜单的展开样式*/
+    display:block;position:absolute;z-index:1000;clear:both;width:100px;left:99px;top:0px;
+    background:#c6c6c6;border:1px solid #990000;
+}
+
+
+
+
