@@ -12509,7 +12509,6 @@ parsepara:function(paras,def){
     if(!arguments[1]){
         return paras;
     }
-    
     if(!$$.isobj(def)){
         var tobj={};
         tobj[def]="";

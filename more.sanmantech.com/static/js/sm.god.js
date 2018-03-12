@@ -945,16 +945,16 @@ make:function(model,data,curlevel,extradata,datafunc){
         }
         return sm.ui.modelreplace(tojq.html(),data);
     }
-},
+},//真实执行模版替换
 makeout:function(modelname,data,def,extradata,datafunc){
     modelname=this.warehouse(modelname);
     arguments[2] && (!$$.isfunction(def)) && (data=this.parsepara(data,def));
     arguments[2] && $$.isfunction(def) && (datafunc=def);
     return this.make(modelname,data,0,extradata,datafunc);
-},
+},//执行模版替换返回格式为
 jqmakeout:function(modelname,data,def,datafunc){
     return $(this.makeout(modelname,data,def,datafunc));
-},
+},//执行模版替换，返回格式为jq格式
 warehouse:function(modelname){
     if($('#_warehouse_').length<1){$("body").prepend("<div id='_warehouse_' style='display:none'></div>");}
     if($("#_warehouse_").children(".biblemodel."+modelname).length>0){
@@ -974,12 +974,11 @@ warehouse:function(modelname){
         }
         return modelname;
     }
-},
+},//从仓库中获取模版原型
 parsepara:function(paras,def){
     if(!arguments[1]){
         return paras;
     }
-    
     if(!$$.isobj(def)){
         var tobj={};
         tobj[def]="";
@@ -1007,7 +1006,7 @@ parsepara:function(paras,def){
         }
         return rsarr;
     }
-},
+},//
 modelreplace:function(str,obj){
     try{
 	    for (p in obj) {
