@@ -10,7 +10,7 @@ define('MODEL_PATH',__DIR__.'/');//模型库目录,命名空间的顶部空间
 define('FRAMEROOT_PATH',MODEL_PATH.'../');//框架根目录
 define('VIEW_PATH',FRAMEROOT_PATH.'view/');//VIEW目录(旧工厂目录)
 define('CONTROL_PATH',FRAMEROOT_PATH.'control/');//VIEW目录(旧工厂目录)
-define('STATIC_PATH',VIEW_PATH.'static/'); 
+define('STATIC_PATH',ENTRY_PATH.'static/'); 
 define('COMMON_PATH',FRAMEROOT_PATH.'common/');
 define('3COM_PATH',COMMON_PATH.'3com/');
 define('CACHE_PATH',ENTRY_PATH.'cache/');
