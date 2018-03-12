@@ -264,10 +264,10 @@ God.func._htmlvar_getvalue=function(oj,varvalue,valueifnoexist){
         
     })
     return rsvalue;
-}
+},//获取HTML变量值
 God.func.jqhtmlvar=function(varname){
     return $("[varname='"+varname+"']");
-}
+},//选定指定varname的元素
 God.func.htmlvar=function(varname,valueifnoexist){
         var returnarr=false;
         var rsvalue=valueifnoexist;
@@ -291,7 +291,7 @@ God.func.htmlvar=function(varname,valueifnoexist){
         }
     });
     return rsvalue;
-}
+},//获取HTML变量
 God.func.autominheighttowindow=function(selector){
 	!arguments[0]&&(selector=".automin-heighttowindow:last");
     if($(selector).length<1){return this;}
@@ -351,10 +351,10 @@ God.func.htmlvars=function(filter){
 	return rsobj;
 }
 
-God.func.hasmaxim=function(){return (typeof (maxim)!='undefined') && $$.isobj(maxim);}
-God.func.merge=function(o){for (x in o) {this[x]=o[x];} return this;}
-God.func.safemerge=function(o){for (x in o) {this.hasOwnProperty(x)&&(this[x]=o[x]);} return this;}
-God.func.isarray=function(obj){return obj&& typeof obj==='object' && Array === obj.constructor;}
+God.func.hasmaxim=function(){return (typeof (maxim)!='undefined') && $$.isobj(maxim);}//是否存在maxim
+God.func.merge=function(o){for (x in o) {this[x]=o[x];} return this;},//把给定的对象的全部属性融合到自身中
+God.func.safemerge=function(o){for (x in o) {this.hasOwnProperty(x)&&(this[x]=o[x]);} return this;}//把给定的对象中与自身相交的属性值更新到自身中
+//God.func.isarray=function(obj){return obj&& typeof obj==='object' && Array === obj.constructor;}
 God.func.rndid=function(prix){prix=arguments[0]?(arguments[0]+"_"):"";return prix+parseInt(1000000*Math.random());}
 God.func.checkurl=function(ou){
   var bp=$$.maxim('htmlrootpath','/');
@@ -398,8 +398,8 @@ outerhtml:function(){
         return this.eq(0).prop("outerHTML");   
     }
     return "";
-},
-innertext:function(txt){//这个函数的目的是在设置节点下面的文本时而不删除子节点
+},//获取当前节点的outerhtml
+innertext:function(txt){
         if(!arguments[0]){
         	var ta=$(this).clone();
         	ta.children().remove();
@@ -412,7 +412,7 @@ innertext:function(txt){//这个函数的目的是在设置节点下面的文本
             }
         }
         return this;
-},
+},//这个函数的目的是在设置节点下面的文本时而不删除子节点
 showme:function(){
 	rs="Total length:"+this.length+"\r\n";
 	
@@ -421,8 +421,8 @@ showme:function(){
 	});
 	alert(rs);
 	return this;
-},
-safedo:function(f){//当集合不为空的时候才执行
+},//打印出当前集合中的outerhtml
+safedo:function(f){
     paras=[];
     $.each(arguments,function(i,v){
         if(i>0){paras.push(v)}
@@ -431,16 +431,16 @@ safedo:function(f){//当集合不为空的时候才执行
         f.apply(this,paras);
     }
     return this;
-},
-naming:function(id){//这个函数的作用是给当前集合按顺序打上一个id标签
+},//当集合不为空的时候才执行
+naming:function(id){
 	i=0;
 	this.each(function(){
 		$(this).attr("id",i>0?(id+"_"+i):id);
 		i=i+1;
 	});
         return this;
-},
-additems:function(type,items){//这个函数的目的是想把关键字中container和filler匹配的上的才append进来，不匹配的自动忽略
+},//这个函数的作用是给当前集合按顺序打上一个id标签
+additems:function(type,items){
         if($$.isarray(type)){
             items=type;
             type="append";
@@ -460,11 +460,11 @@ additems:function(type,items){//这个函数的目的是想把关键字中contai
             }
         });
     return this;
-},
-addto:function(selector,type){//和additems相同，调用者不同
+},//这个函数的目的是想把关键字中container和filler匹配的上的才append进来，不匹配的自动忽略
+addto:function(selector,type){
     $(selector).additems(type,[this]);
     return this;
-},
+},//和additems相同，调用者不同
 //定义鼠标右键方法，接收一个函数参数   
 rightclick:function(fn){  
     //调用这个方法后将禁止系统的右键菜单   
@@ -918,11 +918,11 @@ make:function(model,data,curlevel,extradata,datafunc){
             extradata["i"+nextlevel]=i;
             rsstr=rsstr+sm.ui.make(model,v,nextlevel,extradata,datafunc);
         });
-        //alert("第"+curlevel+"层循环结果:"+rsstr);
+        alert("第"+curlevel+"层循环结果:"+rsstr);
         var itemsojq=$("<div></div>").html(rsstr);
         var rsojq=tojq.clone();
         tojq.find("[il='"+nextlevel+"']").each(function(){
-            //检查是否有cid
+            //检查是否有cid,cid是干什么用的？功能没实现？？
             if(typeof $(this).prop("cid")=="undefined"){
                 rsojq.find("[il='"+nextlevel+"']"+":not([cid])").replaceWith(itemsojq.find("[il='"+nextlevel+"']"+":not([cid])").clone());
                 //alert(rsojq.html());
@@ -932,9 +932,9 @@ make:function(model,data,curlevel,extradata,datafunc){
             }
         });
         if(tojq.find("[il='"+nextlevel+"']").length>0){
-        	return rsojq.html();
+            return rsojq.html();
         } else {
-        	return itemsojq.html();
+            return itemsojq.html();
         }
     } else {
         if(!$$.isobj(data)){data={para:data};}
@@ -945,7 +945,7 @@ make:function(model,data,curlevel,extradata,datafunc){
         }
         return sm.ui.modelreplace(tojq.html(),data);
     }
-},//真实执行模版替换
+},//真实执行模版替换，由多个模版替换动作完成
 makeout:function(modelname,data,def,extradata,datafunc){
     modelname=this.warehouse(modelname);
     arguments[2] && (!$$.isfunction(def)) && (data=this.parsepara(data,def));
@@ -1006,7 +1006,7 @@ parsepara:function(paras,def){
         }
         return rsarr;
     }
-},//
+},//把数组改为关联数组
 modelreplace:function(str,obj){
     try{
 	    for (p in obj) {
@@ -1018,7 +1018,7 @@ modelreplace:function(str,obj){
     	
     }
     return str;
-},
+},//模版的简单替换动作
 
 });
 

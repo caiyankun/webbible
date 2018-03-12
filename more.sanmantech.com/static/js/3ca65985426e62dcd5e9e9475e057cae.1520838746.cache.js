@@ -12448,11 +12448,11 @@ make:function(model,data,curlevel,extradata,datafunc){
             extradata["i"+nextlevel]=i;
             rsstr=rsstr+sm.ui.make(model,v,nextlevel,extradata,datafunc);
         });
-        //alert("第"+curlevel+"层循环结果:"+rsstr);
+        alert("第"+curlevel+"层循环结果:"+rsstr);
         var itemsojq=$("<div></div>").html(rsstr);
         var rsojq=tojq.clone();
         tojq.find("[il='"+nextlevel+"']").each(function(){
-            //检查是否有cid
+            //检查是否有cid,cid是干什么用的？功能没实现？？
             if(typeof $(this).prop("cid")=="undefined"){
                 rsojq.find("[il='"+nextlevel+"']"+":not([cid])").replaceWith(itemsojq.find("[il='"+nextlevel+"']"+":not([cid])").clone());
                 //alert(rsojq.html());
@@ -12462,9 +12462,9 @@ make:function(model,data,curlevel,extradata,datafunc){
             }
         });
         if(tojq.find("[il='"+nextlevel+"']").length>0){
-        	return rsojq.html();
+            return rsojq.html();
         } else {
-        	return itemsojq.html();
+            return itemsojq.html();
         }
     } else {
         if(!$$.isobj(data)){data={para:data};}
@@ -12475,16 +12475,16 @@ make:function(model,data,curlevel,extradata,datafunc){
         }
         return sm.ui.modelreplace(tojq.html(),data);
     }
-},
+},//真实执行模版替换，由多个模版替换动作完成
 makeout:function(modelname,data,def,extradata,datafunc){
     modelname=this.warehouse(modelname);
     arguments[2] && (!$$.isfunction(def)) && (data=this.parsepara(data,def));
     arguments[2] && $$.isfunction(def) && (datafunc=def);
     return this.make(modelname,data,0,extradata,datafunc);
-},
+},//执行模版替换返回格式为
 jqmakeout:function(modelname,data,def,datafunc){
     return $(this.makeout(modelname,data,def,datafunc));
-},
+},//执行模版替换，返回格式为jq格式
 warehouse:function(modelname){
     if($('#_warehouse_').length<1){$("body").prepend("<div id='_warehouse_' style='display:none'></div>");}
     if($("#_warehouse_").children(".biblemodel."+modelname).length>0){
@@ -12504,7 +12504,7 @@ warehouse:function(modelname){
         }
         return modelname;
     }
-},
+},//从仓库中获取模版原型
 parsepara:function(paras,def){
     if(!arguments[1]){
         return paras;
@@ -12536,7 +12536,7 @@ parsepara:function(paras,def){
         }
         return rsarr;
     }
-},
+},//把数组改为关联数组
 modelreplace:function(str,obj){
     try{
 	    for (p in obj) {
@@ -12548,7 +12548,7 @@ modelreplace:function(str,obj){
     	
     }
     return str;
-},
+},//模版的简单替换动作
 
 });
 

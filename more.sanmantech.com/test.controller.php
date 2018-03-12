@@ -7,7 +7,9 @@
 <script language="javascript" type="text/javascript">
     $(document).ready(function(){
         
-        sm.ui.jqmakeout('domainlist',[[1,2],[3,4]],{}).appendTo("body");
+        //sm.dialog.countshow(10,'这是测试标题！','这是测试内容！');
+        sm.dialog.show('title','what are you doing!!');
+        
         
     });
 </script>
