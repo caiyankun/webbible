@@ -676,9 +676,9 @@ God.ajax.taskok=function(func){
 }
 God.ajax.taskfail=function(func){
     if(this.ajaxing()){
-            this._usercallbackfunc["taskfail"].push(func);
+        this._usercallbackfunc["taskfail"].push(func);
     } else {
-            God.taskfail.apply(this,arguments);
+        God.taskfail.apply(this,arguments);
     }
     return this;   
 }
