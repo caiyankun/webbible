@@ -1,16 +1,175 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>摩尔衣橱More Closet</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-<div id="fullpage">
-	<div class="section">Some section1</div>
-	<div class="section">Some section2</div>
-	<div class="section">Some section3</div>
-	<div class="section">Some section4</div>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>摩尔衣橱</title>
+<link rel="stylesheet" href="static/css/sm.jquery.fullpage.css">
+<style>
+    #preloader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ececeb;
+        z-index: 99
+    }
+    #status {
+        width: 176px;
+        height: 64px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        background-image: url(static/img/header-logo.svg);
+        background-repeat: no-repeat;
+        background-position: center;
+        margin: -32px 0 0 -88px
+    }
+    
+    .section1 { background-image: url(static/img/1.jpg);}
+    .section2 { background-image: url(static/img/2.jpg);}
+    .section3 { background-image: url(static/img/3.jpg);}
+    .section4 { background-image: url(static/img/4.jpg);}
+
+    .section2 p { position: relative; left: -120%;}
+    .section3 p { position: relative; bottom: -120%;}
+    .section4 p { display: none;}
+    .section h3{
+        font-size: 50px;
+    }
+    .section p{
+        font-size: 35px;
+    }
+    .section {
+        background-size: cover;
+        text-align:center;
+        position: relative;
+    }
+    h1{
+        font-size: 5em;
+        font-family: arial,helvetica;
+        color: #fff;
+        transform: translateY(-50%);
+        margin:0;
+        padding:0;
+    }
+</style>
+<script src="static/js/jquery/jquery2.1.4.js"></script>
+<script src="static/js/jquery/jquery-ui.js"></script>
+<script src="static/js/sm.jquery.fullpage.js"></script>
+</head>
+
+
+
+<body>
+    
+
+<script>
+    $(document).ready(function() {
+        setTimeout(function () {
+            $('#status').fadeOut();
+            $('#preloader').delay(350).fadeOut('slow');
+            $('#fullpage').fullpage({
+                anchors: ['page1', 'page2', 'page3', 'page4'],
+                afterLoad: function(anchorLink, index){
+
+                    if(index == 2){
+
+                        $('.section2').find('p').delay(500).animate({
+
+                            left: '0'
+
+                        }, 1500, 'easeOutExpo');
+
+                    }
+
+                    if(index == 3){
+
+                        $('.section3').find('p').delay(500).animate({
+
+                            bottom: '0'
+
+                        }, 1500, 'easeOutExpo');
+
+                    }
+
+                    if(index == 4){
+
+                        $('.section4').find('p').fadeIn(2000);
+
+                    }
+
+                },
+
+                onLeave: function(index, direction){
+                    if(index == '2'){
+
+                        $('.section2').find('p').delay(500).animate({
+
+                            left: '-120%'
+
+                        }, 1500, 'easeOutExpo');
+
+                    }
+
+                    if(index == '3'){
+
+                        $('.section3').find('p').delay(500).animate({
+
+                            bottom: '-120%'
+
+                        }, 1500, 'easeOutExpo');
+
+                    }
+
+                    if(index == '4'){
+
+                        $('.section4').find('p').fadeOut(2000);
+
+                    }
+
+                }
+            });
+        }, 2000);
+    });
+</script>
+    
+<div id="preloader">
+    <div id="status">&nbsp;</div>
 </div>
-    </body>
+
+<div id="fullpage">
+<div class="section section1">
+
+    <h3>第一屏</h3>
+
+    <p>fullPage.js — 回调函数演示</p>
+
+</div>
+
+<div class="section section2">
+
+    <h3>第二屏</h3>
+
+    <p>滚动到第二屏后的回调函数执行的效果</p>
+
+</div>
+
+<div class="section section3">
+
+    <h3>第三屏</h3>
+
+    <p>滚动到第三屏后的回调函数执行的效果</p>
+
+</div>
+
+<div class="section section4">
+
+    <h3>第四屏</h3>
+
+    <p>滚动到第四屏后的回调函数执行的效果</p>
+
+</div>
+</div>
+</body>
 </html>

@@ -52,10 +52,18 @@ class View
         DEBUG_ENABLE && Debug::log(['识别出的css文件：',$csslist]);
         return self::cssref($csslist);
     }
-    public static function pages(){
-        if(file_exists(self::$pagefile)){
-            include self::$pagefile;
-            return true;
+    public static function pages($pagename=null){
+        if(is_null($pagename)){
+            if(file_exists(self::$pagefile)){
+                include self::$pagefile;
+                return true;
+            }
+        } else {
+            $pagename=ENTRY_PATH.$pagename."page.html";
+            if(file_exists($pagename)){
+                include $pagename;
+                return true;
+            }
         }
         return false;
     }
