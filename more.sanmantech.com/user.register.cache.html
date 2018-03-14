@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Loading....</title>
+</head>
+<script language="javascript" type="text/javascript">window.onerror=function(m,u,l){alert ("【JS加载出错】:\r\n【文件】:"+u+"\r\n【行】:"+l+"\r\n【信息】:"+m);};</script><script language="javascript" src="/static/js/3ca65985426e62dcd5e9e9475e057cae.1520849129.cache.js"></script><script language="javascript" src="/static/js/839e7fc99f15b964707eee60a0985669.1520819875.cache.js"></script><link rel="stylesheet" type="text/css" href="/static/css/96891f418833aff2df721294d249f7a1.1520819875.cache.css" /><body>
+    <div id="header">
+        
+			<nav class="navbar navbar-default " role="navigation" >
+				<div class="navbar-header">
+					 
+					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+						 <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+					</button> <a class="navbar-brand" href="#">全务通</a>
+				</div>
+				
+				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+					<ul class="nav navbar-nav" style="display:none">
+						<li class="dropdown">
+							 <a href="#" class="dropdown-toggle" data-toggle="dropdown">快捷键<strong class="caret"></strong></a>
+							<ul class="dropdown-menu">
+								<li>
+									<a href="#">Action</a>
+								</li>
+								<li>
+									<a href="#">Another action</a>
+								</li>
+								<li>
+									<a href="#">Something else here</a>
+								</li>
+								<li class="divider">
+								</li>
+								<li>
+									<a href="#">Separated link</a>
+								</li>
+								<li class="divider">
+								</li>
+								<li>
+									<a href="#">One more separated link</a>
+								</li>
+							</ul>
+						</li>
+					</ul>
+					
+					<form class="navbar-form navbar-left" role="search" style="display:none">
+						<div class="form-group">
+							<input type="text" class="form-control" />
+						</div> 
+						<button type="submit" class="btn btn-default">
+							搜索
+						</button>
+					</form>
+
+					<ul class="nav navbar-nav navbar-right">
+						
+						<li class="dropdown">
+							 <a href="#" class="dropdown-toggle" data-toggle="dropdown" varname="h_userlogin" varvalue="text">请登录<strong class="caret"></strong></a>
+							<ul class="dropdown-menu" id="h_userdropdown">
+								<li>
+									<a href="#" varname="h_userinfo" varvalue="text">用户信息</a>
+								</li>
+								<li>
+									<a href="#" varname="h_userreg" varvalue="text">新用户注册</a>
+								</li>
+								<li class="divider">
+								</li>
+								<li>
+									<a href="#" varname="h_userlogout" varvalue="text">退出登录</a>
+								</li>
+							</ul>
+						</li>
+                                                <li>
+							<a href="#" id="h_navbtn"><span class="glyphicon glyphicon-th" aria-hidden="true"></span></a>
+						</li>
+					</ul>
+				</div>
+				
+			</nav>
+
+
+<script language="javascript" type="text/javascript">
+(typeof sm!=="undefined")&&sm.autoinit("headerinit",function(){
+
+
+//alert(JSON.stringify(sm.datasource));
+if(typeof sm.datasource.user!=="undefined"){
+	$('#header [varname="h_userlogin"]').text(sm.datasource.user.uname);
+}
+
+
+sm.event.map("#header *","click.headerinit",{
+	'text:退出登录':function(){
+		sm.ajax.silence().url("/user/logout.func").post().taskok(function(d){
+			sm.page.reload();
+		}).taskfail(function(d){
+			alert("退出登录失败:"+d);
+		});
+	},
+	'text:用户信息':function(){
+		sm.page.open("/user/info.php");
+	},
+	'text:新用户注册':function(){
+		sm.page.open("/user/register.php");
+	},
+	'[varname="h_userlogin"]':function(){
+		if(sm.datasource.role==0){
+			//alert("你需要登录");
+			sm.page.reload("/user/login.php");
+			$('#h_userdropdown li').hide();
+		} else {
+			$('#h_userdropdown li').show();
+		}
+	},
+	'#h_navbtn':function(){
+		sm.page.open("/bible.php");
+	},
+});
+
+});
+
+</script>    </div>
+
+    <div id="mainbody" class="automin-heighttowindow" >
+         <div class="container-fluid">
+	<div class="row">
+		<div class="col-md-1">
+		</div>
+		<div class="col-md-5" align="right">
+			<img alt="Bootstrap Image Preview" src="/static/img/liza_n400.jpg" class="img-rounded" />
+		</div>
+		<div class="col-md-5" style="padding-top:30px;">
+			<form role="form" class="form-inline" >
+				<div class="form-group">
+					 
+					<input type="text" class="form-control form login" placeholder="用户名(邮箱格式)" style="width:400px;margin-bottom:30px;"  varname="uname" varvalue="value"/>
+				</div><br>
+				<div class="form-group">
+					<input type="password" class="form-control form login" placeholder="密码(大于8个字符)" style="width:400px;margin-bottom:30px;" varname="upass" varvalue="value"/>
+				</div><br>
+				<div class="form-group">
+					<input type="password" class="form-control form login" placeholder="重复密码(大于8个字符)" style="width:400px;margin-bottom:30px;" varname="reupass" varvalue="value"/>
+				</div><br>
+				<div class="form-group">
+					 
+
+					<input type="text" class="form-control form login" placeholder="验证码" id="vericodetext" style="width:400px;margin-bottom:30px;" varname="vericode" varvalue="value"/>
+				</div><br>
+				
+				<div class="form-group" style="clear:both">
+				
+					<img  id="vericode" src="/captcha/entry.func" onclick="this.src=this.src+'?'+Math.random()"></img>
+
+				</div> <br>
+				<div class="well well-sm validfailinfo alert alert-warning" style="width:400px;margin-bottom:30px;display:none;"></div>
+				
+			</form><br>
+			<button class="btn btn-danger " style="width:400px;margin-bottom:10px;">注册</button>
+			<button class="btn btn-danger " style="width:400px;margin-bottom:10px;">已有账户?点击登录</button>
+		</div>
+		<div class="col-md-1">
+		</div>
+	</div>
+</div>    </div>
+    
+    <div id="footer" class="automin-heightlast">
+        <hr>
+<p align="center">&copy;深圳市三满科技有限公司.<a href="http://www.miitbeian.gov.cn/" target="_blank">粤ICP备14074926号-1</a></p>
+    </div>
+        <div id='_warehouse_'  style='display:none'></div></body>
+</html>
+

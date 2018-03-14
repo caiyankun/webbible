@@ -1,0 +1,39 @@
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-1">
+		</div>
+		<div class="col-md-5" align="right">
+			<img alt="Bootstrap Image Preview" src="/static/img/liza_n400.jpg" class="img-rounded" />
+		</div>
+		<div class="col-md-5" style="padding-top:30px;">
+			<form role="form" class="form-inline" >
+				<div class="form-group">
+					 
+					<input type="text" class="form-control form login" placeholder="用户名(邮箱格式)" style="width:400px;margin-bottom:30px;"  varname="uname" varvalue="value"/>
+				</div><br>
+				<div class="form-group">
+					<input type="password" class="form-control form login" placeholder="密码(大于8个字符)" style="width:400px;margin-bottom:30px;" varname="upass" varvalue="value"/>
+				</div><br>
+				<div class="form-group">
+					 
+
+					<input type="text" class="form-control form login" placeholder="验证码" id="vericodetext" style="width:400px;margin-bottom:30px;" varname="vericode" varvalue="value"/>
+				</div><br>
+				
+				<div class="form-group" style="clear:both">
+				
+					<img  id="vericode" src="/captcha/entry.func" onclick="this.src=this.src+'?'+Math.random()"></img>
+					<label>
+						<input class="form login" type="checkbox" varname="keeplogin" varvalue="checked"/> 两周免登录
+					</label>
+				</div> <br>
+				<div class="well well-sm validfailinfo alert alert-warning" style="width:400px;margin-bottom:30px;display:none;"></div>
+				
+			</form><br>
+			<button class="btn btn-danger " style="width:400px;margin-bottom:10px;">登录</button>
+			<button class="btn btn-danger " style="width:400px;margin-bottom:10px;">没有账户?点击注册</button>
+		</div>
+		<div class="col-md-1">
+		</div>
+	</div>
+</div>

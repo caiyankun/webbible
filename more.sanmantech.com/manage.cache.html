@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Loading....</title>
+</head>
+<script language="javascript" type="text/javascript">window.onerror=function(m,u,l){alert ("【JS加载出错】:\r\n【文件】:"+u+"\r\n【行】:"+l+"\r\n【信息】:"+m);};</script><script language="javascript" src="/static/js/3ca65985426e62dcd5e9e9475e057cae.1520931187.cache.js"></script><script language="javascript" src="/static/js/839e7fc99f15b964707eee60a0985669.1520819875.cache.js"></script><link rel="stylesheet" type="text/css" href="/static/css/96891f418833aff2df721294d249f7a1.1520819875.cache.css" /><body>
+    <div id="header">
+        
+			<nav class="navbar navbar-default " role="navigation" >
+				<div class="navbar-header">
+					 
+					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+						 <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+					</button> <a class="navbar-brand" href="#">全务通</a>
+				</div>
+				
+				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+					<ul class="nav navbar-nav" style="display:none">
+						<li class="dropdown">
+							 <a href="#" class="dropdown-toggle" data-toggle="dropdown">快捷键<strong class="caret"></strong></a>
+							<ul class="dropdown-menu">
+								<li>
+									<a href="#">Action</a>
+								</li>
+								<li>
+									<a href="#">Another action</a>
+								</li>
+								<li>
+									<a href="#">Something else here</a>
+								</li>
+								<li class="divider">
+								</li>
+								<li>
+									<a href="#">Separated link</a>
+								</li>
+								<li class="divider">
+								</li>
+								<li>
+									<a href="#">One more separated link</a>
+								</li>
+							</ul>
+						</li>
+					</ul>
+					
+					<form class="navbar-form navbar-left" role="search" style="display:none">
+						<div class="form-group">
+							<input type="text" class="form-control" />
+						</div> 
+						<button type="submit" class="btn btn-default">
+							搜索
+						</button>
+					</form>
+
+					<ul class="nav navbar-nav navbar-right">
+						
+						<li class="dropdown">
+							 <a href="#" class="dropdown-toggle" data-toggle="dropdown" varname="h_userlogin" varvalue="text">请登录<strong class="caret"></strong></a>
+							<ul class="dropdown-menu" id="h_userdropdown">
+								<li>
+									<a href="#" varname="h_userinfo" varvalue="text">用户信息</a>
+								</li>
+								<li>
+									<a href="#" varname="h_userreg" varvalue="text">新用户注册</a>
+								</li>
+								<li class="divider">
+								</li>
+								<li>
+									<a href="#" varname="h_userlogout" varvalue="text">退出登录</a>
+								</li>
+							</ul>
+						</li>
+                                                <li>
+							<a href="#" id="h_navbtn"><span class="glyphicon glyphicon-th" aria-hidden="true"></span></a>
+						</li>
+					</ul>
+				</div>
+				
+			</nav>
+
+
+<script language="javascript" type="text/javascript">
+(typeof sm!=="undefined")&&sm.autoinit("headerinit",function(){
+
+
+//alert(JSON.stringify(sm.datasource));
+if(typeof sm.datasource.user!=="undefined"){
+	$('#header [varname="h_userlogin"]').text(sm.datasource.user.uname);
+}
+
+
+sm.event.map("#header *","click.headerinit",{
+	'text:退出登录':function(){
+		sm.ajax.silence().url("/user/logout.func").post().taskok(function(d){
+			sm.page.reload();
+		}).taskfail(function(d){
+			alert("退出登录失败:"+d);
+		});
+	},
+	'text:用户信息':function(){
+		sm.page.open("/user/info.php");
+	},
+	'text:新用户注册':function(){
+		sm.page.open("/user/register.php");
+	},
+	'[varname="h_userlogin"]':function(){
+		if(sm.datasource.role==0){
+			//alert("你需要登录");
+			sm.page.reload("/user/login.php");
+			$('#h_userdropdown li').hide();
+		} else {
+			$('#h_userdropdown li').show();
+		}
+	},
+	'#h_navbtn':function(){
+		sm.page.open("/bible.php");
+	},
+});
+
+});
+
+</script>    </div>
+
+    <div id="mainbody" class="automin-heighttowindow" >
+         <div class="container-fluid">
+	<div class="row">
+		<div class="col-md-3">
+			<div class="panel-group" id="panel-794428">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						 <a class="panel-title" data-toggle="collapse" data-parent="#panel-794428" href="#panel-element-620661">用户管理</a>
+					</div>
+					<div id="panel-element-620661" class="panel-collapse collapse in">
+						<div class="panel-body">
+
+			<div class="list-group">
+				<a class="list-group-item" href="#">申请为设计师</a>
+				<a class="list-group-item" href="#">用户信息</a>
+				<a class="list-group-item" href="#">更改密码</a> 
+			</div>
+
+						</div>
+					</div>
+
+					<div class="panel-heading">
+						 <a class="panel-title" data-toggle="collapse" data-parent="#panel-794428" href="#panel-element-432068">产品管理</a>
+					</div>
+					<div id="panel-element-432068" class="panel-collapse collapse">
+						<div class="panel-body">
+							Anim pariatur cliche...
+						</div>
+					</div>
+                                    	<div class="panel-heading">
+						 <a class="panel-title" data-toggle="collapse" data-parent="#panel-794428" href="#panel-element-432069">晒图管理</a>
+					</div>
+					<div id="panel-element-432069" class="panel-collapse collapse">
+						<div class="panel-body">
+							Anim pariatur cliche...
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-9">
+			<div class="tabbable" id="tabs-273176">
+				<ul class="nav nav-tabs">
+					<li class="active">
+						<a href="#panel-872617" data-toggle="tab">Section 1</a>
+					</li>
+					<li>
+						<a href="#panel-824702" data-toggle="tab">Section 2</a>
+					</li>
+				</ul>
+				<div class="tab-content">
+					<div class="tab-pane active" id="panel-872617">
+						<p>
+							I'm in Section 1.
+						</p>
+					</div>
+					<div class="tab-pane" id="panel-824702">
+						<p>
+							Howdy, I'm in Section 2.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>    </div>
+    
+    <div id="footer" class="automin-heightlast">
+        <hr>
+<p align="center">&copy;深圳市三满科技有限公司.<a href="http://www.miitbeian.gov.cn/" target="_blank">粤ICP备14074926号-1</a></p>
+    </div>
+        <div id='_warehouse_'  style='display:none'></div></body>
+</html>
+
