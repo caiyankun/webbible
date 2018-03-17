@@ -1,7 +1,7 @@
 <?php
     \View::rolecheck(0,"<=","","/user/info.php");
     \View::maxim();
-    \View::createview(["godbless","bootstrap3.3.5"]);
+    \View::createview(["godbless","bootstrap3.3.5","animate","font-awesome4.4.0","hadmin4.0"]);
 ?>
 <script language="javascript" type="text/javascript">
 

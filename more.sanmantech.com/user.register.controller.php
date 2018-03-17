@@ -1,7 +1,8 @@
 <?php
     //\View::rolecheck(0,"<=","","/user/info.php");
     \View::maxim();
-    \View::createview(["godbless","bootstrap3.3.5"]);
+//    \View::createview(["godbless","bootstrap3.3.5"]);
+    \View::createview(["godbless","bootstrap3.3.5","animate","font-awesome4.4.0","hadmin4.0"]);
 ?>
 <script language="javascript" type="text/javascript">
 
@@ -51,12 +52,11 @@
         'text:已有账户?点击登录':function(){
         	sm.page.reload("/user/login.php");
         },
-    }).map("body *","change.input",{
+    }).map("body *","input.input",{//由于使用change 事件与注册方法冲突，修改为input
     	'input.form':function(){
     		$(this).removeClass("alert alert-danger");
     		$(".validfailinfo").html("").hide();
     	},
-    
     });
     //5-6 执行初始化
     $$.autominheighttowindow();
