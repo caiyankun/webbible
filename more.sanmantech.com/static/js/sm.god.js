@@ -955,6 +955,16 @@ makeout:function(modelname,data,def,extradata,datafunc){
 jqmakeout:function(modelname,data,def,datafunc){
     return $(this.makeout(modelname,data,def,datafunc));
 },//执行模版替换，返回格式为jq格式
+part:function(partname,valueiffail){
+    var rsvalue=arguments[1]?valueiffail:"";
+    sm.ajax.async(false).url("/factory/getpart.func/"+partname).post().taskok(function(d){
+        rsvalue=d;
+    }).taskfail(function(d){
+               alert(d);     
+    });
+    
+    return rsvalue;
+},
 warehouse:function(modelname){
     if($('#_warehouse_').length<1){$("body").prepend("<div id='_warehouse_' style='display:none'></div>");}
     if($("#_warehouse_").children(".biblemodel."+modelname).length>0){

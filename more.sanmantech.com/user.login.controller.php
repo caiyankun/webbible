@@ -2,6 +2,9 @@
     \View::rolecheck(0,"<=","","/user/info.php");
     \View::maxim();
     \View::createview(["godbless","bootstrap3.3.5","animate","font-awesome4.4.0","hadmin4.0"]);
+    
+    
+    
 ?>
 <script language="javascript" type="text/javascript">
 
@@ -9,6 +12,7 @@
 //0-6 程序执行的开始，声明页面必须的变量，变量的要求，以及数据交换业务的定义,以及事件
 !(typeof God==='undefined')&&!(typeof jQuery==='undefined')&&$(document).ready(function(){
     //1-6 定义页面中要使用的全部变量声明
+    
     sm.datasource.extend({
         title:"欢迎登录！",//文档的标题
         uname:"",

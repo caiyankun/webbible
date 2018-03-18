@@ -11,6 +11,10 @@
 
 <script language="javascript" type="text/javascript">
     $(document).ready(function(){
-	$('#fullpage').fullpage();
+	alert("进入了controller");
+        
+        $("#testdiv").html(sm.ui.part("manage.test"));
+        
+        alert("离开了controller");
     });
 </script>
