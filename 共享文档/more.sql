@@ -1,200 +1,205 @@
--- phpMyAdmin SQL Dump
--- version 4.6.0
--- http://www.phpmyadmin.net
---
--- Host: localhost
--- Generation Time: Mar 08, 2018 at 09:26 PM
--- Server version: 5.7.12
--- PHP Version: 5.6.21
+/*
+Navicat MySQL Data Transfer
 
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET time_zone = "+00:00";
+Source Server         : 本地
+Source Server Version : 50714
+Source Host           : localhost:3306
+Source Database       : more
 
+Target Server Type    : MYSQL
+Target Server Version : 50714
+File Encoding         : 65001
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+Date: 2018-03-19 19:20:42
+*/
 
---
--- Database: `more`
---
+SET FOREIGN_KEY_CHECKS=0;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `admin`
---
-
-CREATE TABLE `admin` (
-  `aid` int(10) UNSIGNED NOT NULL COMMENT '自增ID',
-  `aname` text COMMENT '用户名',
-  `email` text COMMENT '邮箱',
-  `mobile` char(13) NOT NULL COMMENT '联系电话',
-  `apassword` char(64) DEFAULT NULL COMMENT '密码',
-  `createtime` date DEFAULT NULL COMMENT '创建时间',
-  `updatetime` date DEFAULT NULL COMMENT '更新时间',
-  `log` text COMMENT '日志',
-  `lastlogin` date DEFAULT NULL COMMENT '最后登录时间'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='管理员表';
-
--- --------------------------------------------------------
-
---
--- Table structure for table `chart`
---
-
+-- ----------------------------
+-- Table structure for `chart`
+-- ----------------------------
+DROP TABLE IF EXISTS `chart`;
 CREATE TABLE `chart` (
-  `id` int(10) UNSIGNED NOT NULL COMMENT '自增ID',
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `uid` int(11) DEFAULT NULL COMMENT '用户ID',
-  `type` text COMMENT '类型',
+  `type` varchar(20) DEFAULT 'product' COMMENT '类型',
   `pid` int(11) DEFAULT NULL COMMENT '商品ID',
   `qty` int(11) DEFAULT NULL,
-  `ctime` date DEFAULT NULL COMMENT '创建时间',
-  `otime` date DEFAULT NULL COMMENT '当前时间',
+  `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `otime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '当前时间',
   `unitprice` int(11) DEFAULT NULL COMMENT '单价',
   `saleprice` int(11) DEFAULT NULL COMMENT '出售价',
   `discount` int(11) DEFAULT NULL COMMENT '折扣',
-  `option` text COMMENT '选项'
+  `option` text COMMENT '选项',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uid` (`uid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='购物车表';
 
--- --------------------------------------------------------
+-- ----------------------------
+-- Records of chart
+-- ----------------------------
 
---
--- Table structure for table `comments`
---
-
+-- ----------------------------
+-- Table structure for `comments`
+-- ----------------------------
+DROP TABLE IF EXISTS `comments`;
 CREATE TABLE `comments` (
-  `cid` int(10) UNSIGNED NOT NULL COMMENT '自增ID',
+  `cid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `uid` int(11) DEFAULT NULL COMMENT '用户ID',
   `target` text COMMENT '目标',
   `targeid` int(11) DEFAULT NULL COMMENT '目标ID',
   `content` text COMMENT '内容',
-  `ctime` date DEFAULT NULL COMMENT '创建时间',
-  `option` text COMMENT '选项'
+  `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `option` text COMMENT '选项',
+  PRIMARY KEY (`cid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='评论表';
 
--- --------------------------------------------------------
+-- ----------------------------
+-- Records of comments
+-- ----------------------------
 
---
--- Table structure for table `designer_info`
---
-
+-- ----------------------------
+-- Table structure for `designer_info`
+-- ----------------------------
+DROP TABLE IF EXISTS `designer_info`;
 CREATE TABLE `designer_info` (
-  `did` int(10) UNSIGNED NOT NULL COMMENT '自增ID',
+  `did` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `uid` int(11) DEFAULT NULL COMMENT '用户ID',
-  `ctime` int(11) DEFAULT NULL COMMENT '创建时间',
-  `action` text COMMENT '行为',
+  `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `action` varchar(255) DEFAULT 'info' COMMENT '行为',
   `pid` int(11) DEFAULT NULL COMMENT '商品ID',
-  `option` text COMMENT '选项'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+  `option` text COMMENT '选项',
+  PRIMARY KEY (`did`)
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
--- --------------------------------------------------------
+-- ----------------------------
+-- Records of designer_info
+-- ----------------------------
+INSERT INTO `designer_info` VALUES ('4', '42', '2018-03-17 15:23:19', '作品', '2', null);
+INSERT INTO `designer_info` VALUES ('3', '42', '2018-03-17 15:22:39', '作品', '1', null);
 
---
--- Table structure for table `dictionary`
---
-
+-- ----------------------------
+-- Table structure for `dictionary`
+-- ----------------------------
+DROP TABLE IF EXISTS `dictionary`;
 CREATE TABLE `dictionary` (
-  `id` int(10) UNSIGNED NOT NULL COMMENT '自增ID',
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `key` text COMMENT '变量名',
   `cnnick` text COMMENT '中文显示',
   `ennick` text COMMENT '英文显示',
   `pvalue` text COMMENT '值',
-  `option` text COMMENT '选项'
+  `option` text COMMENT '选项',
+  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='数据定义表';
 
--- --------------------------------------------------------
+-- ----------------------------
+-- Records of dictionary
+-- ----------------------------
 
---
--- Table structure for table `discount`
---
-
+-- ----------------------------
+-- Table structure for `discount`
+-- ----------------------------
+DROP TABLE IF EXISTS `discount`;
 CREATE TABLE `discount` (
-  `id` int(10) UNSIGNED NOT NULL COMMENT '自增ID',
-  `dtype` text COMMENT '折扣类型',
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
+  `dtype` varchar(100) DEFAULT '单价优惠-百分比' COMMENT '折扣类型',
   `target` text COMMENT '目标',
   `pid` int(11) DEFAULT NULL COMMENT '商品ID',
-  `discount` int(11) DEFAULT NULL COMMENT '折扣',
-  `option` text COMMENT '选项'
+  `discount` int(11) DEFAULT '0' COMMENT '折扣',
+  `option` text COMMENT '选项',
+  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='折扣表';
 
--- --------------------------------------------------------
+-- ----------------------------
+-- Records of discount
+-- ----------------------------
 
---
--- Table structure for table `goods`
---
-
+-- ----------------------------
+-- Table structure for `goods`
+-- ----------------------------
+DROP TABLE IF EXISTS `goods`;
 CREATE TABLE `goods` (
-  `pid` int(10) UNSIGNED NOT NULL COMMENT '商品ID',
-  `brand` text COMMENT '品牌',
+  `pid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '商品ID',
+  `brand` text COMMENT '设计师',
   `name` text COMMENT '名称',
   `businesstype` text COMMENT '业务类型',
   `categry` text COMMENT '分类',
   `size` text COMMENT '尺寸',
-  `onboard` tinyint(1) DEFAULT NULL COMMENT '板型',
+  `onboard` tinyint(1) DEFAULT '0' COMMENT '板型',
   `material` text COMMENT '材质',
   `uniprice` int(11) DEFAULT NULL COMMENT '单价',
   `saleprice` int(11) DEFAULT NULL COMMENT '出售价',
   `tag` text COMMENT '标签',
-  `quota` int(11) DEFAULT NULL COMMENT '定额',
+  `quota` int(11) DEFAULT '1' COMMENT '定额',
   `occasion` text COMMENT '场合',
   `color` text COMMENT '颜色',
   `additional` text COMMENT '额外',
   `smallpic` text COMMENT '小图',
   `midpic` text COMMENT '中图',
   `largepic` text COMMENT '原图',
-  `option` text COMMENT '选项'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+  `option` text COMMENT '选项',
+  PRIMARY KEY (`pid`)
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
--- --------------------------------------------------------
+-- ----------------------------
+-- Records of goods
+-- ----------------------------
+INSERT INTO `goods` VALUES ('1', '马云飞', '大衣', null, null, null, '0', null, null, null, null, '1', null, null, null, null, null, null, null);
+INSERT INTO `goods` VALUES ('2', '飞红', '长裙', null, null, null, '0', null, null, null, null, '1', null, null, null, null, null, null, null);
+INSERT INTO `goods` VALUES ('3', '马云飞', '大衣', null, null, null, '0', null, null, null, null, '1', null, null, null, null, null, null, null);
 
---
--- Table structure for table `goods_static`
---
-
+-- ----------------------------
+-- Table structure for `goods_static`
+-- ----------------------------
+DROP TABLE IF EXISTS `goods_static`;
 CREATE TABLE `goods_static` (
-  `id` int(10) UNSIGNED NOT NULL COMMENT '自增ID',
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `pid` int(11) DEFAULT NULL COMMENT '商品ID',
   `dpid` char(32) DEFAULT NULL COMMENT '具体的某个衣服',
   `status` text COMMENT '状态',
   `qty` int(11) DEFAULT NULL,
   `operationtime` date DEFAULT NULL COMMENT '操作时间',
   `operator` int(11) DEFAULT NULL COMMENT '操作符',
-  `option` text COMMENT '选项'
+  `option` text COMMENT '选项',
+  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
--- --------------------------------------------------------
+-- ----------------------------
+-- Records of goods_static
+-- ----------------------------
 
---
--- Table structure for table `member_info`
---
-
+-- ----------------------------
+-- Table structure for `member_info`
+-- ----------------------------
+DROP TABLE IF EXISTS `member_info`;
 CREATE TABLE `member_info` (
-  `id` int(10) UNSIGNED NOT NULL COMMENT '自增ID',
-  `uid` int(10) UNSIGNED DEFAULT NULL COMMENT '用户ID',
-  `ctime` date DEFAULT NULL COMMENT '创建时间',
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
+  `uid` int(10) unsigned DEFAULT NULL COMMENT '用户ID',
+  `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `membertype` int(11) DEFAULT NULL COMMENT '用户类型',
   `memberruntil` date DEFAULT NULL COMMENT '会员期',
   `deposit` int(11) DEFAULT NULL COMMENT '押金',
   `invoice` int(11) DEFAULT NULL COMMENT '发票',
   `balance` int(11) DEFAULT NULL COMMENT '充值余额',
   `quota` int(11) DEFAULT NULL COMMENT '会员额度',
-  `option` text COMMENT '选项'
+  `option` text COMMENT '选项',
+  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
--- --------------------------------------------------------
+-- ----------------------------
+-- Records of member_info
+-- ----------------------------
 
---
--- Table structure for table `order`
---
-
+-- ----------------------------
+-- Table structure for `order`
+-- ----------------------------
+DROP TABLE IF EXISTS `order`;
 CREATE TABLE `order` (
-  `id` int(10) UNSIGNED NOT NULL COMMENT '自增ID',
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `oid` int(11) DEFAULT NULL COMMENT '订单ID',
-  `type` text COMMENT '分类',
+  `type` varchar(20) DEFAULT 'info' COMMENT '分类',
   `uid` int(11) DEFAULT NULL COMMENT '用户ID',
-  `ctime` date DEFAULT NULL COMMENT '创建时间',
+  `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `pid` int(11) DEFAULT NULL COMMENT '商品ID',
   `qty` int(11) DEFAULT NULL,
   `receiver` text COMMENT '接收机',
@@ -205,24 +210,27 @@ CREATE TABLE `order` (
   `discount` int(11) DEFAULT NULL COMMENT '折扣',
   `status` text COMMENT '支付状态',
   `log` text COMMENT '日志',
-  `option` text COMMENT '选项'
+  `option` text COMMENT '选项',
+  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
--- --------------------------------------------------------
+-- ----------------------------
+-- Records of order
+-- ----------------------------
 
---
--- Table structure for table `pocket`
---
-
+-- ----------------------------
+-- Table structure for `pocket`
+-- ----------------------------
+DROP TABLE IF EXISTS `pocket`;
 CREATE TABLE `pocket` (
-  `id` int(10) UNSIGNED NOT NULL COMMENT '自增ID',
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `uid` int(11) DEFAULT NULL COMMENT '用户ID',
-  `type` text COMMENT '类型',
+  `type` varchar(20) DEFAULT '预约' COMMENT '类型',
   `pid` int(11) DEFAULT NULL COMMENT '商品ID',
-  `qty` int(11) DEFAULT NULL,
+  `qty` int(11) DEFAULT '1',
   `quota` int(11) DEFAULT NULL COMMENT '定额',
-  `ctime` date DEFAULT NULL COMMENT '创建时间',
-  `otime` date DEFAULT NULL COMMENT '上一次操作时间',
+  `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `otime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上一次操作时间',
   `log` text COMMENT '日志',
   `btime` date DEFAULT NULL COMMENT '计划出借时间',
   `rtime` date DEFAULT NULL COMMENT '计划归还时间',
@@ -232,252 +240,470 @@ CREATE TABLE `pocket` (
   `contact` text COMMENT '联系方式',
   `address` text COMMENT '详细地址',
   `status` text COMMENT '状态',
-  `option` text COMMENT '选项'
+  `option` text COMMENT '选项',
+  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='租衣表';
 
--- --------------------------------------------------------
+-- ----------------------------
+-- Records of pocket
+-- ----------------------------
 
---
--- Table structure for table `sharepic`
---
-
+-- ----------------------------
+-- Table structure for `sharepic`
+-- ----------------------------
+DROP TABLE IF EXISTS `sharepic`;
 CREATE TABLE `sharepic` (
-  `sid` int(10) UNSIGNED NOT NULL COMMENT '自增ID',
+  `sid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `uid` int(11) DEFAULT NULL COMMENT '用户ID',
   `type` text COMMENT '类型',
   `attaches` text COMMENT '附件',
   `content` text COMMENT '内容',
-  `ctime` date DEFAULT NULL COMMENT '创建时间',
-  `option` text COMMENT '选项'
+  `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `option` text COMMENT '选项',
+  PRIMARY KEY (`sid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='晒图表';
 
--- --------------------------------------------------------
+-- ----------------------------
+-- Records of sharepic
+-- ----------------------------
 
---
--- Table structure for table `shop_info`
---
-
+-- ----------------------------
+-- Table structure for `shop_info`
+-- ----------------------------
+DROP TABLE IF EXISTS `shop_info`;
 CREATE TABLE `shop_info` (
-  `id` int(10) UNSIGNED NOT NULL COMMENT '自增ID',
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `key` text COMMENT '关键词',
   `value` text COMMENT '值',
-  `ctime` date DEFAULT NULL COMMENT '创建时间',
-  `option` text COMMENT '选项'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+  `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `option` text COMMENT '选项',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
--- --------------------------------------------------------
+-- ----------------------------
+-- Records of shop_info
+-- ----------------------------
+INSERT INTO `shop_info` VALUES ('2', 'index', '100', '2018-03-17 16:06:54', null);
 
---
--- Table structure for table `user_action`
---
-
+-- ----------------------------
+-- Table structure for `user_action`
+-- ----------------------------
+DROP TABLE IF EXISTS `user_action`;
 CREATE TABLE `user_action` (
-  `id` int(10) UNSIGNED NOT NULL COMMENT '自增ID',
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `uid` int(11) DEFAULT NULL COMMENT '用户ID',
   `action` text COMMENT '行为',
   `target` text COMMENT '标签',
   `content` text COMMENT '内容',
-  `ctime` date DEFAULT NULL COMMENT '创建时间',
-  `option` text COMMENT '选项'
+  `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `option` text COMMENT '选项',
+  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
--- --------------------------------------------------------
+-- ----------------------------
+-- Records of user_action
+-- ----------------------------
 
---
--- Table structure for table `user_info`
---
-
+-- ----------------------------
+-- Table structure for `user_info`
+-- ----------------------------
+DROP TABLE IF EXISTS `user_info`;
 CREATE TABLE `user_info` (
-  `id` int(10) UNSIGNED NOT NULL COMMENT '自增id',
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增id',
   `uid` int(11) DEFAULT NULL COMMENT '用户ID',
   `nick` text COMMENT '昵称',
   `realname` text COMMENT '真名',
   `shenfenzheng` text COMMENT '身份证',
-  `verified` tinyint(1) DEFAULT NULL COMMENT '验证码',
+  `verified` tinyint(1) DEFAULT '0' COMMENT '验证码',
   `invitationcode` text COMMENT '邀请码',
-  `sex` tinyint(1) DEFAULT NULL COMMENT '性别',
+  `sex` tinyint(1) DEFAULT '1' COMMENT '性别',
   `age` tinyint(3) DEFAULT NULL COMMENT '年龄',
   `mobile` text COMMENT '手机',
   `morecontact` text COMMENT '更多联系方式',
   `address` text COMMENT '地址',
   `moraddress` text COMMENT '详细地址',
-  `additional` text COMMENT '额外'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+  `additional` text COMMENT '额外',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
---
--- Indexes for dumped tables
---
+-- ----------------------------
+-- Records of user_info
+-- ----------------------------
+INSERT INTO `user_info` VALUES ('1', '42', null, null, null, '0', null, '1', null, null, null, null, null, null);
 
---
--- Indexes for table `admin`
---
-ALTER TABLE `admin`
-  ADD PRIMARY KEY (`aid`);
+-- ----------------------------
+-- Procedure structure for `designercreatework`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `designercreatework`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `designercreatework`(IN `p_uid` INT, IN `contents` TEXT)
+    NO SQL
+BEGIN
+	CALL productadd(contents);
+	set @p_pid = @@IDENTITY;
+	INSERT INTO designer_info (uid,action,pid,ctime) VALUES(p_uid,'作品',@p_pid,CURRENT_TIMESTAMP);
 
---
--- Indexes for table `chart`
---
-ALTER TABLE `chart`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uid` (`uid`);
+END
+;;
+DELIMITER ;
 
---
--- Indexes for table `comments`
---
-ALTER TABLE `comments`
-  ADD PRIMARY KEY (`cid`);
+-- ----------------------------
+-- Procedure structure for `designerdelwork`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `designerdelwork`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `designerdelwork`(IN `p_uid` INT, IN `p_pid` INT)
+    NO SQL
+BEGIN
+	DELETE FROM designer_info WHERE uid=p_uid and pid=p_pid;
+   CALL productdel(p_pid); 
+END
+;;
+DELIMITER ;
 
---
--- Indexes for table `designer_info`
---
-ALTER TABLE `designer_info`
-  ADD PRIMARY KEY (`did`);
+-- ----------------------------
+-- Procedure structure for `designerquerywork`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `designerquerywork`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `designerquerywork`(IN `p_uid` INT)
+    NO SQL
+BEGIN
 
---
--- Indexes for table `dictionary`
---
-ALTER TABLE `dictionary`
-  ADD PRIMARY KEY (`id`);
+	 select 
+        uid,action,p.* 
+    from 
+        designer_info as d
+        LEFT join goods as p on d.pid=p.pid
+    WHERE
+        uid=p_uid and d.action='作品';
 
---
--- Indexes for table `discount`
---
-ALTER TABLE `discount`
-  ADD PRIMARY KEY (`id`);
+END
+;;
+DELIMITER ;
 
---
--- Indexes for table `goods`
---
-ALTER TABLE `goods`
-  ADD PRIMARY KEY (`pid`);
+-- ----------------------------
+-- Procedure structure for `designerupdwork`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `designerupdwork`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `designerupdwork`(IN `p_uid` INT, IN `p_pid` INT, IN `contents` TEXT)
+    NO SQL
+BEGIN
+	CALL productupd(p_pid,contents);
+END
+;;
+DELIMITER ;
 
---
--- Indexes for table `goods_static`
---
-ALTER TABLE `goods_static`
-  ADD PRIMARY KEY (`id`);
+-- ----------------------------
+-- Procedure structure for `getuserinfo`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `getuserinfo`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getuserinfo`(IN `uid` INT)
+    NO SQL
+BEGIN
+	DECLARE matchnum INT default 0;
+  	SELECT COUNT(*) INTO matchnum FROM user_info WHERE user_info.uid=uid;
+   if matchnum <1 then
+     INSERT INTO user_info (uid) VALUES(uid);
+   else
+   	  SELECT * FROM user_info WHERE user_info.uid=uid;
+   end if;  
+END
+;;
+DELIMITER ;
 
---
--- Indexes for table `member_info`
---
-ALTER TABLE `member_info`
-  ADD PRIMARY KEY (`id`);
+-- ----------------------------
+-- Procedure structure for `membercreate`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `membercreate`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `membercreate`(IN `p_uid` INT, IN `p_membertype` INT)
+    NO SQL
+BEGIN
+	set @sqlstr=CONCAT("UPDATE member_info SET  membertype=",p_membertype," WHERE member_info.uid=",p_uid);
+	PREPARE stmt_name FROM @sqlstr;
+	EXECUTE stmt_name;
+	DEALLOCATE PREPARE stmt_name;
+	CALL updmemberinfo(p_uid);
+   SELECT * FROM member_info where member_info.uid=p_uid;
+END
+;;
+DELIMITER ;
 
---
--- Indexes for table `order`
---
-ALTER TABLE `order`
-  ADD PRIMARY KEY (`id`);
+-- ----------------------------
+-- Procedure structure for `memberdeposit`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `memberdeposit`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `memberdeposit`(IN `p_uid` INT, IN `p_value` INT)
+    NO SQL
+BEGIN
+	set @sqlstr=CONCAT("UPDATE member_info SET deposit=deposit+",p_value," WHERE member_info.uid=",p_uid);
+	PREPARE stmt_name FROM @sqlstr;
+	EXECUTE stmt_name;
+	DEALLOCATE PREPARE stmt_name;
+   SELECT deposit FROM member_info where member_info.uid=p_uid;
+END
+;;
+DELIMITER ;
 
---
--- Indexes for table `pocket`
---
-ALTER TABLE `pocket`
-  ADD PRIMARY KEY (`id`);
+-- ----------------------------
+-- Procedure structure for `memberdereload`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `memberdereload`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `memberdereload`(IN `p_uid` INT, IN `p_value` INT)
+    NO SQL
+BEGIN
+	set @sqlstr=CONCAT("UPDATE member_info SET balance=balance+",p_value," WHERE member_info.uid=",p_uid);
+	PREPARE stmt_name FROM @sqlstr;
+	EXECUTE stmt_name;
+	DEALLOCATE PREPARE stmt_name;
+   SELECT balance FROM member_info where member_info.uid=p_uid;
+END
+;;
+DELIMITER ;
 
---
--- Indexes for table `sharepic`
---
-ALTER TABLE `sharepic`
-  ADD PRIMARY KEY (`sid`);
+-- ----------------------------
+-- Procedure structure for `memberquery`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `memberquery`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `memberquery`(IN `uid` INT)
+    NO SQL
+BEGIN
+	DECLARE matchnum INT default 0;
+  	SELECT COUNT(*) INTO matchnum FROM member_info WHERE member_info.uid=uid;
+   if matchnum <1 then
+     INSERT INTO member_info set member_info.uid=uid,member_info.membertype=0,member_info.ctime=CURRENT_TIMESTAMP;
+   else
+   	  SELECT * FROM member_info WHERE member_info.uid=uid;
+   end if;  
+END
+;;
+DELIMITER ;
 
---
--- Indexes for table `shop_info`
---
-ALTER TABLE `shop_info`
-  ADD PRIMARY KEY (`id`);
+-- ----------------------------
+-- Procedure structure for `productadd`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `productadd`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `productadd`(IN `contents` TEXT)
+    NO SQL
+BEGIN
+    set @sqlstr=CONCAT("INSERT into goods SET ",contents);
+    PREPARE stmt_name FROM @sqlstr;
+    EXECUTE stmt_name;
+    DEALLOCATE PREPARE stmt_name;
+    
+END
+;;
+DELIMITER ;
 
---
--- Indexes for table `user_action`
---
-ALTER TABLE `user_action`
-  ADD PRIMARY KEY (`id`);
+-- ----------------------------
+-- Procedure structure for `productdel`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `productdel`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `productdel`(IN `p_pid` INT)
+    NO SQL
+BEGIN
 
---
--- Indexes for table `user_info`
---
-ALTER TABLE `user_info`
-  ADD PRIMARY KEY (`id`);
+	DELETE FROM goods WHERE pid=p_pid;
 
---
--- AUTO_INCREMENT for dumped tables
---
+END
+;;
+DELIMITER ;
 
---
--- AUTO_INCREMENT for table `admin`
---
-ALTER TABLE `admin`
-  MODIFY `aid` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '自增ID';
---
--- AUTO_INCREMENT for table `chart`
---
-ALTER TABLE `chart`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '自增ID';
---
--- AUTO_INCREMENT for table `comments`
---
-ALTER TABLE `comments`
-  MODIFY `cid` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '自增ID';
---
--- AUTO_INCREMENT for table `designer_info`
---
-ALTER TABLE `designer_info`
-  MODIFY `did` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '自增ID';
---
--- AUTO_INCREMENT for table `dictionary`
---
-ALTER TABLE `dictionary`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '自增ID';
---
--- AUTO_INCREMENT for table `discount`
---
-ALTER TABLE `discount`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '自增ID';
---
--- AUTO_INCREMENT for table `goods`
---
-ALTER TABLE `goods`
-  MODIFY `pid` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '商品ID';
---
--- AUTO_INCREMENT for table `goods_static`
---
-ALTER TABLE `goods_static`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '自增ID';
---
--- AUTO_INCREMENT for table `member_info`
---
-ALTER TABLE `member_info`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '自增ID';
---
--- AUTO_INCREMENT for table `order`
---
-ALTER TABLE `order`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '自增ID';
---
--- AUTO_INCREMENT for table `pocket`
---
-ALTER TABLE `pocket`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '自增ID';
---
--- AUTO_INCREMENT for table `sharepic`
---
-ALTER TABLE `sharepic`
-  MODIFY `sid` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '自增ID';
---
--- AUTO_INCREMENT for table `shop_info`
---
-ALTER TABLE `shop_info`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '自增ID';
---
--- AUTO_INCREMENT for table `user_action`
---
-ALTER TABLE `user_action`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '自增ID';
---
--- AUTO_INCREMENT for table `user_info`
---
-ALTER TABLE `user_info`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '自增id';
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+-- ----------------------------
+-- Procedure structure for `productqty`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `productqty`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `productqty`(IN `contents` TEXT)
+    NO SQL
+BEGIN
+
+	set @sqlstr=CONCAT("select count(*) from goods where ",contents);
+	PREPARE stmt_name FROM @sqlstr;
+	EXECUTE stmt_name;
+	DEALLOCATE PREPARE stmt_name;
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `productstat`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `productstat`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `productstat`()
+    NO SQL
+BEGIN
+	SELECT COUNT(*) FROM goods;
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `productupd`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `productupd`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `productupd`(IN `p_pid` INT, IN `contents` TEXT)
+    NO SQL
+BEGIN
+
+	set @sqlstr=CONCAT("update goods SET ",contents," where pid=",p_pid );
+    PREPARE stmt_name FROM @sqlstr;
+    EXECUTE stmt_name;
+    DEALLOCATE PREPARE stmt_name;
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `shopdelinfo`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `shopdelinfo`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `shopdelinfo`(IN `p_key` TEXT)
+    NO SQL
+BEGIN
+
+	 declare cnt text default null;
+    select COUNT(*) into cnt from shop_info WHERE shop_info.key=p_key;
+    if cnt > 0 THEN
+    	DELETE FROM shop_info WHERE shop_info.key=p_key;
+    end if;
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `shopreadinfo`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `shopreadinfo`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `shopreadinfo`(IN `p_key` TEXT)
+    NO SQL
+BEGIN
+	SELECT value from shop_info WHERE shop_info.key = p_key;
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `shopwriteinfo`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `shopwriteinfo`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `shopwriteinfo`(IN `p_key` TEXT, IN `p_value` TEXT)
+    NO SQL
+BEGIN
+    declare cnt text default null;
+    select COUNT(*) into cnt from shop_info WHERE shop_info.key=p_key;
+    if cnt > 0 THEN
+    	UPDATE shop_info SET shop_info.value=p_value WHERE shop_info.key=p_key;
+    ELSE
+		INSERT INTO shop_info (shop_info.key,shop_info.value,ctime) VALUES(p_key,p_value,CURRENT_TIMESTAMP);
+    end if;
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `updmemberinfo`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `updmemberinfo`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `updmemberinfo`(IN `p_uid` INT)
+    NO SQL
+BEGIN
+DECLARE cnt INT DEFAULT 0;
+    select membertype into cnt from member_info WHERE uid=p_uid;
+	if cnt=1 THEN
+    	UPDATE member_info SET quota=1000,memberuntil=date_add(now(),INTERVAL 12 month) WHERE uid=p_uid;
+   ELSEIF cnt=2 THEN
+   		UPDATE member_info SET quota=2000,memberuntil=date_add(now(),INTERVAL 6 month) WHERE uid=p_uid;
+   ELSEIF cnt=3 THEN 
+   		UPDATE member_info SET quota=3000,memberuntil=date_add(now(),INTERVAL 3 month) WHERE uid=p_uid;
+    end if;
+    
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `upduserinfo`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `upduserinfo`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `upduserinfo`(IN `uid` INT, IN `contents` TEXT)
+    NO SQL
+BEGIN
+	set @sqlstr=CONCAT("UPDATE user_info SET ",contents," WHERE user_info.uid=",uid);
+	PREPARE stmt_name FROM @sqlstr;
+	EXECUTE stmt_name;
+	DEALLOCATE PREPARE stmt_name;
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `useractionadd`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `useractionadd`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `useractionadd`(IN `p_uid` INT, IN `p_action` VARCHAR(100), IN `p_target` VARCHAR(100))
+    NO SQL
+BEGIN
+	DECLARE matchnum INT default 0;
+  	SELECT COUNT(*) INTO matchnum FROM user_action WHERE user_action.uid=p_uid and user_action.action=p_action and target=p_target;
+   if matchnum <1 then
+     INSERT INTO user_action set uid=p_uid,action=p_action,target=p_target,ctime=CURRENT_TIMESTAMP; 
+     
+   end if;  
+   SELECT * FROM user_action WHERE user_action.uid=p_uid;
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `useractiondel`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `useractiondel`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `useractiondel`(IN `p_uid` INT, IN `p_action` VARCHAR(100), IN `p_target` VARCHAR(100))
+    NO SQL
+BEGIN
+	DECLARE matchnum INT default 0;
+  	SELECT COUNT(*) INTO matchnum FROM user_action WHERE user_action.uid=p_uid and user_action.action=p_action and target=p_target;
+     if matchnum >0 then
+    DELETE FROM user_action where user_action.uid=p_uid and user_action.action=p_action and user_action.target=p_target;
+     
+   end if;  
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `useractionquery`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `useractionquery`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `useractionquery`(IN `p_uid` INT, IN `p_action` VARCHAR(100))
+    NO SQL
+BEGIN
+
+	SELECT * FROM user_action where user_action.uid=p_uid and  user_action.action=p_action;
+    
+END
+;;
+DELIMITER ;
