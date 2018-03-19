@@ -8,15 +8,15 @@ class user
         if(!\Db::simplecall("user.login",array($uname,md5($upass)))){
             \Response::returntaskfail("存储过程执行失败！",\Db::$error,\Db::$info);
         } 
-        \User::$curuser=array_combine (array('uid','uname','role','option'),\Db::arraydata());
-        if(\User::$curuser['role']<\Config::get($role, "userrole",101)){
+        \User::$curuser=array_combine (array('uid','uname','ulevel','token','option'),\Db::arraydata());
+        if(\User::$curuser['ulevel']<\Config::get($role, "userrole",101)){
             //$this->logout();
             \User::$curuser=null;
             \Response::returntaskfail("用户身份不符！",4,"您没有".$role."的身份！");
         }
     	\Session::set("_user", \User::$curuser);
         \Cookie::savesession($keeplogin?60*60*24*14:-3600);
-        \Response::returntaskok(self::info());
+        \Response::returntaskok(\User::info());
     }
     public function register($uname,$upass,$vericode,$role="user") {
         if(!captcha::staticcheck($vericode)){\Response::returntaskfail("验证码不正确！",1,"验证码不正确！");}
@@ -64,6 +64,15 @@ class user
             \Response::returntaskok(\Db::arraydata());
         }
     }
+    public function tokenlogin($token){
+        if(!\Db::simplecall("user.tokencheck",array($token))){
+            \Response::returntaskfail("存储过程执行失败！",\Db::$error,\Db::$info);
+        } 
+        \User::$curuser=array_combine (array('uid','uname','ulevel','token','option'),\Db::arraydata());
+        \Session::set("_user", \User::$curuser);
+        \Response::returntaskok(\User::info());    
+    }
+
     public function upduserinfo() {
         $content="";
         foreach ($_GET as $key => $value){

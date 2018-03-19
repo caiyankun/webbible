@@ -70,7 +70,6 @@ function is_password($password){
 	}
 	//return preg_match('/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/', $password) ? true : false;
 	return preg_match('/^\S{6,32}$/', $password) ? true : false;
-	
 }
 
 /**
