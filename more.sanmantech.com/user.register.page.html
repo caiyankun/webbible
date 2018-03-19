@@ -1,40 +1,31 @@
-<div class="container-fluid">
-	<div class="row">
-		<div class="col-md-1">
-		</div>
-		<div class="col-md-5" align="right">
-			<img alt="Bootstrap Image Preview" src="/static/img/liza_n400.jpg" class="img-rounded" />
-		</div>
-		<div class="col-md-5" style="padding-top:30px;">
-			<form role="form" class="form-inline" >
+<div class="gray-bg">
+	<div class="middle-box text-center loginscreen   animated fadeInDown">
+		<div>
+			<div>
+				<h1 class="logo-name">M+</h1>
+			</div>
+			<h3>欢迎注册 摩尔衣橱</h3>
+			<p>创建一个M+新账户</p>
+			<form class="m-t" role="form">
 				<div class="form-group">
-					 
-					<input type="text" class="form-control form login" placeholder="用户名(邮箱格式)" style="width:400px;margin-bottom:30px;"  varname="uname" varvalue="value"/>
-				</div><br>
+					<input type="text" class="form-control form login" placeholder="用户名(邮箱格式)"  varname="uname" varvalue="value">
+				</div>
 				<div class="form-group">
-					<input type="password" class="form-control form login" placeholder="密码(大于8个字符)" style="width:400px;margin-bottom:30px;" varname="upass" varvalue="value"/>
-				</div><br>
+					<input type="password" class="form-control form login" placeholder="密码(大于8个字符)"  varname="upass" varvalue="value">
+				</div>
 				<div class="form-group">
-					<input type="password" class="form-control form login" placeholder="重复密码(大于8个字符)" style="width:400px;margin-bottom:30px;" varname="reupass" varvalue="value"/>
-				</div><br>
+					<input type="password" class="form-control form login" placeholder="重复密码(大于8个字符)" varname="reupass" varvalue="value"/>
+				</div>
 				<div class="form-group">
-					 
-
-					<input type="text" class="form-control form login" placeholder="验证码" id="vericodetext" style="width:400px;margin-bottom:30px;" varname="vericode" varvalue="value"/>
-				</div><br>
-				
-				<div class="form-group" style="clear:both">
-				
+					<input type="text" class="form-control form login" placeholder="验证码" id="vericodetext" varname="vericode" varvalue="value"/>
+				</div>
+				<div class="form-group" style="text-align: left">
 					<img  id="vericode" src="/captcha/entry.func" onclick="this.src=this.src+'?'+Math.random()"></img>
-
-				</div> <br>
-				<div class="well well-sm validfailinfo alert alert-warning" style="width:400px;margin-bottom:30px;display:none;"></div>
-				
-			</form><br>
-			<button class="btn btn-danger " style="width:400px;margin-bottom:10px;">注册</button>
-			<button class="btn btn-danger " style="width:400px;margin-bottom:10px;">已有账户?点击登录</button>
-		</div>
-		<div class="col-md-1">
+				</div>
+			</form>
+			<div class="well well-sm validfailinfo alert alert-warning" style="display:none;"></div>
+			<button class="btn btn-primary block full-width m-b">注册</button>
+			<a class="text-muted text-center">已有账户?点击登录</a>
 		</div>
 	</div>
 </div>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Loading....</title>
 </head>
-<script language="javascript" type="text/javascript">window.onerror=function(m,u,l){alert ("【JS加载出错】:\r\n【文件】:"+u+"\r\n【行】:"+l+"\r\n【信息】:"+m);};</script><script language="javascript" src="/static/js/3ca65985426e62dcd5e9e9475e057cae.1520931187.cache.js"></script><script language="javascript" src="/static/js/839e7fc99f15b964707eee60a0985669.1520819875.cache.js"></script><link rel="stylesheet" type="text/css" href="/static/css/96891f418833aff2df721294d249f7a1.1520819875.cache.css" /><body>
+<script language="javascript" type="text/javascript">window.onerror=function(m,u,l){alert ("【JS加载出错】:\r\n【文件】:"+u+"\r\n【行】:"+l+"\r\n【信息】:"+m);};</script><script language="javascript" src="/static/js/3ca65985426e62dcd5e9e9475e057cae.1520931187.cache.js"></script><script language="javascript" src="/static/js/97243d7e852d196167d5cea3c5bdc6c7.1521281948.cache.js"></script><link rel="stylesheet" type="text/css" href="/static/css/9aff8c938e45ee993298a43ddfec6b60.1521281948.cache.css" /><body>
     <div id="header">
         
 			<nav class="navbar navbar-default " role="navigation" >
@@ -123,42 +123,36 @@ sm.event.map("#header *","click.headerinit",{
 </script>    </div>
 
     <div id="mainbody" class="automin-heighttowindow" >
-         <div class="container-fluid">
-	<div class="row">
-		<div class="col-md-1">
-		</div>
-		<div class="col-md-5" align="right">
-			<img alt="Bootstrap Image Preview" src="/static/img/liza_n400.jpg" class="img-rounded" />
-		</div>
-		<div class="col-md-5" style="padding-top:30px;">
-			<form role="form" class="form-inline" >
-				<div class="form-group">
-					 
-					<input type="text" class="form-control form login" placeholder="用户名(邮箱格式)" style="width:400px;margin-bottom:30px;"  varname="uname" varvalue="value"/>
-				</div><br>
-				<div class="form-group">
-					<input type="password" class="form-control form login" placeholder="密码(大于8个字符)" style="width:400px;margin-bottom:30px;" varname="upass" varvalue="value"/>
-				</div><br>
-				<div class="form-group">
-					 
+         <div class="gray-bg">
+	<div class="middle-box text-center loginscreen  animated fadeInDown">
+		<div>
+			<div>
 
-					<input type="text" class="form-control form login" placeholder="验证码" id="vericodetext" style="width:400px;margin-bottom:30px;" varname="vericode" varvalue="value"/>
-				</div><br>
-				
-				<div class="form-group" style="clear:both">
-				
+				<h1 class="logo-name">M</h1>
+
+			</div>
+			<h3>欢迎使用摩尔衣橱</h3>
+
+			<form class="m-t" role="form">
+				<div class="form-group">
+					<input type="email" class="form-control form login" placeholder="用户名(邮箱格式)" varname="uname" varvalue="value"/>
+				</div>
+				<div class="form-group">
+					<input type="password" class="form-control form login" placeholder="密码(大于8个字符)" varname="upass" varvalue="value"/>
+				</div>
+				<div class="form-group">
+					<input type="text" class="form-control form login" placeholder="验证码" id="vericodetext" varname="vericode" varvalue="value"/>
+				</div>
+				<div class="form-group" style="text-align: left">
 					<img  id="vericode" src="/captcha/entry.func" onclick="this.src=this.src+'?'+Math.random()"></img>
-					<label>
-						<input class="form login" type="checkbox" varname="keeplogin" varvalue="checked"/> 两周免登录
-					</label>
-				</div> <br>
-				<div class="well well-sm validfailinfo alert alert-warning" style="width:400px;margin-bottom:30px;display:none;"></div>
-				
-			</form><br>
-			<button class="btn btn-danger " style="width:400px;margin-bottom:10px;">登录</button>
-			<button class="btn btn-danger " style="width:400px;margin-bottom:10px;">没有账户?点击注册</button>
-		</div>
-		<div class="col-md-1">
+				</div>
+				<div class="form-group" style="text-align: left">
+					<input class="form login" type="checkbox" varname="keeplogin" varvalue="checked"/> 两周免登录
+				</div>
+			</form>
+			<div class="well well-sm validfailinfo alert alert-warning" style="display:none;"></div>
+			<button class="btn btn-primary block full-width m-b">登录</button>
+			<a class="text-muted text-center">没有账户?点击注册</a>
 		</div>
 	</div>
 </div>    </div>
