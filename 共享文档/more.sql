@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50714
 File Encoding         : 65001
 
-Date: 2018-03-19 19:20:42
+Date: 2018-03-20 22:08:29
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -24,7 +24,7 @@ CREATE TABLE `chart` (
   `uid` int(11) DEFAULT NULL COMMENT '用户ID',
   `type` varchar(20) DEFAULT 'product' COMMENT '类型',
   `pid` int(11) DEFAULT NULL COMMENT '商品ID',
-  `qty` int(11) DEFAULT NULL,
+  `qty` int(11) DEFAULT NULL COMMENT '数量',
   `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `otime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '当前时间',
   `unitprice` int(11) DEFAULT NULL COMMENT '单价',
@@ -33,11 +33,12 @@ CREATE TABLE `chart` (
   `option` text COMMENT '选项',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid` (`uid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='购物车表';
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='购物车表';
 
 -- ----------------------------
 -- Records of chart
 -- ----------------------------
+INSERT INTO `chart` VALUES ('2', '42', 'product', '1', '3', '2018-03-20 21:44:50', '2018-03-20 21:44:50', null, null, null, null);
 
 -- ----------------------------
 -- Table structure for `comments`
@@ -47,16 +48,18 @@ CREATE TABLE `comments` (
   `cid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `uid` int(11) DEFAULT NULL COMMENT '用户ID',
   `target` text COMMENT '目标',
-  `targeid` int(11) DEFAULT NULL COMMENT '目标ID',
+  `targetid` int(11) DEFAULT NULL COMMENT '目标ID',
   `content` text COMMENT '内容',
   `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `option` text COMMENT '选项',
   PRIMARY KEY (`cid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='评论表';
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='评论表';
 
 -- ----------------------------
 -- Records of comments
 -- ----------------------------
+INSERT INTO `comments` VALUES ('1', '42', '1', '2', '1111', '2018-03-19 20:51:50', null);
+INSERT INTO `comments` VALUES ('2', '42', '78', '1', 'brand=\'马云飞\',name=\'大衣\'', '2018-03-19 21:07:06', null);
 
 -- ----------------------------
 -- Table structure for `designer_info`
@@ -90,11 +93,12 @@ CREATE TABLE `dictionary` (
   `pvalue` text COMMENT '值',
   `option` text COMMENT '选项',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='数据定义表';
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='数据定义表';
 
 -- ----------------------------
 -- Records of dictionary
 -- ----------------------------
+INSERT INTO `dictionary` VALUES ('1', 'info', '22222', 'english', null, null);
 
 -- ----------------------------
 -- Table structure for `discount`
@@ -105,7 +109,7 @@ CREATE TABLE `discount` (
   `dtype` varchar(100) DEFAULT '单价优惠-百分比' COMMENT '折扣类型',
   `target` text COMMENT '目标',
   `pid` int(11) DEFAULT NULL COMMENT '商品ID',
-  `discount` int(11) DEFAULT '0' COMMENT '折扣',
+  `discount` int(2) unsigned DEFAULT '0' COMMENT '折扣',
   `option` text COMMENT '选项',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='折扣表';
@@ -332,6 +336,114 @@ CREATE TABLE `user_info` (
 INSERT INTO `user_info` VALUES ('1', '42', null, null, null, '0', null, '1', null, null, null, null, null, null);
 
 -- ----------------------------
+-- Procedure structure for `chartadd`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `chartadd`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `chartadd`(IN `p_uid` INT, IN `p_pid` INT, IN `p_qty` INT)
+    NO SQL
+BEGIN
+INSERT INTO chart set chart.uid=p_uid,chart.pid=p_pid,chart.qty=p_qty;
+
+	
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `chartdel`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `chartdel`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `chartdel`(IN `p_uid` INT, IN `p_pid` INT)
+    NO SQL
+BEGIN
+
+	DELETE FROM chart WHERE uid=p_uid and pid=p_pid;
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `chartquery`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `chartquery`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `chartquery`(IN `p_uid` INT)
+    NO SQL
+BEGIN
+
+	SELECT * from chart WHERE uid=p_uid;
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `chartupd`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `chartupd`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `chartupd`(IN `p_uid` INT, IN `p_pid` INT, IN `p_qty` INT)
+    NO SQL
+BEGIN
+
+	set @sqlstr=CONCAT("update chart SET qty=qty+",p_qty," where chart.uid=",p_uid," and pid=",p_pid);
+    PREPARE stmt_name FROM @sqlstr;
+    EXECUTE stmt_name;
+    DEALLOCATE PREPARE stmt_name;
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `commentsadd`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `commentsadd`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `commentsadd`(IN `p_uid` INT, IN `p_target` TEXT, IN `p_targetid` INT, IN `contents` TEXT)
+    NO SQL
+BEGIN
+
+	INSERT INTO comments set  uid=p_uid,target=p_target,targetid=p_targetid,content=contents,ctime=CURRENT_TIMESTAMP; 
+    
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `commentsquerybytarget`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `commentsquerybytarget`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `commentsquerybytarget`(IN `p_target` TEXT, IN `p_targetid` INT)
+    NO SQL
+BEGIN
+
+	SELECT * FROM comments WHERE comments.target=p_target and comments.targetid=p_targetid;
+	
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `commentsquerybyuser`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `commentsquerybyuser`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `commentsquerybyuser`(IN `p_uid` INT)
+    NO SQL
+BEGIN
+
+	SELECT * FROM comments WHERE comments.uid=p_uid;
+    
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
 -- Procedure structure for `designercreatework`
 -- ----------------------------
 DROP PROCEDURE IF EXISTS `designercreatework`;
@@ -396,6 +508,97 @@ END
 DELIMITER ;
 
 -- ----------------------------
+-- Procedure structure for `dicgetalias`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `dicgetalias`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `dicgetalias`(IN `p_key` TEXT)
+    NO SQL
+BEGIN
+
+	SELECT cnnick,ennick FROM dictionary where dictionary.key=p_key;
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `dicgetkey`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `dicgetkey`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `dicgetkey`(IN `p_nick` TEXT)
+    NO SQL
+BEGIN
+
+	SELECT dictionary.key FROM dictionary where cnnick=p_nick or ennick=p_nick;
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `dicquery`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `dicquery`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `dicquery`(IN `p_key` TEXT)
+    NO SQL
+BEGIN
+
+	SELECT * from dictionary where dictionary.key=p_key;
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `dicupditem`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `dicupditem`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `dicupditem`(IN `p_key` TEXT, IN `contents` TEXT)
+    NO SQL
+BEGIN
+set @sqlstr=CONCAT("update dictionary SET ",contents," where dictionary.key=",p_key);
+    PREPARE stmt_name FROM @sqlstr;
+    EXECUTE stmt_name;
+    DEALLOCATE PREPARE stmt_name;
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `discountdel`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `discountdel`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `discountdel`(IN `p_pid` INT)
+    NO SQL
+BEGIN
+
+	DELETE FROM discount WHERE pid=p_pid;
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `discountupd`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `discountupd`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `discountupd`(IN `p_pid` INT, IN `p_value` DOUBLE)
+    NO SQL
+BEGIN
+	
+    INSERT INTO discount SET pid=p_pid,discount=p_value;
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
 -- Procedure structure for `getuserinfo`
 -- ----------------------------
 DROP PROCEDURE IF EXISTS `getuserinfo`;
@@ -407,9 +610,9 @@ BEGIN
   	SELECT COUNT(*) INTO matchnum FROM user_info WHERE user_info.uid=uid;
    if matchnum <1 then
      INSERT INTO user_info (uid) VALUES(uid);
-   else
+   end if;
    	  SELECT * FROM user_info WHERE user_info.uid=uid;
-   end if;  
+  
 END
 ;;
 DELIMITER ;
@@ -651,6 +854,7 @@ BEGIN
 	PREPARE stmt_name FROM @sqlstr;
 	EXECUTE stmt_name;
 	DEALLOCATE PREPARE stmt_name;
+   SELECT * FROM user_info WHERE user_info.uid = uid;
 END
 ;;
 DELIMITER ;
