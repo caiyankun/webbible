@@ -52,6 +52,9 @@ class Cookie
     public static function getsession(){
         return self::get("autosession");
     }
+    public static function deletesession(){
+         self::delete("autosession");
+    }
 
 
     /**

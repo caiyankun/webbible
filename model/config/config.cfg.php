@@ -1,7 +1,7 @@
 <?php
 return [
 	'CFG_BASEPATH'=>MODEL_PATH,//额外的配置文件的基地址，似乎没有使用，框架默认的两个基本的配置文件不受以下四个变量控制
-	'CFG_AUTOLOAD'=>["routerule","db"],//需要自动加载的额外的配置文件，每个文件名是一个domain
+	'CFG_AUTOLOAD'=>["routerule","db","token"],//需要自动加载的额外的配置文件，每个文件名是一个domain
 	'CFG_USERPATH'=>"config/",//额外的配置文件相对于基地址的路径
 	'CFGSUFFIX'=>".cfg.php",//额外的配置文件的后缀名字
 	'ROUTERULE_DOMAIN'=>"routerule",//路由权限规则表在配置中的哪个domain

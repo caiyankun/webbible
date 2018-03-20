@@ -4,7 +4,44 @@
 /*实现模型类的权限控制：
 *（0）Role类是给用户操作的，不涉及模型类;
 */
-
+/**
+ * 数组 转 对象
+ *
+ * @param array $arr 数组
+ * @return object
+ */
+function array_to_object($arr) {
+    if (gettype($arr) != 'array') {
+        return;
+    }
+    foreach ($arr as $k => $v) {
+        if (gettype($v) == 'array' || getType($v) == 'object') {
+            $arr[$k] = (object)array_to_object($v);
+        }
+    }
+ 
+    return (object)$arr;
+}
+ 
+/**
+ * 对象 转 数组
+ *
+ * @param object $obj 对象
+ * @return array
+ */
+function object_to_array($obj) {
+    $obj = (array)$obj;
+    foreach ($obj as $k => $v) {
+        if (gettype($v) == 'resource') {
+            return;
+        }
+        if (gettype($v) == 'object' || gettype($v) == 'array') {
+            $obj[$k] = (array)object_to_array($v);
+        }
+    }
+ 
+    return $obj;
+}
 
 class User
 {
@@ -14,7 +51,7 @@ class User
     public static $error=0;
     public static $info="";
     public static function getrole(){
-        return self::info()['role'];
+        return self::info()['ulevel'];
     }
     public static function uid(){
         return self::info()['uid'];
@@ -24,7 +61,7 @@ class User
     }
     public static function info(){
         if(Session::has("_user")){
-            return Session::get("_user");
+            return object_to_array(Session::get("_user"));
         } else {
             return Config::get("guestuser",'',self::$guestuser);
         }

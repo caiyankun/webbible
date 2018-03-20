@@ -3,12 +3,11 @@ namespace model;
 
 class user
 {
-    public function login($uname,$upass,$vericode,$keeplogin=false,$role="user") {
-        if(!captcha::staticcheck($vericode)){\Response::returntaskfail("验证码不正确！",1,"验证码不正确！");}
+        public function applogin($uname,$upass,$role="user") {
         if(!\Db::simplecall("user.login",array($uname,md5($upass)))){
             \Response::returntaskfail("存储过程执行失败！",\Db::$error,\Db::$info);
         } 
-        \User::$curuser=array_combine (array('uid','uname','ulevel','token','option'),\Db::arraydata());
+        \User::$curuser=array_combine (array('uid','uname','ulevel','option'),\Db::arraydata());
         if(\User::$curuser['ulevel']<\Config::get($role, "userrole",101)){
             //$this->logout();
             \User::$curuser=null;
@@ -16,7 +15,26 @@ class user
         }
     	\Session::set("_user", \User::$curuser);
         \Cookie::savesession($keeplogin?60*60*24*14:-3600);
-        \Response::returntaskok(\User::info());
+        $rsarray=\User::info();
+        $rsarray["token"]= \Token::create(\User::info());
+        \Response::returntaskok($rsarray);
+    }
+    public function login($uname,$upass,$vericode,$keeplogin=false,$role="user") {
+        if(!captcha::staticcheck($vericode)){\Response::returntaskfail("验证码不正确！",1,"验证码不正确！");}
+        if(!\Db::simplecall("user.login",array($uname,md5($upass)))){
+            \Response::returntaskfail("存储过程执行失败！",\Db::$error,\Db::$info);
+        } 
+        \User::$curuser=array_combine (array('uid','uname','ulevel','option'),\Db::arraydata());
+        if(\User::$curuser['ulevel']<\Config::get($role, "userrole",101)){
+            //$this->logout();
+            \User::$curuser=null;
+            \Response::returntaskfail("用户身份不符！",4,"您没有".$role."的身份！");
+        }
+    	\Session::set("_user", \User::$curuser);
+        \Cookie::savesession($keeplogin?60*60*24*14:-3600);
+        $rsarray=\User::info();
+        $rsarray["token"]= \Token::create(\User::info());
+        \Response::returntaskok($rsarray);
     }
     public function register($uname,$upass,$vericode,$role="user") {
         if(!captcha::staticcheck($vericode)){\Response::returntaskfail("验证码不正确！",1,"验证码不正确！");}
@@ -36,6 +54,8 @@ class user
     }
     public function logout() {
         \Session::delete("_user");
+        \Cookie::deletesession();
+        \Cookie::delete("PHPSESSID");
         \Response::returntaskok("退出登录成功！");
     }
     public function changerole($uid,$uname,$newrole) {

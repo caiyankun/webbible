@@ -41,4 +41,14 @@ class Request
     public static function cookie($dataname,$prefix = null){
         return Cookie::get($dataname,$prefix );
     }
+    public static function picoutdata($dataname){
+        $temp=self::data($dataname);
+        self::delete($dataname);
+        return $temp;
+    }
+    public static function delete($dataname) {
+        unset($_POST[$dataname]);
+        unset($_REQUEST[$dataname]);
+        unset($_GET[$dataname]);
+    }
 }

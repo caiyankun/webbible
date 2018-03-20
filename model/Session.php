@@ -29,11 +29,25 @@ class Session
     {
     	self::$init = false;
     	if(Cookie::hassession()){
-    		session_id(Cookie::getsession());
-    		session_start();
-    		self::$init = true;
-    		return true;
-    	}
+            session_id(Cookie::getsession());
+            session_start();
+            self::$init = true;
+            return true;
+        } else {
+            if(Request::isrequest("token")){
+                $jwt=Request::picoutdata("token");
+                if(Token::check($jwt)){
+                    session_start();
+                    self::$init = true;
+                    self::set("_user", Token::$userinfo);
+                    return true;
+                } else {
+                    \Session::delete("_user");
+                    \Cookie::deletesession();
+                    \Cookie::delete("PHPSESSID");
+                }
+            } 
+        }
     	return false;
     	//看不懂下面一大堆乱七八糟的东西！放弃
         if (empty($config)) {
