@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50714
 File Encoding         : 65001
 
-Date: 2018-03-20 20:44:48
+Date: 2018-03-20 22:08:29
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -24,7 +24,7 @@ CREATE TABLE `chart` (
   `uid` int(11) DEFAULT NULL COMMENT '用户ID',
   `type` varchar(20) DEFAULT 'product' COMMENT '类型',
   `pid` int(11) DEFAULT NULL COMMENT '商品ID',
-  `qty` int(11) DEFAULT NULL,
+  `qty` int(11) DEFAULT NULL COMMENT '数量',
   `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `otime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '当前时间',
   `unitprice` int(11) DEFAULT NULL COMMENT '单价',
@@ -33,11 +33,12 @@ CREATE TABLE `chart` (
   `option` text COMMENT '选项',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid` (`uid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='购物车表';
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='购物车表';
 
 -- ----------------------------
 -- Records of chart
 -- ----------------------------
+INSERT INTO `chart` VALUES ('2', '42', 'product', '1', '3', '2018-03-20 21:44:50', '2018-03-20 21:44:50', null, null, null, null);
 
 -- ----------------------------
 -- Table structure for `comments`
@@ -333,6 +334,69 @@ CREATE TABLE `user_info` (
 -- Records of user_info
 -- ----------------------------
 INSERT INTO `user_info` VALUES ('1', '42', null, null, null, '0', null, '1', null, null, null, null, null, null);
+
+-- ----------------------------
+-- Procedure structure for `chartadd`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `chartadd`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `chartadd`(IN `p_uid` INT, IN `p_pid` INT, IN `p_qty` INT)
+    NO SQL
+BEGIN
+INSERT INTO chart set chart.uid=p_uid,chart.pid=p_pid,chart.qty=p_qty;
+
+	
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `chartdel`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `chartdel`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `chartdel`(IN `p_uid` INT, IN `p_pid` INT)
+    NO SQL
+BEGIN
+
+	DELETE FROM chart WHERE uid=p_uid and pid=p_pid;
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `chartquery`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `chartquery`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `chartquery`(IN `p_uid` INT)
+    NO SQL
+BEGIN
+
+	SELECT * from chart WHERE uid=p_uid;
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `chartupd`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `chartupd`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `chartupd`(IN `p_uid` INT, IN `p_pid` INT, IN `p_qty` INT)
+    NO SQL
+BEGIN
+
+	set @sqlstr=CONCAT("update chart SET qty=qty+",p_qty," where chart.uid=",p_uid," and pid=",p_pid);
+    PREPARE stmt_name FROM @sqlstr;
+    EXECUTE stmt_name;
+    DEALLOCATE PREPARE stmt_name;
+
+END
+;;
+DELIMITER ;
 
 -- ----------------------------
 -- Procedure structure for `commentsadd`
