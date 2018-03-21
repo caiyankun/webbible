@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: 2018-03-19 07:07:57
+-- Generation Time: 2018-03-21 12:21:31
 -- 服务器版本： 5.7.19
 -- PHP Version: 5.6.31
 
@@ -70,8 +70,8 @@ BEGIN
    else
        select count(*) into matchnum from user_basic where uname=p_uname and upass=p_upass;
        if matchnum>0 then
-        UPDATE user_basic SET user_basic.token=md5(rand()*rand()), lastlogintime=CURRENT_TIMESTAMP where uname=p_uname and user_basic.uid=uid;
-         select uid,uname,ulevel,token,uoption from user_basic where uname=p_uname and upass=p_upass;
+        UPDATE user_basic SET lastlogintime=CURRENT_TIMESTAMP where uname=p_uname and user_basic.uid=uid;
+         select uid,uname,ulevel,uoption from user_basic where uname=p_uname and upass=p_upass;
        else
          SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = 'Password incorrect!';
        end if;
@@ -118,26 +118,6 @@ BEGIN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'An error occurred';
 END$$
 
-DROP PROCEDURE IF EXISTS `tokencheck`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `tokencheck` (IN `token` CHAR(32))  NO SQL
-BEGIN
-   DECLARE matchnum INT default 0;
-   DECLARE lltime timestamp ;
-   select count(*) into matchnum from user_basic where user_basic.token=token;
-   if matchnum>0 then
-		SELECT lastlogintime into lltime from user_basic WHERE user_basic.token=token;
-        IF now()<(lltime+60*60*24*3) THEN
-           select uid,uname,ulevel,token,uoption from user_basic where user_basic.token=token;
-        ELSE
-        	SIGNAL SQLSTATE '45002' SET MESSAGE_TEXT = 'Token expire!';
-        END IF;
-   ELSE
-   	   SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = 'Token Wrong!';
-   end if;
-	
-
-END$$
-
 DROP PROCEDURE IF EXISTS `username_check`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `username_check` (IN `p_uname` VARCHAR(100), OUT `cnt` INT)  BEGIN
    select count(*) into cnt from user_basic where uname=p_uname;
@@ -157,7 +137,6 @@ CREATE TABLE IF NOT EXISTS `user_basic` (
   `uname` varchar(32) NOT NULL,
   `upass` varchar(32) NOT NULL,
   `ulevel` int(10) NOT NULL DEFAULT '1',
-  `token` varchar(32) NOT NULL,
   `registertime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `lastlogintime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `lastloginip` text,
@@ -171,17 +150,17 @@ CREATE TABLE IF NOT EXISTS `user_basic` (
 -- 转存表中的数据 `user_basic`
 --
 
-INSERT INTO `user_basic` (`uid`, `uname`, `upass`, `ulevel`, `token`, `registertime`, `lastlogintime`, `lastloginip`, `lastloginstatus`, `loginlogs`, `uoption`) VALUES
-(39, 'a@a.com', '25d55ad283aa400af464c76d713c07ad', 1, '', '2018-03-08 14:50:49', '2018-03-08 14:53:30', NULL, NULL, NULL, NULL),
-(37, 'cai_yankun@test.com', '25d55ad283aa400af464c76d713c07ad', 1, '', '2018-03-08 14:50:49', '2018-03-08 14:53:30', NULL, NULL, NULL, NULL),
-(38, 'cai_yankun@qq.com', '2c5354c37359ddea251ed23a032a10ee', 1, '', '2018-03-08 14:50:49', '2018-03-08 14:53:30', NULL, NULL, NULL, NULL),
-(40, 'b@b.com', '25d55ad283aa400af464c76d713c07ad', 1, '', '2018-03-08 14:50:49', '2018-03-08 14:53:30', NULL, NULL, NULL, NULL),
-(41, 'c@c.com', '25d55ad283aa400af464c76d713c07ad', 1, '', '2018-03-08 14:50:49', '2018-03-08 14:53:30', NULL, NULL, NULL, NULL),
-(46, 'test@test.com', '12345678', 101, '9eac5ab383461abc162d9cbd421d627d', '2018-03-19 00:52:19', '2018-03-19 00:52:46', NULL, NULL, NULL, NULL),
-(42, '11', 'b6d767d2f8ed5d21a44b0e5886680cb9', 101, '', '2018-03-08 15:44:44', '2018-03-08 21:54:42', NULL, NULL, NULL, NULL),
-(43, 'bb', '21ad0bd836b90d08f4cf640b4c298e7c', 101, '', '2018-03-08 21:49:02', '2018-03-08 21:49:02', NULL, NULL, NULL, NULL),
-(44, 'cc', '41fcba09f2bdcdf315ba4119dc7978dd', 102, '', '2018-03-08 22:53:21', '2018-03-08 23:28:14', NULL, NULL, NULL, NULL),
-(45, 'aa@aa.com', '25d55ad283aa400af464c76d713c07ad', 101, 'c1865b1cd4680773c320e97d36a29a7b', '2018-03-17 10:20:24', '2018-03-19 06:07:50', NULL, NULL, NULL, NULL);
+INSERT INTO `user_basic` (`uid`, `uname`, `upass`, `ulevel`, `registertime`, `lastlogintime`, `lastloginip`, `lastloginstatus`, `loginlogs`, `uoption`) VALUES
+(39, 'a@a.com', '25d55ad283aa400af464c76d713c07ad', 1, '2018-03-08 14:50:49', '2018-03-08 14:53:30', NULL, NULL, NULL, NULL),
+(37, 'cai_yankun@test.com', '25d55ad283aa400af464c76d713c07ad', 1, '2018-03-08 14:50:49', '2018-03-08 14:53:30', NULL, NULL, NULL, NULL),
+(38, 'cai_yankun@qq.com', '2c5354c37359ddea251ed23a032a10ee', 1, '2018-03-08 14:50:49', '2018-03-08 14:53:30', NULL, NULL, NULL, NULL),
+(40, 'b@b.com', '25d55ad283aa400af464c76d713c07ad', 1, '2018-03-08 14:50:49', '2018-03-08 14:53:30', NULL, NULL, NULL, NULL),
+(41, 'c@c.com', '25d55ad283aa400af464c76d713c07ad', 1, '2018-03-08 14:50:49', '2018-03-08 14:53:30', NULL, NULL, NULL, NULL),
+(46, 'test@test.com', '12345678', 101, '2018-03-19 00:52:19', '2018-03-19 00:52:46', NULL, NULL, NULL, NULL),
+(42, '11', 'b6d767d2f8ed5d21a44b0e5886680cb9', 101, '2018-03-08 15:44:44', '2018-03-08 21:54:42', NULL, NULL, NULL, NULL),
+(43, 'bb', '21ad0bd836b90d08f4cf640b4c298e7c', 101, '2018-03-08 21:49:02', '2018-03-08 21:49:02', NULL, NULL, NULL, NULL),
+(44, 'cc', '41fcba09f2bdcdf315ba4119dc7978dd', 102, '2018-03-08 22:53:21', '2018-03-08 23:28:14', NULL, NULL, NULL, NULL),
+(45, 'aa@aa.com', '25d55ad283aa400af464c76d713c07ad', 101, '2018-03-17 10:20:24', '2018-03-21 12:16:18', NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
