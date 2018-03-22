@@ -44,6 +44,13 @@ class user
         } 
         \Response::returntaskok("注册成功！");
     }
+    public function appregister($uname,$upass,$role="user") {
+        $ulevel= \Config::get($role, "userrole", 101);
+        if(!\Db::simplecall("user.register_special",array($uname,md5($upass),$ulevel))){
+            \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
+        } 
+        \Response::returntaskok("注册成功！");
+    }
     public function changepass($uname,$uoldpass,$unewpass,$vericode) {
         if(!captcha::staticcheck($vericode)){\Response::returntaskfail("验证码不正确！",1,"验证码不正确！");}
         \User::checkright(101)||\Response::returntaskfail("您还未登录！",2,"您还未登录！");
