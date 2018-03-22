@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50714
 File Encoding         : 65001
 
-Date: 2018-03-20 22:08:29
+Date: 2018-03-21 21:13:00
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -98,7 +98,7 @@ CREATE TABLE `dictionary` (
 -- ----------------------------
 -- Records of dictionary
 -- ----------------------------
-INSERT INTO `dictionary` VALUES ('1', 'info', '22222', 'english', null, null);
+INSERT INTO `dictionary` VALUES ('1', 'info', '中文2', 'english', null, null);
 
 -- ----------------------------
 -- Table structure for `discount`
@@ -265,11 +265,14 @@ CREATE TABLE `sharepic` (
   `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `option` text COMMENT '选项',
   PRIMARY KEY (`sid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='晒图表';
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COMMENT='晒图表';
 
 -- ----------------------------
 -- Records of sharepic
 -- ----------------------------
+INSERT INTO `sharepic` VALUES ('2', '42', 'info', 'info', 'wwewq', '2018-03-21 20:06:41', null);
+INSERT INTO `sharepic` VALUES ('3', '42', 'info1', 'info1', '222e2e', '2018-03-21 20:06:57', null);
+INSERT INTO `sharepic` VALUES ('4', '42', 'info3', 'info3', '134554333', '2018-03-21 20:07:12', null);
 
 -- ----------------------------
 -- Table structure for `shop_info`
@@ -333,7 +336,7 @@ CREATE TABLE `user_info` (
 -- ----------------------------
 -- Records of user_info
 -- ----------------------------
-INSERT INTO `user_info` VALUES ('1', '42', null, null, null, '0', null, '1', null, null, null, null, null, null);
+INSERT INTO `user_info` VALUES ('1', '42', '李四', '王老五', null, '0', null, '1', null, null, null, null, null, null);
 
 -- ----------------------------
 -- Procedure structure for `chartadd`
@@ -560,10 +563,12 @@ DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `dicupditem`(IN `p_key` TEXT, IN `contents` TEXT)
     NO SQL
 BEGIN
+
 set @sqlstr=CONCAT("update dictionary SET ",contents," where dictionary.key=",p_key);
     PREPARE stmt_name FROM @sqlstr;
     EXECUTE stmt_name;
     DEALLOCATE PREPARE stmt_name;
+
 END
 ;;
 DELIMITER ;
@@ -764,6 +769,77 @@ BEGIN
     PREPARE stmt_name FROM @sqlstr;
     EXECUTE stmt_name;
     DEALLOCATE PREPARE stmt_name;
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `sharepicadd`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `sharepicadd`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sharepicadd`(IN `p_uid` INT, IN `p_type` TEXT, IN `p_attach` TEXT, IN `contents` TEXT)
+    NO SQL
+BEGIN
+
+	INSERT INTO sharepic (uid,type,attaches,content,ctime) VALUES(p_uid,p_type,p_attach,contents,CURRENT_TIMESTAMP);
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `sharepicdel`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `sharepicdel`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sharepicdel`(IN `p_uid` INT, IN `p_sid` INT)
+    NO SQL
+BEGIN
+
+	DELETE FROM sharepic where uid=p_uid and sid=p_sid;
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `sharepiclist`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `sharepiclist`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sharepiclist`(IN `p_uid` INT, IN `p_start` INT, IN `p_length` INT)
+    NO SQL
+BEGIN
+DECLARE cnt INT DEFAULT 0;
+   select count(*) into cnt from sharepic WHERE uid=p_uid;
+   if cnt>0 then
+   	 set @sqlstr=CONCAT("select * from sharepic where sharepic.uid=",p_uid," order by ctime asc limit ",p_start,p_length);
+    PREPARE stmt_name FROM @sqlstr;
+    EXECUTE stmt_name;
+    DEALLOCATE PREPARE stmt_name;   
+   end if;
+   if cnt=0 THEN
+   	  set @sqlstr=CONCAT("select * from sharepic order by ctime asc limit ",p_start,p_length);
+    PREPARE stmt_name FROM @sqlstr;
+    EXECUTE stmt_name;
+    DEALLOCATE PREPARE stmt_name; 
+   end if;
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for `sharepicquery`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `sharepicquery`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sharepicquery`(IN `p_sid` INT)
+    NO SQL
+BEGIN
+
+	SELECT * FROM sharepic WHERE sid=p_sid;
 
 END
 ;;
