@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: 2018-03-21 12:21:31
+-- Generation Time: 2018-03-24 14:19:10
 -- 服务器版本： 5.7.19
 -- PHP Version: 5.6.31
 
@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS `user_basic` (
   `loginlogs` text,
   `uoption` text,
   PRIMARY KEY (`uid`)
-) ENGINE=MyISAM AUTO_INCREMENT=47 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=50 DEFAULT CHARSET=utf8;
 
 --
 -- 转存表中的数据 `user_basic`
@@ -160,7 +160,10 @@ INSERT INTO `user_basic` (`uid`, `uname`, `upass`, `ulevel`, `registertime`, `la
 (42, '11', 'b6d767d2f8ed5d21a44b0e5886680cb9', 101, '2018-03-08 15:44:44', '2018-03-08 21:54:42', NULL, NULL, NULL, NULL),
 (43, 'bb', '21ad0bd836b90d08f4cf640b4c298e7c', 101, '2018-03-08 21:49:02', '2018-03-08 21:49:02', NULL, NULL, NULL, NULL),
 (44, 'cc', '41fcba09f2bdcdf315ba4119dc7978dd', 102, '2018-03-08 22:53:21', '2018-03-08 23:28:14', NULL, NULL, NULL, NULL),
-(45, 'aa@aa.com', '25d55ad283aa400af464c76d713c07ad', 101, '2018-03-17 10:20:24', '2018-03-21 12:16:18', NULL, NULL, NULL, NULL);
+(45, 'aa@aa.com', '25d55ad283aa400af464c76d713c07ad', 101, '2018-03-17 10:20:24', '2018-03-23 22:16:05', NULL, NULL, NULL, NULL),
+(47, 'eolinker@1', '25d55ad283aa400af464c76d713c07ad', 101, '2018-03-24 00:37:47', '2018-03-24 00:37:47', NULL, NULL, NULL, NULL),
+(48, 'eolinker@2', '25d55ad283aa400af464c76d713c07ad', 101, '2018-03-24 00:37:54', '2018-03-24 00:40:07', NULL, NULL, NULL, NULL),
+(49, 'eolinker@', '25d55ad283aa400af464c76d713c07ad', 801, '2018-03-24 07:43:17', '2018-03-24 13:04:47', NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 

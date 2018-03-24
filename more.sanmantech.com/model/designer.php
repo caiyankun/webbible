@@ -16,12 +16,33 @@ class designer {
      */
     public function creatework(){
         $productinfo="";
-        foreach ($_GET as $key => $value){
-            if(empty($productinfo)){
-                $productinfo=$productinfo.$key."=\"".$value."\"";
-            } else {
-                $productinfo=$productinfo.",".$key."=\"".$value."\"";
+        foreach ($_REQUEST as $key => $value){
+            if(in_array($key, array(
+                "name",
+                "businesstype",
+                "categry",
+                "size",
+                "onboard",
+                "material",
+                "uniprice",
+                "saleprice",
+                "tag",
+                "quota",
+                "occasion",
+                "color",
+                "additional",
+                "smallpic",
+                "midpic",
+                "largepic",
+                "option"
+            ))){
+                if(empty($productinfo)){
+                    $productinfo=$productinfo.$key."=\"".$value."\"";
+                } else {
+                    $productinfo=$productinfo.",".$key."=\"".$value."\"";
+                }
             }
+
         }
         \User::checkright(200)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
         if(!\Db::simplecall("more.designercreatework", array(\User::uid(),$productinfo))){
@@ -34,9 +55,9 @@ class designer {
     /**
      * 删除作品
      */
-    public function delwork(){
+    public function delwork($pid){
         \User::checkright(200)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
-        if(!\Db::simplecall("more.designerdelwork", array(\User::uid(),$_GET[pid]))){
+        if(!\Db::simplecall("more.designerdelwork", array(\User::uid(),$pid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
             \Response::returntaskok('删除作品成功！');
@@ -46,17 +67,51 @@ class designer {
     /**
      * 修改作品
      */
-    public function updwork(){
-        $pid = $_GET[pid];
+    public function updwork($pid,$productinfo){
         $content="";
-        foreach ($_GET as $key => $value){
-            if(empty($content)){
-                if($key == 'pid') continue;
-                $content=$content.$key."=\"".$value."\"";
-            } else {
-                if($key == 'pid') continue;
-                $content=$content.",".$key."=\"".$value."\"";
+        
+        if(is_string($productinfo)){
+            try {
+                $productinfo= json_decode($productinfo);
+            } catch (Exception $exc) {
+               
             }
+                    
+        }
+        if(!is_object($productinfo)){
+            \Response::returntaskfail("业务执行失败！", 2, "更新字段格式不正确！");
+        }
+        foreach ($productinfo as $key => $value){
+            
+            if(in_array($key, array(
+                "name",
+                "businesstype",
+                "categry",
+                "size",
+                "onboard",
+                "material",
+                "uniprice",
+                "saleprice",
+                "tag",
+                "quota",
+                "occasion",
+                "color",
+                "additional",
+                "smallpic",
+                "midpic",
+                "largepic",
+                "option"
+            ))){
+                if(empty($content)){
+                    $content=$content.$key."=\"".$value."\"";
+                } else {
+                    $content=$content.",".$key."=\"".$value."\"";
+                }
+            }
+            
+            
+            
+            
         }
         \User::checkright(200)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
         if(!\Db::simplecall("more.designerupdwork", array(\User::uid(),$pid,$content))){
@@ -74,7 +129,7 @@ class designer {
         if(!\Db::simplecall("more.designerquerywork", array(\User::uid()))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedata());
         }
     }
 }

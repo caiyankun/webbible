@@ -89,16 +89,39 @@ class product {
    
     public function add(){
         $content="";
-        foreach ($_GET as $key => $value){
-            if(empty($content)){
-                $content=$content.$key."=\"".$value."\"";
-            } else {
-                $content=$content.",".$key."=\"".$value."\"";
+        \User::checkright(800)||\Response::returntaskfail("请用管理员身份登录！！",2,"请用管理员身份登录！");
+        foreach ($_REQUEST as $key => $value){
+            if(in_array($key, array(
+                "brand",
+                "name",
+                "businesstype",
+                "categry",
+                "size",
+                "onboard",
+                "material",
+                "uniprice",
+                "saleprice",
+                "tag",
+                "quota",
+                "occasion",
+                "color",
+                "additional",
+                "smallpic",
+                "midpic",
+                "largepic",
+                "option"
+            ))){
+                if(empty($content)){
+                    $content=$content.$key."=\"".$value."\"";
+                } else {
+                    $content=$content.",".$key."=\"".$value."\"";
+                }
             }
+
         }
         //var_dump($content);die;
-        //\User::checkright(100)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
-        if(!\Db::simplecall("more.productadd", array($content))){
+        //
+        if(!\Db::simplecall("more.productadd", array($content,"_a"))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
             \Response::returntaskok('添加产品成功！');
@@ -109,18 +132,48 @@ class product {
      * 修改产品
      * @param $pid 商品ID
      */
-    public function upd(){
-        $pid = $_GET[pid];
+    public function upd($pid,$productinfo){
         $content="";
-        foreach ($_GET as $key => $value){
-            if(empty($content)){
-                if($key == 'pid') continue;
-                $content=$content.$key."=\"".$value."\"";
-            } else {
-                if($key == 'pid') continue;
-                $content=$content.",".$key."=\"".$value."\"";
+        \User::checkright(800)||\Response::returntaskfail("请用管理员身份登录！！",2,"请用管理员身份登录！");
+        if(is_string($productinfo)){
+            try {
+                $productinfo= json_decode($productinfo);
+            } catch (Exception $exc) {
+               
+            }     
+        }
+        if(!is_object($productinfo)){
+            \Response::returntaskfail("业务执行失败！", 2, "更新字段格式不正确！");
+        }
+        foreach ($productinfo as $key => $value){
+            
+            if(in_array($key, array(
+                "name",
+                "businesstype",
+                "categry",
+                "size",
+                "onboard",
+                "material",
+                "uniprice",
+                "saleprice",
+                "tag",
+                "quota",
+                "occasion",
+                "color",
+                "additional",
+                "smallpic",
+                "midpic",
+                "largepic",
+                "option"
+            ))){
+                if(empty($content)){
+                    $content=$content.$key."=\"".$value."\"";
+                } else {
+                    $content=$content.",".$key."=\"".$value."\"";
+                }
             }
         }
+        
         if(!\Db::simplecall("more.productupd", array($pid,$content))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {

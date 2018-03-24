@@ -14,20 +14,9 @@ class chart {
     /**
      * 添加购物车
      */
-    public function add(){
-        $content="";
-        foreach ($_GET as $key => $value){
-            if($key=='uid'){
-            } else {
-                if(empty($content)){
-                    $content=$content.$key."='".$value."'";
-                } else {
-                    $content=$content.",".$key."='".$value."'";
-                }
-            }
-        }
+    public function add($pid,$qty){
         \User::checkright(100)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
-        if(!\Db::simplecall("more.chartadd", array(\User::uid(),$content))){
+        if(!\Db::simplecall("more.chartadd", array(\User::uid(),$pid,$qty))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
             \Response::returntaskok("添加购物车成功!");
@@ -37,38 +26,40 @@ class chart {
     /*
      *删除购物车
      */
-    public function del(){
-        $pid = $_GET[pid];
-        $qty = $_GET[qty];
+    public function del($pid){
         \User::checkright(100)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
-        if(!\Db::simplecall("more.chartdel", array(\User::uid(),$pid,$qty))){
+        if(!\Db::simplecall("more.chartdel", array(\User::uid(),$pid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
             \Response::returntaskok("删除成功!");
         }
     }
-
+    public function clear() {
+        \User::checkright(100)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
+        if(!\Db::simplecall("more.chartclear", array(\User::uid()))){
+            \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
+        } else {
+            \Response::returntaskok("删除成功!");
+        }
+    }
     /**
      * 查看购物车
      */
     public function query(){
-        $pid = $_GET[pid];
         \User::checkright(100)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
-        if(!\Db::simplecall("more.chartquery", array(\User::uid(),$pid))){
+        if(!\Db::simplecall("more.chartquery", array(\User::uid()))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedata());
         }
     }
 
     /**
      * 修改数量成功
      */
-    public function upd(){
-        $pid = $_GET[pid];
-        $qty = $_GET[qty];
+    public function upd($pid,$qty){
         \User::checkright(100)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
-        if(!\Db::simplecall("more.chartdel", array(\User::uid(),$pid,$qty))){
+        if(!\Db::simplecall("more.chartupd", array(\User::uid(),$pid,$qty))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
             \Response::returntaskok("修改数量成功!");

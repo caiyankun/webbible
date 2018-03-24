@@ -35,7 +35,7 @@ class useraction
         if(!\Db::simplecall("more.useractionquery", array(\User::uid(),$action))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         }else{
-            \Response::returntaskok(\Db::arraydata());
+            \Response::returntaskok(\Db::cubedata());
         }
     }
     public function stat(){

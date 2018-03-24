@@ -14,22 +14,25 @@ class discount {
     /**
      * 添加折扣
      */
-    public function upd(){
-        $pid = $_GET[pid];
-        $value = $_GET[discount];
+    public function upd($pid,$value){
         \User::checkright(801)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
         if(!\Db::simplecall("more.discountupd", array($pid,$value))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok('添加折扣成功！');
+            \Response::returntaskok(\Db::tabledata());
         }
     }
-
+    public function get($pid) {
+        if(!\Db::simplecall("more.discountget", array($pid,"_aa"))){
+            \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
+        } else {
+            \Response::returntaskok(\Db::tabledata());
+        }
+    }
     /**
      * 删除折扣
      */
-    public function del(){
-        $pid = $_GET[pid];
+    public function del($pid){
         \User::checkright(801)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
         if(!\Db::simplecall("more.discountdel", array($pid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);

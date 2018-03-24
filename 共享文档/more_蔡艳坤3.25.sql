@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: 2018-03-24 04:24:45
+-- Generation Time: 2018-03-24 14:18:05
 -- 服务器版本： 5.7.19
 -- PHP Version: 5.6.31
 
@@ -30,34 +30,47 @@ DROP PROCEDURE IF EXISTS `chartadd`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `chartadd` (IN `uid` INT, IN `pid` INT, IN `qty` INT)  NO SQL
 BEGIN
 
-CALL more.discountget(pid,@discount);
+/*规定一个人的购物车中相同的产品只占用一行*/
+SELECT COUNT(*) INTO @num FROM more.chart 
+WHERE chart.uid=uid AND chart.pid=pid;
 
-INSERT INTO more.chart (
-	chart.uid,
-    chart.pid,
-    chart.qty,
-    chart.ctime,
-    chart.otime,
-    chart.unitprice,
-    chart.saleprice,
-    chart.discount,
-    chart.totalprice
-) SELECT
-	uid,
-    pid,
-    qty,
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP,
-    goods.uniprice,
-    goods.saleprice,
-    @discount,
-    (goods.saleprice+@discount)*qty
-FROM
-	more.goods LEFT JOIN more.discount ON goods.pid=discount.pid
-WHERE
-	goods.pid=pid
-;
 
+IF @num>0 THEN
+	SELECT chart.qty INTO @q FROM more.chart 
+	WHERE chart.uid=uid AND chart.pid=pid;
+	CALL more.chartupd(uid,pid,qty+@q);
+
+ELSE
+	CALL more.discountget(pid,@discount);
+
+    INSERT INTO more.chart (
+        chart.uid,
+        chart.pid,
+        chart.qty,
+        chart.ctime,
+        chart.otime,
+        chart.unitprice,
+        chart.saleprice,
+        chart.discount,
+        chart.totalprice
+    ) SELECT
+        uid,
+        pid,
+        qty,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP,
+        goods.uniprice,
+        goods.saleprice,
+        @discount,
+        (goods.saleprice+@discount)*qty
+    FROM
+        more.goods LEFT JOIN more.discount 
+        ON goods.pid=discount.pid
+    WHERE
+        goods.pid=pid
+    ;
+
+END IF;
 	
 END$$
 
@@ -72,30 +85,31 @@ WHERE chart.uid=uid;
 END$$
 
 DROP PROCEDURE IF EXISTS `chartdel`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `chartdel` (IN `uid` INT, IN `id` INT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `chartdel` (IN `uid` INT, IN `pid` INT)  NO SQL
 BEGIN
 
-	DELETE FROM more.chart WHERE chart.uid=uid and chart.id=id;
+	DELETE FROM more.chart WHERE chart.uid=uid and chart.pid=pid;
     
 END$$
 
 DROP PROCEDURE IF EXISTS `chartquery`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `chartquery` (IN `p_uid` INT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `chartquery` (IN `uid` INT)  NO SQL
 BEGIN
 
-	SELECT * from chart WHERE uid=p_uid;
+	SELECT * from more.chart WHERE chart.uid=uid;
+	SELECT SUM(chart.totalprice) FROM more.chart WHERE chart.uid=uid;
 
 END$$
 
 DROP PROCEDURE IF EXISTS `chartupd`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `chartupd` (IN `uid` INT, IN `id` INT, IN `qty` INT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `chartupd` (IN `uid` INT, IN `pid` INT, IN `qty` INT)  NO SQL
 BEGIN
 
 UPDATE more.chart SET
 	chart.qty=qty,
     chart.totalprice=(chart.saleprice+chart.discount)*qty
 WHERE 
-	chart.uid=uid AND chart.id=id
+	chart.uid=uid AND chart.pid=pid
 ;
 
 END$$
@@ -213,11 +227,21 @@ CALL productupd(pid,contents);
 
 END$$
 
+DROP PROCEDURE IF EXISTS `dicdelitem`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `dicdelitem` (IN `pkey` TEXT)  NO SQL
+BEGIN
+
+DELETE FROM more.dictionary 
+WHERE dictionary.key=pkey;
+
+
+END$$
+
 DROP PROCEDURE IF EXISTS `dicgetalias`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `dicgetalias` (IN `p_key` TEXT)  NO SQL
 BEGIN
 
-	SELECT cnnick,ennick INTO @q FROM dictionary where dictionary.key=p_key;
+	SELECT cnnick,ennick  FROM dictionary where dictionary.key=p_key;
    
 
 END$$
@@ -240,14 +264,26 @@ BEGIN
 END$$
 
 DROP PROCEDURE IF EXISTS `dicupditem`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `dicupditem` (IN `pkey` TEXT, IN `cnnick` TEXT, IN `ennick` INT, IN `pvalue` INT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `dicupditem` (IN `pkey` TEXT, IN `cnnick` TEXT, IN `ennick` TEXT, IN `pvalue` TEXT)  NO SQL
 BEGIN
 
-UPDATE more.dictionary SET
-    dictionary.cnnick=cnnick,
-    dictionary.ennick=ennick,
-    dictionary.pvalue=pvalue
-WHERE dictionary.key=pkey;
+SELECT COUNT(*) INTO @p FROM more.dictionary WHERE dictionary.key=pkey;
+IF @p>0 THEN
+	UPDATE more.dictionary SET
+	    dictionary.cnnick=cnnick,
+	    dictionary.ennick=ennick,
+	    dictionary.pvalue=pvalue
+	WHERE dictionary.key=pkey;
+ELSE
+	INSERT INTO more.dictionary SET
+    	dictionary.key=pkey,
+    	dictionary.cnnick=cnnick,
+	    dictionary.ennick=ennick,
+	    dictionary.pvalue=pvalue
+   ;
+END IF;
+
+
 
 
 
@@ -271,7 +307,7 @@ WHERE discount.pid=pid ;
 IF isnull(discount) THEN
 	SET discount=0;
 END IF;
-
+SELECT discount;
 END$$
 
 DROP PROCEDURE IF EXISTS `discountupd`$$
@@ -761,7 +797,7 @@ END$$
 DROP PROCEDURE IF EXISTS `pocketlist`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `pocketlist` (IN `uid` INT, IN `filterinfo` TEXT, IN `page` INT, IN `length` INT)  NO SQL
 BEGIN
-	set @sqlstr=CONCAT("SELECT * FROM more.pocket WHERE pocket.uid=uid  ",filterinfo," limit ",(page-1)*length,",",length );
+	set @sqlstr=CONCAT("SELECT * FROM more.pocket WHERE pocket.uid=",uid,filterinfo," limit ",(page-1)*length,",",length );
 
     PREPARE stmt_name FROM @sqlstr;
     EXECUTE stmt_name;
@@ -951,20 +987,19 @@ END$$
 DROP PROCEDURE IF EXISTS `sharepiclist`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sharepiclist` (IN `p_uid` INT, IN `page` INT, IN `length` INT)  NO SQL
 BEGIN
-DECLARE cnt INT DEFAULT 0;
-   select count(*) into cnt from sharepic WHERE uid=p_uid;
-   if cnt>0 then
-   	 set @sqlstr=CONCAT("select * from sharepic where sharepic.uid=",p_uid," order by ctime asc limit ",(page-1)*length,",",length);
-    PREPARE stmt_name FROM @sqlstr;
-    EXECUTE stmt_name;
-    DEALLOCATE PREPARE stmt_name;   
-   end if;
-   if cnt=0 THEN
-   	  set @sqlstr=CONCAT("select * from sharepic order by ctime asc limit ",(page-1)*length,",",length);
-    PREPARE stmt_name FROM @sqlstr;
-    EXECUTE stmt_name;
-    DEALLOCATE PREPARE stmt_name; 
-   end if;
+
+IF p_uid=0 THEN
+	set @sqlstr=CONCAT("select * from sharepic "," order by ctime asc limit ",(page-1)*length,",",length);
+ELSE
+	set @sqlstr=CONCAT("select * from sharepic where sharepic.uid=",p_uid," order by ctime asc limit ",(page-1)*length,",",length);
+END IF;
+
+
+
+PREPARE stmt_name FROM @sqlstr;
+EXECUTE stmt_name;
+DEALLOCATE PREPARE stmt_name;   
+
 END$$
 
 DROP PROCEDURE IF EXISTS `sharepicquery`$$
@@ -1126,7 +1161,7 @@ CREATE TABLE IF NOT EXISTS `chart` (
   `totalprice` int(11) DEFAULT NULL,
   `option` text COMMENT '选项',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=23 DEFAULT CHARSET=utf8 COMMENT='购物车表';
+) ENGINE=MyISAM AUTO_INCREMENT=29 DEFAULT CHARSET=utf8 COMMENT='购物车表';
 
 --
 -- 转存表中的数据 `chart`
@@ -1153,18 +1188,19 @@ CREATE TABLE IF NOT EXISTS `comments` (
   `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `option` text COMMENT '选项',
   PRIMARY KEY (`cid`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8 COMMENT='评论表';
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COMMENT='评论表';
 
 --
 -- 转存表中的数据 `comments`
 --
 
 INSERT INTO `comments` (`cid`, `uid`, `target`, `targetid`, `content`, `ctime`, `option`) VALUES
-(1, 42, '衣服', 2, '1111', '2018-03-19 12:51:50', NULL),
-(2, 42, '衣服', 1, 'brand=\'马云飞\',name=\'大衣\'', '2018-03-19 13:07:06', NULL),
-(3, 48, '衣服', 1, '这个衣服不错', '2018-03-24 04:19:46', NULL),
+(1, 42, '产品', 2, '1111', '2018-03-19 12:51:50', NULL),
+(2, 42, '产品', 1, 'brand=\'马云飞\',name=\'大衣\'', '2018-03-19 13:07:06', NULL),
+(3, 48, '产品', 1, '这个衣服不错', '2018-03-24 04:19:46', NULL),
 (4, 48, '订单', 2, '这个订单不错', '2018-03-24 04:20:24', NULL),
-(5, 48, '用户', 48, '这个用户不错', '2018-03-24 04:20:49', NULL);
+(5, 48, '用户', 48, '这个用户不错', '2018-03-24 04:20:49', NULL),
+(6, 49, '产品', 3, '这衣服不好', '2018-03-24 12:25:51', NULL);
 
 -- --------------------------------------------------------
 
@@ -1181,7 +1217,7 @@ CREATE TABLE IF NOT EXISTS `designer_info` (
   `pid` int(11) DEFAULT NULL COMMENT '商品ID',
   `option` text COMMENT '选项',
   PRIMARY KEY (`did`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
 
 --
 -- 转存表中的数据 `designer_info`
@@ -1191,7 +1227,9 @@ INSERT INTO `designer_info` (`did`, `uid`, `ctime`, `action`, `pid`, `option`) V
 (4, 42, '2018-03-17 07:23:19', '作品', 2, NULL),
 (3, 42, '2018-03-17 07:22:39', '作品', 1, NULL),
 (7, 48, '2018-03-24 02:09:03', '作品', 14, NULL),
-(8, 48, '2018-03-24 02:09:40', '作品', 15, NULL);
+(8, 48, '2018-03-24 02:09:40', '作品', 15, NULL),
+(11, 49, '2018-03-24 10:21:33', '作品', 18, NULL),
+(10, 49, '2018-03-24 10:18:34', '作品', 17, NULL);
 
 -- --------------------------------------------------------
 
@@ -1208,14 +1246,14 @@ CREATE TABLE IF NOT EXISTS `dictionary` (
   `pvalue` text COMMENT '值',
   `option` text COMMENT '选项',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='数据定义表';
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COMMENT='数据定义表';
 
 --
 -- 转存表中的数据 `dictionary`
 --
 
 INSERT INTO `dictionary` (`id`, `key`, `cnnick`, `ennick`, `pvalue`, `option`) VALUES
-(1, 'info', '22222', 'english', NULL, NULL);
+(4, 'test', '测试', '33333', '[\"1\",\"2\"]', NULL);
 
 -- --------------------------------------------------------
 
@@ -1232,14 +1270,15 @@ CREATE TABLE IF NOT EXISTS `discount` (
   `discount` int(2) DEFAULT '0' COMMENT '折扣',
   `option` text COMMENT '选项',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='折扣表';
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COMMENT='折扣表';
 
 --
 -- 转存表中的数据 `discount`
 --
 
 INSERT INTO `discount` (`id`, `dtype`, `target`, `pid`, `discount`, `option`) VALUES
-(2, '单价优惠-百分比', NULL, 1, -6, NULL);
+(3, '单价优惠-百分比', NULL, 2, -10, NULL),
+(4, '单价优惠-百分比', NULL, 11, -100, NULL);
 
 -- --------------------------------------------------------
 
@@ -1269,7 +1308,7 @@ CREATE TABLE IF NOT EXISTS `goods` (
   `largepic` text COMMENT '原图',
   `option` text COMMENT '选项',
   PRIMARY KEY (`pid`)
-) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
 
 --
 -- 转存表中的数据 `goods`
@@ -1280,7 +1319,10 @@ INSERT INTO `goods` (`pid`, `brand`, `name`, `businesstype`, `categry`, `size`, 
 (2, '飞红', '长裙', NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (11, '马云飞', '大衣2', NULL, NULL, 'xl', 0, NULL, 29, 3, '热门', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (14, '设计师', '短裤', NULL, NULL, 'xl', 0, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(15, '设计师', '短裤', NULL, NULL, 'xxl', 0, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+(15, '设计师', '短裤', NULL, NULL, 'xxl', 0, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(18, '设计师', '韩式衣服', NULL, '上衣', 'xl', 0, '尼龙', 300, 240, '热门,韩流', 1, NULL, '红色', NULL, NULL, NULL, NULL, NULL),
+(17, '设计师', '韩式衣服', NULL, '上衣', 'xl', 0, '塑料', 100, 240, '热门,韩流', 1, NULL, '红色', NULL, NULL, NULL, NULL, NULL),
+(20, 'lv', '包包', NULL, NULL, 'XXXS', 0, NULL, 666, 444, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1299,7 +1341,7 @@ CREATE TABLE IF NOT EXISTS `goods_static` (
   `operator` int(11) DEFAULT NULL COMMENT '操作符',
   `option` text COMMENT '选项',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=25 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=33 DEFAULT CHARSET=utf8;
 
 --
 -- 转存表中的数据 `goods_static`
@@ -1329,7 +1371,15 @@ INSERT INTO `goods_static` (`id`, `pid`, `dpid`, `status`, `qty`, `operationtime
 (21, 11, NULL, '出借中', -1, '2018-03-24', 11, NULL),
 (22, 11, NULL, '清洗中', 1, '2018-03-24', 11, NULL),
 (23, 11, NULL, '出借中', -1, '2018-03-24', 11, NULL),
-(24, 11, NULL, '清洗中', 1, '2018-03-24', 11, NULL);
+(24, 11, NULL, '清洗中', 1, '2018-03-24', 11, NULL),
+(25, 44, NULL, '仓库', -3, '2018-03-24', 49, NULL),
+(26, 44, NULL, '吃屎', 3, '2018-03-24', 49, NULL),
+(27, 17, NULL, '上架', -7, '2018-03-24', 49, NULL),
+(28, 18, NULL, '上架', -1, '2018-03-24', 49, NULL),
+(29, 17, NULL, '出借', 7, '2018-03-24', 49, NULL),
+(30, 18, NULL, '出借', 1, '2018-03-24', 49, NULL),
+(31, 17, NULL, '出借中', -1, '2018-03-24', 49, NULL),
+(32, 17, NULL, '清洗中', 1, '2018-03-24', 49, NULL);
 
 -- --------------------------------------------------------
 
@@ -1350,7 +1400,7 @@ CREATE TABLE IF NOT EXISTS `member_info` (
   `quota` int(11) DEFAULT NULL COMMENT '会员额度',
   `option` text COMMENT '选项',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 --
 -- 转存表中的数据 `member_info`
@@ -1359,7 +1409,8 @@ CREATE TABLE IF NOT EXISTS `member_info` (
 INSERT INTO `member_info` (`id`, `uid`, `ctime`, `membertype`, `memberruntil`, `deposit`, `invoice`, `balance`, `quota`, `option`) VALUES
 (1, 11, '2018-03-23 05:58:58', 1, '2018-12-30', NULL, NULL, NULL, 10, NULL),
 (2, 12, '2018-03-23 05:59:02', 1, '2018-12-30', NULL, NULL, NULL, 10, NULL),
-(4, 48, '2018-03-24 00:59:12', 2, '2017-12-31', 280, NULL, 400, 0, NULL);
+(4, 48, '2018-03-24 00:59:12', 2, '2017-12-31', 280, NULL, 400, 0, NULL),
+(5, 49, '2018-03-24 08:26:51', 3, '2019-03-24', 888, 0, 600, 9, NULL);
 
 -- --------------------------------------------------------
 
@@ -1387,7 +1438,7 @@ CREATE TABLE IF NOT EXISTS `order` (
   `log` text COMMENT '日志',
   `option` text COMMENT '选项',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=25 DEFAULT CHARSET=utf8;
 
 --
 -- 转存表中的数据 `order`
@@ -1412,7 +1463,12 @@ INSERT INTO `order` (`id`, `oid`, `type`, `uid`, `ctime`, `pid`, `qty`, `receive
 (16, 'ffffffff', 'product', 11, '2018-03-22 14:42:54', 1, 3, NULL, NULL, NULL, 11, 22, 22, 33, NULL, NULL, NULL),
 (17, '1521761283', 'info', 0, '2018-03-22 23:28:03', NULL, NULL, '我是收获人呢', '我是联系方式', '我是地址', NULL, NULL, NULL, NULL, '已撤销', NULL, NULL),
 (18, '0|1521761340', 'info', 0, '2018-03-22 23:29:00', NULL, NULL, 'ggg', 'ttt', 'yyy', NULL, NULL, NULL, NULL, '已撤销', NULL, '我不想要了'),
-(19, '0|1521761473', 'info', 0, '2018-03-22 23:31:13', NULL, NULL, '11', '2222', '333', NULL, NULL, NULL, NULL, '待支付', NULL, NULL);
+(19, '0|1521761473', 'info', 0, '2018-03-22 23:31:13', NULL, NULL, '11', '2222', '333', NULL, NULL, NULL, NULL, '待支付', NULL, NULL),
+(20, '49|1521897501', 'info', 49, '2018-03-24 13:18:21', NULL, NULL, '蔡艳坤', '123', '北京', NULL, NULL, NULL, NULL, '已撤销-未支付订单撤销', NULL, '不想要了'),
+(21, '49|1521897501', 'product', 49, '2018-03-24 13:18:21', 17, 3, NULL, NULL, NULL, 100, 240, 0, 720, NULL, NULL, NULL),
+(22, '49|1521897501', 'product', 49, '2018-03-24 13:18:21', 20, 1, NULL, NULL, NULL, 666, 444, 0, 444, NULL, NULL, NULL),
+(23, '49|1521898316', 'info', 49, '2018-03-24 13:31:56', NULL, NULL, '1', '1', '1', NULL, NULL, NULL, NULL, '已完成', NULL, NULL),
+(24, '49|1521898316', 'product', 49, '2018-03-24 13:31:56', 11, 2, NULL, NULL, NULL, 29, 3, -100, -194, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1441,7 +1497,7 @@ CREATE TABLE IF NOT EXISTS `pocket` (
   `status` text COMMENT '状态',
   `option` text COMMENT '选项',
   PRIMARY KEY (`rid`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COMMENT='租衣表';
+) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=utf8 COMMENT='租衣表';
 
 --
 -- 转存表中的数据 `pocket`
@@ -1450,7 +1506,15 @@ CREATE TABLE IF NOT EXISTS `pocket` (
 INSERT INTO `pocket` (`rid`, `uid`, `type`, `pid`, `qty`, `quota`, `ctime`, `otime`, `log`, `btime`, `rtime`, `rbtime`, `rrtime`, `receiver`, `contact`, `address`, `status`, `option`) VALUES
 (6, 11, '出借', 11, 1, 2, '2018-03-23 15:49:51', '2018-03-23 15:49:51', NULL, NULL, NULL, NULL, NULL, '菜', '13602', '上海', '待发货', NULL),
 (8, 11, '归还', 11, 1, 2, '2018-03-23 15:52:58', '2018-03-23 15:52:58', NULL, NULL, NULL, '2018-03-24', '2018-03-24', '菜', '13602', '上海', '待归还', NULL),
-(7, 11, '出借', 11, 1, 2, '2018-03-23 15:50:50', '2018-03-23 15:50:50', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '出借', NULL);
+(7, 11, '出借', 11, 1, 2, '2018-03-23 15:50:50', '2018-03-23 15:50:50', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '出借', NULL),
+(10, 49, '出借', 17, 1, 1, '2018-03-24 13:53:56', '2018-03-24 13:53:56', NULL, '2018-04-16', '2019-01-01', NULL, NULL, '蔡艳坤', '136', '上海', '待发货', NULL),
+(11, 49, '出借', 17, 1, 1, '2018-03-24 13:53:56', '2018-03-24 13:53:56', NULL, '2018-04-16', '2019-01-01', NULL, NULL, '蔡艳坤', '136', '上海', '待发货', NULL),
+(12, 49, '出借', 17, 1, 1, '2018-03-24 13:53:56', '2018-03-24 13:53:56', NULL, '2018-04-16', '2019-01-01', NULL, NULL, '蔡艳坤', '136', '上海', '待发货', NULL),
+(13, 49, '出借', 17, 1, 1, '2018-03-24 13:53:56', '2018-03-24 13:53:56', NULL, '2018-04-16', '2019-01-01', NULL, NULL, '蔡艳坤', '136', '上海', '待发货', NULL),
+(14, 49, '出借', 17, 1, 1, '2018-03-24 13:53:56', '2018-03-24 13:53:56', NULL, '2018-04-16', '2019-01-01', NULL, NULL, '蔡艳坤', '136', '上海', '待发货', NULL),
+(15, 49, '出借', 17, 1, 1, '2018-03-24 13:53:56', '2018-03-24 13:53:56', NULL, '2018-04-16', '2019-01-01', '2018-03-24', NULL, '蔡艳坤', '136', '上海', '待归还', NULL),
+(16, 49, '归还', 17, 1, 1, '2018-03-24 13:53:56', '2018-03-24 13:53:56', NULL, '2018-04-16', '2019-01-01', '2018-03-24', '2018-03-24', '蔡艳坤', '136', '上海', '已完成', NULL),
+(19, 49, '出借', 18, 1, 1, '2018-03-24 13:56:54', '2018-03-24 13:56:54', NULL, '2018-04-16', '2019-01-01', NULL, NULL, '蔡艳坤', '136', '上海', '待发货', NULL);
 
 -- --------------------------------------------------------
 
@@ -1468,7 +1532,7 @@ CREATE TABLE IF NOT EXISTS `sharepic` (
   `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `option` text COMMENT '选项',
   PRIMARY KEY (`sid`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='晒图表';
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 COMMENT='晒图表';
 
 --
 -- 转存表中的数据 `sharepic`
@@ -1476,7 +1540,10 @@ CREATE TABLE IF NOT EXISTS `sharepic` (
 
 INSERT INTO `sharepic` (`sid`, `uid`, `type`, `attaches`, `content`, `ctime`, `option`) VALUES
 (1, 48, '图片', '[\"statid/01.jpg\",\"static/02.jpg\"]', '这是我的第一次晒图', '2018-03-24 02:31:41', NULL),
-(2, 48, '图片', '[\"statid/01.jpg\",\"static/02.jpg\"]', 'name=\'短裤\',size=\'xl\'', '2018-03-24 02:32:07', NULL);
+(4, 49, '图片', '[\"图片1\",\"图片2\"]', '我的晒图1', '2018-03-24 11:34:48', NULL),
+(5, 49, '图片', '[\"图片1\",\"图片2\"]', '我的晒图1', '2018-03-24 11:34:59', NULL),
+(6, 49, '图片', '[\"图片1\",\"图片2\"]', '我的晒图1', '2018-03-24 11:35:00', NULL),
+(7, 49, '图片', '[\"图片1\",\"图片2\"]', '我的晒图1', '2018-03-24 11:35:01', NULL);
 
 -- --------------------------------------------------------
 
@@ -1492,7 +1559,7 @@ CREATE TABLE IF NOT EXISTS `shop_info` (
   `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `option` text COMMENT '选项',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 
 --
 -- 转存表中的数据 `shop_info`
@@ -1518,7 +1585,7 @@ CREATE TABLE IF NOT EXISTS `user_action` (
   `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `option` text COMMENT '选项',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 
 --
 -- 转存表中的数据 `user_action`
@@ -1529,7 +1596,12 @@ INSERT INTO `user_action` (`id`, `uid`, `action`, `target`, `content`, `ctime`, 
 (2, 48, '关注', '2', NULL, '2018-03-24 00:44:07', NULL),
 (3, 48, '关注', '3', NULL, '2018-03-24 00:44:15', NULL),
 (4, 48, '收藏', '4', NULL, '2018-03-24 00:44:25', NULL),
-(5, 48, '收藏', '5', NULL, '2018-03-24 00:44:28', NULL);
+(5, 48, '收藏', '5', NULL, '2018-03-24 00:44:28', NULL),
+(8, 49, '关注', '48', NULL, '2018-03-24 08:19:20', NULL),
+(9, 49, '收藏', '11', NULL, '2018-03-24 08:19:25', NULL),
+(10, 49, '签到', '', NULL, '2018-03-24 08:19:36', NULL),
+(11, 49, '预约', '1', NULL, '2018-03-24 08:19:40', NULL),
+(12, 49, '预约', '11', NULL, '2018-03-24 08:20:10', NULL);
 
 -- --------------------------------------------------------
 
@@ -1554,7 +1626,7 @@ CREATE TABLE IF NOT EXISTS `user_info` (
   `moraddress` text COMMENT '详细地址',
   `additional` text COMMENT '额外',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
 -- 转存表中的数据 `user_info`
@@ -1562,7 +1634,8 @@ CREATE TABLE IF NOT EXISTS `user_info` (
 
 INSERT INTO `user_info` (`id`, `uid`, `nick`, `realname`, `shenfenzheng`, `verified`, `invitationcode`, `sex`, `age`, `mobile`, `morecontact`, `address`, `moraddress`, `additional`) VALUES
 (1, 42, NULL, NULL, NULL, 0, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL),
-(2, 45, NULL, NULL, NULL, 0, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL);
+(2, 45, NULL, NULL, NULL, 0, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(3, 49, '翱翔的鱼', '蔡艳坤', '130123198210074333', 0, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

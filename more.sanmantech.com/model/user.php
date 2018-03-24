@@ -68,15 +68,29 @@ class user
         $content="";
         $requestdata=\Request::data();
         foreach ($requestdata as $key => $value){
-            if($key=='uid'){
-            } else {
+            if(in_array($key, array(
+                "nick",
+                "realname",
+                "shenfenzheng",
+                "verified",
+                "invitationcode",
+                "sex",
+                "age",
+                "mobile",
+                "morecontact",
+                "address",
+                "moraddress",
+                "additional"
+            ))){
                 if(empty($content)){
-                    $content=$content.$key."='".$value."'";
+                    $content=$content.$key."=\'".$value."\'";
                 } else {
-                    $content=$content.",".$key."='".$value."'";
+                    $content=$content.",".$key."=\'".$value."\'";
                 }
             }
         }
+        //echo $content;
+        //exit(0);
         if(!\Db::simplecall("more.upduserinfo", array(\User::uid(),$content))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {

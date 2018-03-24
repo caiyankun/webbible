@@ -30,12 +30,14 @@ class comment
     /**
      * 根据用户ID查询评论
      */
-    public function query(){
-        \User::checkright(100)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
-        if(!\Db::simplecall("more.commentsquerybyuser", array(\User::uid()))){
+    public function query($uid){
+        if($uid==0 || empty($uid)) {
+            $uid= \User::uid();
+        }
+        if(!\Db::simplecall("more.commentsquerybyuser", array($uid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::arraydata());
+            \Response::returntaskok(\Db::tabledata());
         }
     }
 
@@ -43,7 +45,7 @@ class comment
         if(!\Db::simplecall("more.commentsquerybytarget", array($target,$targetid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::arraydata());
+            \Response::returntaskok(\Db::tabledata());
         }
     }
 }

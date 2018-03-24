@@ -28,8 +28,7 @@ class sharepic {
     /**
      * 查询一条晒图
      */
-    public function query(){
-        $sid = $_GET[sid];
+    public function query($sid){
         if(!\Db::simplecall("more.sharepicquery", array($sid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
@@ -40,23 +39,19 @@ class sharepic {
     /**
      * 查询晒图列表
      */
-    public function lst(){
-        $uid = $_GET[uid];
-        $start = $_GET[start];
-        $length = $_GET[length];
-        if(!\Db::simplecall("more.sharepiclist", array($uid,$start,$length))){
+    public function slist($uid,$page,$length){
+        if(!\Db::simplecall("more.sharepiclist", array($uid,$page,$length))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::arraydata());
+            \Response::returntaskok(\Db::cubedata());
         }
     }
 
     /**
      * 删除晒图
      */
-    public function del(){
-        $sid = $_GET[sid];
-        if(!\Db::simplecall("more.sharepicdel", array($sid))){
+    public function del($sid){
+        if(!\Db::simplecall("more.sharepicdel", array(\User::uid(),$sid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
             \Response::returntaskok("删除晒图成功");
