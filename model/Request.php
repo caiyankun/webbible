@@ -29,11 +29,11 @@ class Request
         //var_dump(self::ispost());
         return REQUEST_LIMIT&&(!self::ispost());
     }
-    public static function post($dataname){
-        return $_POST[$dataname];
+    public static function post($dataname=null){
+        return is_null($dataname)?$_POST:$_POST[$dataname];
     }
-    public static function data($dataname){
-        return $_REQUEST[$dataname];
+    public static function data($dataname=null){
+        return is_null($dataname)?$_REQUEST:$_REQUEST[$dataname];
     }
     public static function iscookie($name, $prefix = null){
         return Cookie::has($name, $prefix);

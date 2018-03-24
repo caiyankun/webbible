@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: 2018-03-23 17:34:58
+-- Generation Time: 2018-03-24 04:24:45
 -- 服务器版本： 5.7.19
 -- PHP Version: 5.6.31
 
@@ -27,19 +27,56 @@ DELIMITER $$
 -- 存储过程
 --
 DROP PROCEDURE IF EXISTS `chartadd`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `chartadd` (IN `p_uid` INT, IN `p_pid` INT, IN `p_qty` INT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `chartadd` (IN `uid` INT, IN `pid` INT, IN `qty` INT)  NO SQL
 BEGIN
-INSERT INTO chart set chart.uid=p_uid,chart.pid=p_pid,chart.qty=p_qty;
+
+CALL more.discountget(pid,@discount);
+
+INSERT INTO more.chart (
+	chart.uid,
+    chart.pid,
+    chart.qty,
+    chart.ctime,
+    chart.otime,
+    chart.unitprice,
+    chart.saleprice,
+    chart.discount,
+    chart.totalprice
+) SELECT
+	uid,
+    pid,
+    qty,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    goods.uniprice,
+    goods.saleprice,
+    @discount,
+    (goods.saleprice+@discount)*qty
+FROM
+	more.goods LEFT JOIN more.discount ON goods.pid=discount.pid
+WHERE
+	goods.pid=pid
+;
 
 	
 END$$
 
-DROP PROCEDURE IF EXISTS `chartdel`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `chartdel` (IN `p_uid` INT, IN `p_pid` INT)  NO SQL
+DROP PROCEDURE IF EXISTS `chartclear`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `chartclear` (IN `uid` INT)  NO SQL
 BEGIN
 
-	DELETE FROM chart WHERE uid=p_uid and pid=p_pid;
+DELETE FROM more.chart
+WHERE chart.uid=uid;
 
+
+END$$
+
+DROP PROCEDURE IF EXISTS `chartdel`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `chartdel` (IN `uid` INT, IN `id` INT)  NO SQL
+BEGIN
+
+	DELETE FROM more.chart WHERE chart.uid=uid and chart.id=id;
+    
 END$$
 
 DROP PROCEDURE IF EXISTS `chartquery`$$
@@ -51,37 +88,45 @@ BEGIN
 END$$
 
 DROP PROCEDURE IF EXISTS `chartupd`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `chartupd` (IN `p_uid` INT, IN `p_pid` INT, IN `p_qty` INT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `chartupd` (IN `uid` INT, IN `id` INT, IN `qty` INT)  NO SQL
 BEGIN
 
-	set @sqlstr=CONCAT("update chart SET qty=qty+",p_qty," where chart.uid=",p_uid," and pid=",p_pid);
-    PREPARE stmt_name FROM @sqlstr;
-    EXECUTE stmt_name;
-    DEALLOCATE PREPARE stmt_name;
+UPDATE more.chart SET
+	chart.qty=qty,
+    chart.totalprice=(chart.saleprice+chart.discount)*qty
+WHERE 
+	chart.uid=uid AND chart.id=id
+;
 
 END$$
 
 DROP PROCEDURE IF EXISTS `commentsadd`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `commentsadd` (IN `p_uid` INT, IN `p_target` TEXT, IN `p_targetid` INT, IN `contents` TEXT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `commentsadd` (IN `uid` INT, IN `target` TEXT, IN `targetid` INT, IN `contents` TEXT)  NO SQL
 BEGIN
 
-	INSERT INTO comments set  uid=p_uid,target=p_target,targetid=p_targetid,content=contents,ctime=CURRENT_TIMESTAMP; 
+INSERT INTO comments set  
+	comments.uid=uid,
+	comments.target=target,
+    comments.targetid=targetid,
+    comments.content=contents,
+    comments.ctime=CURRENT_TIMESTAMP
+; 
     
 END$$
 
 DROP PROCEDURE IF EXISTS `commentsquerybytarget`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `commentsquerybytarget` (IN `p_target` TEXT, IN `p_targetid` INT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `commentsquerybytarget` (IN `target` TEXT, IN `targetid` INT)  NO SQL
 BEGIN
 
-	SELECT * FROM comments WHERE comments.target=p_target and comments.targetid=p_targetid;
+	SELECT * FROM comments WHERE comments.target=target and comments.targetid=targetid;
 	
 END$$
 
 DROP PROCEDURE IF EXISTS `commentsquerybyuser`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `commentsquerybyuser` (IN `p_uid` INT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `commentsquerybyuser` (IN `uid` INT)  NO SQL
 BEGIN
 
-	SELECT * FROM comments WHERE comments.uid=p_uid;
+	SELECT * FROM comments WHERE comments.uid=uid;
     
 END$$
 
@@ -96,46 +141,84 @@ BEGIN
 END$$
 
 DROP PROCEDURE IF EXISTS `designercreatework`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `designercreatework` (IN `p_uid` INT, IN `contents` TEXT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `designercreatework` (IN `uid` INT, IN `contents` TEXT)  NO SQL
 BEGIN
-	CALL productadd(contents);
-	set @p_pid = @@IDENTITY;
-	INSERT INTO designer_info (uid,action,pid,ctime) VALUES(p_uid,'作品',@p_pid,CURRENT_TIMESTAMP);
+
+CALL productadd(CONCAT(contents,",brand='设计师'"),@pid);
+	/*set @p_pid = @@IDENTITY;*/
+INSERT INTO designer_info (
+    designer_info.uid,
+   designer_info.action,
+    designer_info.pid,
+    designer_info.ctime
+) VALUES(
+    uid,
+    '作品',
+    @pid,
+    CURRENT_TIMESTAMP
+);
 
 END$$
 
 DROP PROCEDURE IF EXISTS `designerdelwork`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `designerdelwork` (IN `p_uid` INT, IN `p_pid` INT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `designerdelwork` (IN `uid` INT, IN `pid` INT)  NO SQL
 BEGIN
-	DELETE FROM designer_info WHERE uid=p_uid and pid=p_pid;
-   CALL productdel(p_pid); 
+
+/*检查该pid是否是该uid的作品*/
+SELECT COUNT(*) INTO @q FROM designer_info
+WHERE designer_info.uid=uid AND designer_info.pid=pid;
+
+IF @q<1 THEN
+	SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT='该设计师没有发布该作品！';
+END IF;
+
+DELETE FROM designer_info 
+WHERE designer_info.uid=uid and designer_info.pid=pid;
+
+CALL productdel(pid); 
+
+
 END$$
 
 DROP PROCEDURE IF EXISTS `designerquerywork`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `designerquerywork` (IN `p_uid` INT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `designerquerywork` (IN `uid` INT)  NO SQL
 BEGIN
 
-	 select 
-        uid,action,p.* 
-    from 
-        designer_info as d
-        LEFT join goods as p on d.pid=p.pid
-    WHERE
-        uid=p_uid and d.action='作品';
+SELECT
+    designer_info.uid,
+    designer_info.action,
+    goods.pid,
+    goods.name,
+    designer_info.ctime
+FROM
+	designer_info LEFT join goods on designer_info.pid=goods.pid
+WHERE
+	designer_info.uid=uid and designer_info.action='作品'
+;
 
 END$$
 
 DROP PROCEDURE IF EXISTS `designerupdwork`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `designerupdwork` (IN `p_uid` INT, IN `p_pid` INT, IN `contents` TEXT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `designerupdwork` (IN `uid` INT, IN `pid` INT, IN `contents` TEXT)  NO SQL
 BEGIN
-	CALL productupd(p_pid,contents);
+/*检查该pid是否是该uid的作品*/
+SELECT COUNT(*) INTO @q FROM designer_info
+WHERE designer_info.uid=uid AND designer_info.pid=pid;
+
+IF @q<1 THEN
+	SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT='该设计师没有发布该作品！';
+END IF;
+
+CALL productupd(pid,contents);
+
 END$$
 
 DROP PROCEDURE IF EXISTS `dicgetalias`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `dicgetalias` (IN `p_key` TEXT)  NO SQL
 BEGIN
 
-	SELECT cnnick,ennick FROM dictionary where dictionary.key=p_key;
+	SELECT cnnick,ennick INTO @q FROM dictionary where dictionary.key=p_key;
+   
 
 END$$
 
@@ -143,25 +226,31 @@ DROP PROCEDURE IF EXISTS `dicgetkey`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `dicgetkey` (IN `p_nick` TEXT)  NO SQL
 BEGIN
 
-	SELECT dictionary.key FROM dictionary where cnnick=p_nick or ennick=p_nick;
+SELECT dictionary.key FROM dictionary 
+where cnnick=p_nick or ennick=p_nick;
 
 END$$
 
 DROP PROCEDURE IF EXISTS `dicquery`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `dicquery` (IN `p_key` TEXT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `dicquery` (IN `pkey` TEXT)  NO SQL
 BEGIN
 
-	SELECT * from dictionary where dictionary.key=p_key;
+	SELECT * from more.dictionary where dictionary.key=pkey;
 
 END$$
 
 DROP PROCEDURE IF EXISTS `dicupditem`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `dicupditem` (IN `p_key` TEXT, IN `contents` TEXT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `dicupditem` (IN `pkey` TEXT, IN `cnnick` TEXT, IN `ennick` INT, IN `pvalue` INT)  NO SQL
 BEGIN
-set @sqlstr=CONCAT("update dictionary SET ",contents," where dictionary.key=",p_key);
-    PREPARE stmt_name FROM @sqlstr;
-    EXECUTE stmt_name;
-    DEALLOCATE PREPARE stmt_name;
+
+UPDATE more.dictionary SET
+    dictionary.cnnick=cnnick,
+    dictionary.ennick=ennick,
+    dictionary.pvalue=pvalue
+WHERE dictionary.key=pkey;
+
+
+
 END$$
 
 DROP PROCEDURE IF EXISTS `discountdel`$$
@@ -172,11 +261,25 @@ BEGIN
 
 END$$
 
-DROP PROCEDURE IF EXISTS `discountupd`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `discountupd` (IN `p_pid` INT, IN `p_value` DOUBLE)  NO SQL
+DROP PROCEDURE IF EXISTS `discountget`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `discountget` (IN `pid` INT, OUT `discount` INT)  NO SQL
 BEGIN
-	
-    INSERT INTO discount SET pid=p_pid,discount=p_value;
+SET discount=0;
+SELECT SUM(discount.discount) INTO discount FROM more.discount
+WHERE discount.pid=pid ;
+
+IF isnull(discount) THEN
+	SET discount=0;
+END IF;
+
+END$$
+
+DROP PROCEDURE IF EXISTS `discountupd`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `discountupd` (IN `pid` INT, IN `value` DOUBLE)  NO SQL
+BEGIN
+
+DELETE FROM discount WHERE discount.pid=pid;
+INSERT INTO discount SET discount.pid=pid,discount.discount=value;
 
 END$$
 
@@ -193,46 +296,92 @@ BEGIN
 END$$
 
 DROP PROCEDURE IF EXISTS `membercreate`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `membercreate` (IN `p_uid` INT, IN `p_membertype` INT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `membercreate` (IN `uid` INT, IN `membertype` INT, IN `validuntil` DATETIME, IN `quota` INT)  NO SQL
 BEGIN
-	set @sqlstr=CONCAT("UPDATE member_info SET  membertype=",p_membertype," WHERE member_info.uid=",p_uid);
-	PREPARE stmt_name FROM @sqlstr;
-	EXECUTE stmt_name;
-	DEALLOCATE PREPARE stmt_name;
-	CALL updmemberinfo(p_uid);
-   SELECT * FROM member_info where member_info.uid=p_uid;
+
+UPDATE more.member_info SET
+	member_info.membertype=membertype,
+    member_info.memberruntil=validuntil,
+    member_info.quota=quota
+WHERE
+	member_info.uid=uid
+;
+SELECT * FROM member_info where member_info.uid=uid;
+
 END$$
 
 DROP PROCEDURE IF EXISTS `memberdeposit`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `memberdeposit` (IN `p_uid` INT, IN `p_value` INT)  NO SQL
 BEGIN
-	set @sqlstr=CONCAT("UPDATE member_info SET deposit=deposit+",p_value," WHERE member_info.uid=",p_uid);
-	PREPARE stmt_name FROM @sqlstr;
-	EXECUTE stmt_name;
-	DEALLOCATE PREPARE stmt_name;
-   SELECT deposit FROM member_info where member_info.uid=p_uid;
-END$$
 
-DROP PROCEDURE IF EXISTS `memberdereload`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `memberdereload` (IN `p_uid` INT, IN `p_value` INT)  NO SQL
-BEGIN
-	set @sqlstr=CONCAT("UPDATE member_info SET balance=balance+",p_value," WHERE member_info.uid=",p_uid);
-	PREPARE stmt_name FROM @sqlstr;
-	EXECUTE stmt_name;
-	DEALLOCATE PREPARE stmt_name;
-   SELECT balance FROM member_info where member_info.uid=p_uid;
+UPDATE more.member_info SET
+	member_info.deposit=member_info.deposit+p_value
+WHERE
+	member_info.uid=p_uid
+;
+    
 END$$
 
 DROP PROCEDURE IF EXISTS `memberquery`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `memberquery` (IN `uid` INT)  NO SQL
 BEGIN
-	DECLARE matchnum INT default 0;
-  	SELECT COUNT(*) INTO matchnum FROM member_info WHERE member_info.uid=uid;
-   if matchnum <1 then
-     INSERT INTO member_info set member_info.uid=uid,member_info.membertype=0,member_info.ctime=CURRENT_TIMESTAMP;
-   else
-   	  SELECT * FROM member_info WHERE member_info.uid=uid;
-   end if;  
+
+DECLARE matchnum INT default 0;
+SELECT COUNT(*) INTO matchnum FROM member_info WHERE member_info.uid=uid;
+
+if matchnum <1 then
+   	INSERT INTO member_info set 
+      member_info.uid=uid,
+      member_info.membertype=0,
+      member_info.ctime=CURRENT_TIMESTAMP,
+      member_info.deposit=0,
+      member_info.balance=0,
+      member_info.quota=0,
+      member_info.memberruntil=CURRENT_DATE,
+      member_info.invoice=0
+    ;
+end if;  
+   SELECT * FROM more.member_info WHERE member_info.uid=uid;
+END$$
+
+DROP PROCEDURE IF EXISTS `memberquota`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `memberquota` (IN `uid` INT, OUT `quota` INT)  NO SQL
+BEGIN
+
+SELECT member_info.quota into quota FROM more.member_info 
+WHERE member_info.uid=uid;
+
+
+IF quota>0 THEN
+    /*检查会员是否过期*/
+    SELECT member_info.memberruntil INTO @validuntil 
+    FROM more.member_info
+    WHERE member_info.uid=uid;
+
+    IF @validuntil<CURRENT_DATE THEN
+        SET quota=0;
+        UPDATE member_info SET member_info.quota=0 
+        WHERE member_info.uid=uid;
+    END IF;
+
+END IF;
+
+
+
+
+
+END$$
+
+DROP PROCEDURE IF EXISTS `memberreload`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `memberreload` (IN `p_uid` INT, IN `p_value` INT)  NO SQL
+BEGIN
+
+UPDATE more.member_info SET
+	member_info.balance=member_info.balance+p_value
+WHERE
+	member_info.uid=p_uid
+;
+    
 END$$
 
 DROP PROCEDURE IF EXISTS `ordercancel`$$
@@ -693,12 +842,14 @@ GROUP BY pocket.status;
 END$$
 
 DROP PROCEDURE IF EXISTS `productadd`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `productadd` (IN `contents` TEXT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `productadd` (IN `contents` TEXT, OUT `pid` INT)  NO SQL
 BEGIN
-    set @sqlstr=CONCAT("INSERT into goods SET ",contents);
-    PREPARE stmt_name FROM @sqlstr;
-    EXECUTE stmt_name;
-    DEALLOCATE PREPARE stmt_name;
+
+set @sqlstr=CONCAT("INSERT into more.goods SET ",contents);
+PREPARE stmt_name FROM @sqlstr;
+EXECUTE stmt_name;
+DEALLOCATE PREPARE stmt_name;
+SELECT LAST_INSERT_ID() INTO pid;
     
 END$$
 
@@ -759,13 +910,13 @@ if row_count()<1 THEN
 END$$
 
 DROP PROCEDURE IF EXISTS `productupd`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `productupd` (IN `p_pid` INT, IN `contents` TEXT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `productupd` (IN `pid` INT, IN `contents` TEXT)  NO SQL
 BEGIN
 
-	set @sqlstr=CONCAT("update goods SET ",contents," where pid=",p_pid );
-    PREPARE stmt_name FROM @sqlstr;
-    EXECUTE stmt_name;
-    DEALLOCATE PREPARE stmt_name;
+set @sqlstr=CONCAT("update goods SET ",contents," where pid=",pid );
+PREPARE stmt_name FROM @sqlstr;
+EXECUTE stmt_name;
+DEALLOCATE PREPARE stmt_name;
 
 END$$
 
@@ -773,7 +924,19 @@ DROP PROCEDURE IF EXISTS `sharepicadd`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sharepicadd` (IN `p_uid` INT, IN `p_type` TEXT, IN `p_attach` TEXT, IN `contents` TEXT)  NO SQL
 BEGIN
 
-	INSERT INTO sharepic (uid,type,attaches,content,ctime) VALUES(p_uid,p_type,p_attach,contents,CURRENT_TIMESTAMP);
+INSERT INTO sharepic (
+    uid,
+    type,
+    attaches,
+    content,
+    ctime
+) VALUES(
+    p_uid,
+    p_type,
+    p_attach,
+    contents,
+    CURRENT_TIMESTAMP
+);
 
 END$$
 
@@ -786,18 +949,18 @@ BEGIN
 END$$
 
 DROP PROCEDURE IF EXISTS `sharepiclist`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sharepiclist` (IN `p_uid` INT, IN `p_start` INT, IN `p_length` INT)  NO SQL
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sharepiclist` (IN `p_uid` INT, IN `page` INT, IN `length` INT)  NO SQL
 BEGIN
 DECLARE cnt INT DEFAULT 0;
    select count(*) into cnt from sharepic WHERE uid=p_uid;
    if cnt>0 then
-   	 set @sqlstr=CONCAT("select * from sharepic where sharepic.uid=",p_uid," order by ctime asc limit ",p_start,p_length);
+   	 set @sqlstr=CONCAT("select * from sharepic where sharepic.uid=",p_uid," order by ctime asc limit ",(page-1)*length,",",length);
     PREPARE stmt_name FROM @sqlstr;
     EXECUTE stmt_name;
     DEALLOCATE PREPARE stmt_name;   
    end if;
    if cnt=0 THEN
-   	  set @sqlstr=CONCAT("select * from sharepic order by ctime asc limit ",p_start,p_length);
+   	  set @sqlstr=CONCAT("select * from sharepic order by ctime asc limit ",(page-1)*length,",",length);
     PREPARE stmt_name FROM @sqlstr;
     EXECUTE stmt_name;
     DEALLOCATE PREPARE stmt_name; 
@@ -912,6 +1075,14 @@ BEGIN
     
 END$$
 
+DROP PROCEDURE IF EXISTS `useractionstat`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `useractionstat` (IN `uid` INT)  NO SQL
+BEGIN
+
+SELECT user_action.action,COUNT(*) FROM more.user_action where user_action.uid=uid GROUP BY user_action.action;
+    
+END$$
+
 DELIMITER ;
 
 -- --------------------------------------------------------
@@ -952,10 +1123,19 @@ CREATE TABLE IF NOT EXISTS `chart` (
   `unitprice` int(11) DEFAULT NULL COMMENT '单价',
   `saleprice` int(11) DEFAULT NULL COMMENT '出售价',
   `discount` int(11) DEFAULT NULL COMMENT '折扣',
-  `totalprice` int(11) NOT NULL,
+  `totalprice` int(11) DEFAULT NULL,
   `option` text COMMENT '选项',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='购物车表';
+) ENGINE=MyISAM AUTO_INCREMENT=23 DEFAULT CHARSET=utf8 COMMENT='购物车表';
+
+--
+-- 转存表中的数据 `chart`
+--
+
+INSERT INTO `chart` (`id`, `uid`, `type`, `pid`, `qty`, `ctime`, `otime`, `unitprice`, `saleprice`, `discount`, `totalprice`, `option`) VALUES
+(22, 48, 'product', 1, 3, '2018-03-24 03:56:22', '2018-03-24 03:56:22', 10, 9, -3, 18, NULL),
+(21, 48, 'product', 11, 6, '2018-03-24 03:55:54', '2018-03-24 03:55:54', 29, 3, 0, 18, NULL),
+(20, 4, 'product', 1, 10, '2018-03-24 03:55:23', '2018-03-24 03:55:23', 10, 9, -3, 60, NULL);
 
 -- --------------------------------------------------------
 
@@ -973,15 +1153,18 @@ CREATE TABLE IF NOT EXISTS `comments` (
   `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `option` text COMMENT '选项',
   PRIMARY KEY (`cid`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='评论表';
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8 COMMENT='评论表';
 
 --
 -- 转存表中的数据 `comments`
 --
 
 INSERT INTO `comments` (`cid`, `uid`, `target`, `targetid`, `content`, `ctime`, `option`) VALUES
-(1, 42, '1', 2, '1111', '2018-03-19 12:51:50', NULL),
-(2, 42, '78', 1, 'brand=\'马云飞\',name=\'大衣\'', '2018-03-19 13:07:06', NULL);
+(1, 42, '衣服', 2, '1111', '2018-03-19 12:51:50', NULL),
+(2, 42, '衣服', 1, 'brand=\'马云飞\',name=\'大衣\'', '2018-03-19 13:07:06', NULL),
+(3, 48, '衣服', 1, '这个衣服不错', '2018-03-24 04:19:46', NULL),
+(4, 48, '订单', 2, '这个订单不错', '2018-03-24 04:20:24', NULL),
+(5, 48, '用户', 48, '这个用户不错', '2018-03-24 04:20:49', NULL);
 
 -- --------------------------------------------------------
 
@@ -998,7 +1181,7 @@ CREATE TABLE IF NOT EXISTS `designer_info` (
   `pid` int(11) DEFAULT NULL COMMENT '商品ID',
   `option` text COMMENT '选项',
   PRIMARY KEY (`did`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 
 --
 -- 转存表中的数据 `designer_info`
@@ -1006,7 +1189,9 @@ CREATE TABLE IF NOT EXISTS `designer_info` (
 
 INSERT INTO `designer_info` (`did`, `uid`, `ctime`, `action`, `pid`, `option`) VALUES
 (4, 42, '2018-03-17 07:23:19', '作品', 2, NULL),
-(3, 42, '2018-03-17 07:22:39', '作品', 1, NULL);
+(3, 42, '2018-03-17 07:22:39', '作品', 1, NULL),
+(7, 48, '2018-03-24 02:09:03', '作品', 14, NULL),
+(8, 48, '2018-03-24 02:09:40', '作品', 15, NULL);
 
 -- --------------------------------------------------------
 
@@ -1044,10 +1229,17 @@ CREATE TABLE IF NOT EXISTS `discount` (
   `dtype` varchar(100) DEFAULT '单价优惠-百分比' COMMENT '折扣类型',
   `target` text COMMENT '目标',
   `pid` int(11) DEFAULT NULL COMMENT '商品ID',
-  `discount` int(2) UNSIGNED DEFAULT '0' COMMENT '折扣',
+  `discount` int(2) DEFAULT '0' COMMENT '折扣',
   `option` text COMMENT '选项',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='折扣表';
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='折扣表';
+
+--
+-- 转存表中的数据 `discount`
+--
+
+INSERT INTO `discount` (`id`, `dtype`, `target`, `pid`, `discount`, `option`) VALUES
+(2, '单价优惠-百分比', NULL, 1, -6, NULL);
 
 -- --------------------------------------------------------
 
@@ -1077,16 +1269,18 @@ CREATE TABLE IF NOT EXISTS `goods` (
   `largepic` text COMMENT '原图',
   `option` text COMMENT '选项',
   PRIMARY KEY (`pid`)
-) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
 
 --
 -- 转存表中的数据 `goods`
 --
 
 INSERT INTO `goods` (`pid`, `brand`, `name`, `businesstype`, `categry`, `size`, `onboard`, `material`, `uniprice`, `saleprice`, `tag`, `quota`, `occasion`, `color`, `additional`, `smallpic`, `midpic`, `largepic`, `option`) VALUES
-(1, '马云飞', '大衣', NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(1, '马云飞', '大衣1', NULL, NULL, NULL, 0, NULL, 10, 9, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (2, '飞红', '长裙', NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(11, '马云飞', '大衣', NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+(11, '马云飞', '大衣2', NULL, NULL, 'xl', 0, NULL, 29, 3, '热门', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(14, '设计师', '短裤', NULL, NULL, 'xl', 0, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(15, '设计师', '短裤', NULL, NULL, 'xxl', 0, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1156,15 +1350,16 @@ CREATE TABLE IF NOT EXISTS `member_info` (
   `quota` int(11) DEFAULT NULL COMMENT '会员额度',
   `option` text COMMENT '选项',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
 --
 -- 转存表中的数据 `member_info`
 --
 
 INSERT INTO `member_info` (`id`, `uid`, `ctime`, `membertype`, `memberruntil`, `deposit`, `invoice`, `balance`, `quota`, `option`) VALUES
-(1, 11, '2018-03-23 05:58:58', NULL, NULL, NULL, NULL, NULL, 11, NULL),
-(2, 12, '2018-03-23 05:59:02', NULL, NULL, NULL, NULL, NULL, 3, NULL);
+(1, 11, '2018-03-23 05:58:58', 1, '2018-12-30', NULL, NULL, NULL, 10, NULL),
+(2, 12, '2018-03-23 05:59:02', 1, '2018-12-30', NULL, NULL, NULL, 10, NULL),
+(4, 48, '2018-03-24 00:59:12', 2, '2017-12-31', 280, NULL, 400, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -1273,7 +1468,15 @@ CREATE TABLE IF NOT EXISTS `sharepic` (
   `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `option` text COMMENT '选项',
   PRIMARY KEY (`sid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='晒图表';
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='晒图表';
+
+--
+-- 转存表中的数据 `sharepic`
+--
+
+INSERT INTO `sharepic` (`sid`, `uid`, `type`, `attaches`, `content`, `ctime`, `option`) VALUES
+(1, 48, '图片', '[\"statid/01.jpg\",\"static/02.jpg\"]', '这是我的第一次晒图', '2018-03-24 02:31:41', NULL),
+(2, 48, '图片', '[\"statid/01.jpg\",\"static/02.jpg\"]', 'name=\'短裤\',size=\'xl\'', '2018-03-24 02:32:07', NULL);
 
 -- --------------------------------------------------------
 
@@ -1289,14 +1492,15 @@ CREATE TABLE IF NOT EXISTS `shop_info` (
   `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `option` text COMMENT '选项',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 --
 -- 转存表中的数据 `shop_info`
 --
 
 INSERT INTO `shop_info` (`id`, `key`, `value`, `ctime`, `option`) VALUES
-(2, 'index', '100', '2018-03-17 08:06:54', NULL);
+(2, 'index', '100', '2018-03-17 08:06:54', NULL),
+(5, '轮播2', '234', '2018-03-24 02:23:15', NULL);
 
 -- --------------------------------------------------------
 
@@ -1314,7 +1518,18 @@ CREATE TABLE IF NOT EXISTS `user_action` (
   `ctime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `option` text COMMENT '选项',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+
+--
+-- 转存表中的数据 `user_action`
+--
+
+INSERT INTO `user_action` (`id`, `uid`, `action`, `target`, `content`, `ctime`, `option`) VALUES
+(1, 48, '关注', '1', NULL, '2018-03-24 00:43:49', NULL),
+(2, 48, '关注', '2', NULL, '2018-03-24 00:44:07', NULL),
+(3, 48, '关注', '3', NULL, '2018-03-24 00:44:15', NULL),
+(4, 48, '收藏', '4', NULL, '2018-03-24 00:44:25', NULL),
+(5, 48, '收藏', '5', NULL, '2018-03-24 00:44:28', NULL);
 
 -- --------------------------------------------------------
 
@@ -1339,14 +1554,15 @@ CREATE TABLE IF NOT EXISTS `user_info` (
   `moraddress` text COMMENT '详细地址',
   `additional` text COMMENT '额外',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
 -- 转存表中的数据 `user_info`
 --
 
 INSERT INTO `user_info` (`id`, `uid`, `nick`, `realname`, `shenfenzheng`, `verified`, `invitationcode`, `sex`, `age`, `mobile`, `morecontact`, `address`, `moraddress`, `additional`) VALUES
-(1, 42, NULL, NULL, NULL, 0, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL);
+(1, 42, NULL, NULL, NULL, 0, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(2, 45, NULL, NULL, NULL, 0, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

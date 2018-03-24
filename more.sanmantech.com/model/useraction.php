@@ -38,7 +38,15 @@ class useraction
             \Response::returntaskok(\Db::arraydata());
         }
     }
+    public function stat(){
 
+        \User::checkright(100)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
+        if(!\Db::simplecall("more.useractionstat", array(\User::uid()))){
+            \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
+        }else{
+            \Response::returntaskok(\Db::cubedata());
+        }
+    }
     public function del($action,$target){
         \User::checkright(100)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
         if(!\Db::simplecall("more.useractiondel", array(\User::uid(),$action,$target))){

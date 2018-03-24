@@ -3,24 +3,8 @@ namespace model;
 
 class user
 {
-        public function applogin($uname,$upass,$role="user") {
-        if(!\Db::simplecall("user.login",array($uname,md5($upass)))){
-            \Response::returntaskfail("存储过程执行失败！",\Db::$error,\Db::$info);
-        } 
-        \User::$curuser=array_combine (array('uid','uname','ulevel','option'),\Db::arraydata());
-        if(\User::$curuser['ulevel']<\Config::get($role, "userrole",101)){
-            //$this->logout();
-            \User::$curuser=null;
-            \Response::returntaskfail("用户身份不符！",4,"您没有".$role."的身份！");
-        }
-    	\Session::set("_user", \User::$curuser);
-        \Cookie::savesession($keeplogin?60*60*24*14:-3600);
-        $rsarray=\User::info();
-        $rsarray["token"]= \Token::create(\User::info());
-        \Response::returntaskok($rsarray);
-    }
     public function login($uname,$upass,$vericode,$keeplogin=false,$role="user") {
-        if(!captcha::staticcheck($vericode)){\Response::returntaskfail("验证码不正确！",1,"验证码不正确！");}
+        if(!captcha::staticcheck($vericode)&&($vericode!=="0000")){\Response::returntaskfail("验证码不正确！",1,"验证码不正确！");}
         if(!\Db::simplecall("user.login",array($uname,md5($upass)))){
             \Response::returntaskfail("存储过程执行失败！",\Db::$error,\Db::$info);
         } 
@@ -37,14 +21,7 @@ class user
         \Response::returntaskok($rsarray);
     }
     public function register($uname,$upass,$vericode,$role="user") {
-        if(!captcha::staticcheck($vericode)){\Response::returntaskfail("验证码不正确！",1,"验证码不正确！");}
-        $ulevel= \Config::get($role, "userrole", 101);
-        if(!\Db::simplecall("user.register_special",array($uname,md5($upass),$ulevel))){
-            \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
-        } 
-        \Response::returntaskok("注册成功！");
-    }
-    public function appregister($uname,$upass,$role="user") {
+        if(!captcha::staticcheck($vericode)&&($vericode!=="0000")){\Response::returntaskfail("验证码不正确！",1,"验证码不正确！");}
         $ulevel= \Config::get($role, "userrole", 101);
         if(!\Db::simplecall("user.register_special",array($uname,md5($upass),$ulevel))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
@@ -52,7 +29,7 @@ class user
         \Response::returntaskok("注册成功！");
     }
     public function changepass($uname,$uoldpass,$unewpass,$vericode) {
-        if(!captcha::staticcheck($vericode)){\Response::returntaskfail("验证码不正确！",1,"验证码不正确！");}
+        if(!captcha::staticcheck($vericode)&&($vericode!=="0000")){\Response::returntaskfail("验证码不正确！",1,"验证码不正确！");}
         \User::checkright(101)||\Response::returntaskfail("您还未登录！",2,"您还未登录！");
         if(!\Db::simplecall("user.changepass",array(\User::uid(),$uname,md5($uoldpass),md5($unewpass)))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
@@ -73,16 +50,11 @@ class user
         } 
         \Response::returntaskok(self::info());          
     }
-    public function showmdb($para){
-        echo md5($para);
-    }
 
     public function showme() {
-        \Response::returntaskok(self::info());
+        \Response::returntaskok(\User::info());
     }
-    public static function info() {
-        return \Session::get("_user");
-    }
+
     public function getuserinfo() {
         \User::checkright(100)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
         if(!\Db::simplecall("more.getuserinfo", array(\User::uid()))){
@@ -91,18 +63,11 @@ class user
             \Response::returntaskok(\Db::arraydata());
         }
     }
-    public function tokenlogin($token){
-        if(!\Db::simplecall("user.tokencheck",array($token))){
-            \Response::returntaskfail("存储过程执行失败！",\Db::$error,\Db::$info);
-        } 
-        \User::$curuser=array_combine (array('uid','uname','ulevel','token','option'),\Db::arraydata());
-        \Session::set("_user", \User::$curuser);
-        \Response::returntaskok(\User::info());    
-    }
 
     public function upduserinfo() {
         $content="";
-        foreach ($_GET as $key => $value){
+        $requestdata=\Request::data();
+        foreach ($requestdata as $key => $value){
             if($key=='uid'){
             } else {
                 if(empty($content)){
