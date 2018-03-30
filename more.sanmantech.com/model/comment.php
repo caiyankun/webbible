@@ -23,7 +23,7 @@ class comment
         if(!\Db::simplecall("more.commentsadd", array(\User::uid(),$target,$targetid,$content))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok('添加评论成功！');
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -37,7 +37,7 @@ class comment
         if(!\Db::simplecall("more.commentsquerybyuser", array($uid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -45,7 +45,7 @@ class comment
         if(!\Db::simplecall("more.commentsquerybytarget", array($target,$targetid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 }

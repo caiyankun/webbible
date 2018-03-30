@@ -23,8 +23,8 @@ class Response
         self::$data=$data;    
         self::$_taskstat["code"]=self::$code;
         self::$_taskstat["info"]=self::$info;
-	self::$responseobj["_taskresult"]=self::$data;
-        self::$responseobj["_taskstat"]=self::$_taskstat;
+	self::$responseobj["data"]=self::$data;
+        self::$responseobj["stat"]=self::$_taskstat;
         echo json_encode(self::$responseobj,JSON_UNESCAPED_UNICODE);
         exit(0);
     }
@@ -34,8 +34,8 @@ class Response
         self::$data=$data;    
         self::$_taskstat["code"]=self::$code;
         self::$_taskstat["info"]=self::$info;
-	self::$responseobj["_taskresult"]=self::$data;
-        self::$responseobj["_taskstat"]=self::$_taskstat;
+	self::$responseobj["data"]=self::$data;
+        self::$responseobj["stat"]=self::$_taskstat;
         echo json_encode(self::$responseobj,JSON_UNESCAPED_UNICODE);
         exit(0);
     }
@@ -45,8 +45,8 @@ class Response
         self::$data=null;    
         self::$_taskstat["code"]=self::$code;
         self::$_taskstat["info"]=self::$info;
-	self::$responseobj["_taskresult"]=self::$data;
-        self::$responseobj["_taskstat"]=self::$_taskstat;
+	self::$responseobj["data"]=self::$data;
+        self::$responseobj["stat"]=self::$_taskstat;
         echo json_encode(self::$responseobj,JSON_UNESCAPED_UNICODE);
         exit(0);
     }
@@ -56,8 +56,8 @@ class Response
         self::$data=null;    
         self::$_taskstat["code"]=self::$code;
         self::$_taskstat["info"]=self::$info;
-	self::$responseobj["_taskresult"]=self::$data;
-        self::$responseobj["_taskstat"]=self::$_taskstat;
+	self::$responseobj["data"]=self::$data;
+        self::$responseobj["stat"]=self::$_taskstat;
         echo json_encode(self::$responseobj,JSON_UNESCAPED_UNICODE);
         exit(0);
     }

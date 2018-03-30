@@ -19,7 +19,7 @@ class member
         if(!\Db::simplecall("more.memberquery", array(\User::uid()))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         }else{
-            \Response::returntaskok(\Db::arraydata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -32,7 +32,7 @@ class member
         if(!\Db::simplecall("more.memberreload", array(\User::uid(),$value))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         }else{
-            \Response::returntaskok(\Db::arraydata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -41,14 +41,14 @@ class member
             if(!\Db::simplecall("more.memberdeposit", array(\User::uid(),$value))){
                 \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
             }else{
-                \Response::returntaskok(\Db::arraydata());
+                \Response::returntaskok(\Db::cubedatawithtitle());
             }
         }
         if(\User::checkright(800)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！"))
             if(!\Db::simplecall("more.memberdeposit", array(\User::uid(),$value))){
                 \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
             }else{
-                \Response::returntaskok('退押金成功！');
+                \Response::returntaskok(\Db::cubedatawithtitle());
             }
     }
 
@@ -94,7 +94,7 @@ class member
         if(!\Db::simplecall("more.membercreate", array(\User::uid(),$membertypecode[$newtype],$memberuntil[$timetype],$memberquota[$newtype]))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         }else{
-            \Response::returntaskok(\Db::arraydata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 }

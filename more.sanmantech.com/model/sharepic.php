@@ -21,7 +21,7 @@ class sharepic {
         if(!\Db::simplecall("more.sharepicadd", array(\User::uid(),$type,$attachstr,$textcontent))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::arraydata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -32,7 +32,7 @@ class sharepic {
         if(!\Db::simplecall("more.sharepicquery", array($sid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::arraydata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -43,7 +43,7 @@ class sharepic {
         if(!\Db::simplecall("more.sharepiclist", array($uid,$page,$length))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -54,7 +54,7 @@ class sharepic {
         if(!\Db::simplecall("more.sharepicdel", array(\User::uid(),$sid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok("删除晒图成功");
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 }

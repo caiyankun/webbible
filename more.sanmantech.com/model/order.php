@@ -23,7 +23,7 @@ class order {
         if(!\Db::simplecall("more.ordercreate", array(\User::uid(),$oid,$receiver,$contact,$address))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }         
     }
     public function info($oid) {
@@ -32,7 +32,7 @@ class order {
         if(!\Db::simplecall("more.orderquery", array(\User::uid(),$oid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         } 
     }
     public function pay($oid) {
@@ -41,7 +41,7 @@ class order {
         if(!\Db::simplecall("more.orderpay", array(\User::uid(),$oid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         } 
     }
     public function delivered($oid) {
@@ -50,7 +50,7 @@ class order {
         if(!\Db::simplecall("more.orderdelivered", array(\User::uid(),$oid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         } 
     }
     public function stat() {
@@ -59,7 +59,7 @@ class order {
         if(!\Db::simplecall("more.orderstat", array(\User::uid()))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         } 
     }
     public function flist($filterinfo="") {
@@ -68,7 +68,7 @@ class order {
         if(!\Db::simplecall("more.orderlist", array(\User::uid(),$filterinfo))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         } 
     }
     public function upd($oid,$receiver,$contact,$address) {
@@ -77,7 +77,7 @@ class order {
         if(!\Db::simplecall("more.orderupd", array(\User::uid(),$oid,$receiver,$contact,$address))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         } 
     }
     public function deliveredcancelapply($oid,$reason) {
@@ -86,7 +86,7 @@ class order {
         if(!\Db::simplecall("more.orderdeliveredcancelapply", array(\User::uid(),$oid,$reason))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         } 
     }
     public function deliveredcancel($uid,$oid) {
@@ -95,7 +95,7 @@ class order {
         if(!\Db::simplecall("more.orderdeliveredcancel", array($uid,$oid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         } 
     }
     public function payedcancelapply($oid,$reason) {
@@ -104,7 +104,7 @@ class order {
         if(!\Db::simplecall("more.orderpayedcancelapply", array(\User::uid(),$oid,$reason))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         } 
     }
     public function payedcancel($uid,$oid) {
@@ -113,7 +113,7 @@ class order {
         if(!\Db::simplecall("more.orderpayedcancel", array($uid,$oid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         } 
     }
     public function cancel($oid,$reason) {
@@ -122,7 +122,7 @@ class order {
         if(!\Db::simplecall("more.ordercancel", array(\User::uid(),$oid,$reason))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         } 
     }
 }

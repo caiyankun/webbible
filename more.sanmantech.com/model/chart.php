@@ -19,7 +19,7 @@ class chart {
         if(!\Db::simplecall("more.chartadd", array(\User::uid(),$pid,$qty))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok("添加购物车成功!");
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -31,7 +31,7 @@ class chart {
         if(!\Db::simplecall("more.chartdel", array(\User::uid(),$pid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok("删除成功!");
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
     public function clear() {
@@ -39,7 +39,7 @@ class chart {
         if(!\Db::simplecall("more.chartclear", array(\User::uid()))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok("删除成功!");
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
     /**
@@ -50,7 +50,7 @@ class chart {
         if(!\Db::simplecall("more.chartquery", array(\User::uid()))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -62,7 +62,7 @@ class chart {
         if(!\Db::simplecall("more.chartupd", array(\User::uid(),$pid,$qty))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok("修改数量成功!");
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 }

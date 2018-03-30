@@ -18,7 +18,7 @@ class dictionary {
         if(!\Db::simplecall("more.dicquery", array($key))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -29,7 +29,7 @@ class dictionary {
         if(!\Db::simplecall("more.dicgetalias", array($key))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -40,7 +40,7 @@ class dictionary {
         if(!\Db::simplecall("more.dicgetkey", array($nick))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -51,14 +51,14 @@ class dictionary {
         if(!\Db::simplecall("more.dicupditem", array($key,$cnnick,$ennick,$pvalue))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
     public function del($key) {
          if(!\Db::simplecall("more.dicdelitem", array($key))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 }

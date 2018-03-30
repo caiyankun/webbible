@@ -12,8 +12,12 @@
 <script language="javascript" type="text/javascript">
     $(document).ready(function(){
 	alert("进入了controller");
-        
-        $("#testdiv").html(sm.ui.part("manage.test"));
+        sm.ajax.url("http://more.sanmantech.com/user/showme.func").post().taskok(function(d){
+            alert(JSON.stringify(d));
+        }).taskfail(function(d){
+            alert(1);
+        });
+        //$("#testdiv").html(sm.ui.part("manage.test"));
         
         alert("离开了controller");
     });

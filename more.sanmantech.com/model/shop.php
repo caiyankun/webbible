@@ -19,7 +19,7 @@ class shop {
         if(!\Db::simplecall("more.shopwriteinfo", array($key,$value))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok('添加成功！');
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -31,7 +31,7 @@ class shop {
         if(!\Db::simplecall("more.shopdelinfo", array($key))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok('删除成功！');
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -42,7 +42,7 @@ class shop {
         if(!\Db::simplecall("more.shopreadinfo", array($key))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 }

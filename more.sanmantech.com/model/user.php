@@ -26,7 +26,7 @@ class user
         if(!\Db::simplecall("user.register_special",array($uname,md5($upass),$ulevel))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } 
-        \Response::returntaskok("注册成功！");
+        \Response::returntaskok(self::info());
     }
     public function changepass($uname,$uoldpass,$unewpass,$vericode) {
         if(!captcha::staticcheck($vericode)&&($vericode!=="0000")){\Response::returntaskfail("验证码不正确！",1,"验证码不正确！");}
@@ -40,7 +40,7 @@ class user
         \Session::delete("_user");
         \Cookie::deletesession();
         \Cookie::delete("PHPSESSID");
-        \Response::returntaskok("退出登录成功！");
+        \Response::returntaskok(self::info());
     }
     public function changerole($uid,$uname,$newrole) {
         \User::checkright(801)||\Response::returntaskfail("您不是管理员，不可以修改用户角色！",2,"您不是管理员，不可以修改用户角色！");
@@ -60,7 +60,7 @@ class user
         if(!\Db::simplecall("more.getuserinfo", array(\User::uid()))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::arraydata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -94,7 +94,7 @@ class user
         if(!\Db::simplecall("more.upduserinfo", array(\User::uid(),$content))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::arraydata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 }

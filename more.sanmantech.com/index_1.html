@@ -1,0 +1,97 @@
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script><!--(1)引入vue.js-->
+        <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
+    </head>
+    
+    <body>
+        <div id="app"> <!--(2-1)声明一个vue实体-->
+        {{ message }}
+        <span :title="message">
+            鼠标悬停几秒钟查看此处动态绑定的提示信息！
+          </span>
+        <p v-if="seen">现在你看到我了</p>
+        <ul>
+            <li v-for="todo in todos">
+                {{todo.text}}
+            </li>
+        </ul>
+        <button @click="reverseMessage">逆转消息</button>
+        <input v-model="message">
+        <ol>
+            <todo-item
+              v-for="item in groceryList"
+              :todo="item"
+              :key="item.id"
+            ></todo-item>
+        </ol>
+        </div>
+        
+    </body>
+    
+    <script language="javascript" type="text/javascript">
+        Vue.component('todo-item', {
+        props: ['todo'],//（1）这里定义了一个可以在模版中应用的变量；（2）这个变量可以以普通属性的方式与外界绑定；
+        template: '<li>{{ todo.text }}</li>'
+      });
+      var app = new Vue({ //2-2这里声明一个实体与模版对应
+        el: '#app',
+        data: {
+          message: 'Hello Vue!',
+          seen:false,
+          todos: [
+            { text: '学习 JavaScript' },
+            { text: '学习 Vue' },
+            { text: '整个牛项目' }
+          ],
+          groceryList: [
+            { id: 0, text: '蔬菜' },
+            { id: 1, text: '奶酪' },
+            { id: 2, text: '随便其它什么人吃的东西' }
+          ],
+        },
+        methods: {
+            reverseMessage: function () {
+              this.message = this.message.split('').reverse().join('');
+            }
+          }
+      })
+      Vue.http.post('http://local.more.com/user/showme.func').then(function(d){
+          alert(d.data);
+      }, function(d){
+          alert(d.data);
+      });
+      
+      //发送
+      
+      
+      
+                //请求的5个阶段，对应readyState的值
+        //0: 未初始化，send方法未调用；
+        //1: 正在发送请求，send方法已调用；
+        //2: 请求发送完毕，send方法执行完毕；
+        //3: 正在解析响应内容；
+        //4: 响应内容解析完毕；
+
+    var data = 'name=yang';
+    var xhr = new XMLHttpRequest();        //创建一个ajax对象
+    xhr.onreadystatechange = function(event){    //对ajax对象进行监听
+        if(xhr.readyState == 4){    //4表示解析完毕
+            if(xhr.status == 200){    //200为正常返回
+                alert(JSON.stringify(xhr));
+            }
+        }
+    };
+    xhr.open('POST','http://local.more.com/user/showme.func',true);    //建立连接，参数一：发送方式，二：请求地址，三：是否异步，true为异步
+    xhr.setRequestHeader('Content-type','application/x-www-form-urlencoded');    //可有可无
+    xhr.send(data);  
+      
+      
+      
+    </script>
+    
+    <zidingyi a="123" b="456">我是自定义标签，你能看到我吗</zidingyi>
+</html>

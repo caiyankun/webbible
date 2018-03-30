@@ -22,14 +22,14 @@ class pocket {
             } 
             $qty--;
         } while ($qty>1);
-        \Response::returntaskok(\Db::tabledata());
+        \Response::returntaskok(\Db::cubedatawithtitle());
     }
     public function del($rid) {
         \User::checkright(100)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
         if(!\Db::simplecall("more.pocketdel", array(\User::uid(),$rid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         } 
     }
     public function stat() {
@@ -37,7 +37,7 @@ class pocket {
         if(!\Db::simplecall("more.pocketstat", array(\User::uid()))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         } 
     }
     public function plist($filterinfo="",$page=1,$length=6) {
@@ -45,7 +45,7 @@ class pocket {
         if(!\Db::simplecall("more.pocketlist", array(\User::uid(),$filterinfo,$page,$length))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         } 
     }
     public function query($rid) {
@@ -53,7 +53,7 @@ class pocket {
         if(!\Db::simplecall("more.pocketquery", array(\User::uid(),$rid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         } 
     }
     public function borrow($receiver,$contract,$address,$btime,$rtime) {
@@ -61,7 +61,7 @@ class pocket {
         if(!\Db::simplecall("more.pocketborrow", array(\User::uid(),$receiver,$contract,$address,$btime,$rtime))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         } 
     }
     public function delivered($uid,$rid) {
@@ -69,7 +69,7 @@ class pocket {
         if(!\Db::simplecall("more.pocketdelivered", array($uid,$rid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
     public function preturn($uid,$rid) {
@@ -77,7 +77,7 @@ class pocket {
         if(!\Db::simplecall("more.pocketreturn", array($uid,$rid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 }

@@ -14,7 +14,7 @@ class product {
         if(!\Db::simplecall("more.productstatupd", array($pid,$oldstat,$newstat,$qty, \User::uid()))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }   
     }
     public function stat($filterinfo=""){
@@ -46,10 +46,10 @@ class product {
         if(!\Db::simplecall("more.productstat", array($filterstr))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }    
     }
-    public function query($filterinfo,$orderinfo,$page=1,$length=2) {
+    public function query($filterinfo="{}",$orderinfo="",$page=1,$length=2) {
         if(is_string($filterinfo)){
             try {
                 $filterinfo= json_decode($filterinfo);
@@ -79,7 +79,7 @@ class product {
         if(!\Db::simplecall("more.productquery", array($filterstr,$orderstr,$page,$length))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
     /**
@@ -124,7 +124,7 @@ class product {
         if(!\Db::simplecall("more.productadd", array($content,"_a"))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok('添加产品成功！');
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -177,7 +177,7 @@ class product {
         if(!\Db::simplecall("more.productupd", array($pid,$content))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok('修改产品成功！');
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -189,7 +189,7 @@ class product {
         if(!\Db::simplecall("more.productdel", array($pid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok('删除产品成功！');
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 

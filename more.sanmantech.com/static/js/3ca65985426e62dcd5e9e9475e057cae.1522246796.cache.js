@@ -12217,7 +12217,7 @@ God.ajax._setup={type:'POST',url:'',async:true,success:sm.ajax.callback_success,
 }
 God.coms("datasource").extendproto({//存储所有该页面用于交换的数据
 extend:function(newobj){
-	if((typeof newobj)=="undefined") {return this;}
+	if(!$$.isobj(newobj)) {return this;}
 	if((typeof newobj.title)!=="undefined"){document.title=newobj.title}
 	$$.merge.apply(this,[newobj]);return this;
 },

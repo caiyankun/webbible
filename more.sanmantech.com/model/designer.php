@@ -48,7 +48,7 @@ class designer {
         if(!\Db::simplecall("more.designercreatework", array(\User::uid(),$productinfo))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok('添加作品成功！');
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -60,7 +60,7 @@ class designer {
         if(!\Db::simplecall("more.designerdelwork", array(\User::uid(),$pid))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok('删除作品成功！');
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -117,7 +117,7 @@ class designer {
         if(!\Db::simplecall("more.designerupdwork", array(\User::uid(),$pid,$content))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok('修改作品成功！');
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -129,7 +129,7 @@ class designer {
         if(!\Db::simplecall("more.designerquerywork", array(\User::uid()))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 }

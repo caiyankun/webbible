@@ -126,7 +126,10 @@ class Db {
             return $valueiffail;
         }
     }
-
+    public static function cubedatawithtitle($valueiffail=[[[]]]){
+        
+        return array_merge(self::cubedata($valueiffail), [[self::$datatitle]]);
+    }
 /* 
      * 获取连接实例，如果没有初始化的话进行初始化
      * @param 

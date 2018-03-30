@@ -21,7 +21,7 @@ class useraction
         if(!\Db::simplecall("more.useractionadd", array(\User::uid(),$action,$target))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::tabledata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 
@@ -35,7 +35,7 @@ class useraction
         if(!\Db::simplecall("more.useractionquery", array(\User::uid(),$action))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         }else{
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
     public function stat(){
@@ -44,7 +44,7 @@ class useraction
         if(!\Db::simplecall("more.useractionstat", array(\User::uid()))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         }else{
-            \Response::returntaskok(\Db::cubedata());
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
     public function del($action,$target){
@@ -52,7 +52,7 @@ class useraction
         if(!\Db::simplecall("more.useractiondel", array(\User::uid(),$action,$target))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         }else{
-            \Response::returntaskok("取消成功！");
+            \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
 }
