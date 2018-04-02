@@ -1,228 +1,93 @@
-!window.onerror&&(window.onerror=function(m,u,l){alert ('【JS加载出错】:\r\n【文件】:'+u+"\r\n【行】:"+l+"\r\n【信息】:"+m);});
+!window.onerror&&(window.onerror=function(m,u,l){alert ('神码加载出错:\r\n【文件】:'+u+"\r\n【行】:"+l+"\r\n【信息】:"+m);});
 
-//God.js Core 开始
+//---------------God.js Core 开始：sm及原型定义，链式操作--------------------
+
 if (true){
+    
+//原型定义-开始:--sm及God原型定义，链式操作
+if(true){
 if (typeof God==='undefined') {God={};}//定义分开是为了方便弱化对js文件的加载顺序的要求
 if (typeof sm==='undefined') { //减少内存消耗以及区隔不同组件的自定义值的关联
     sm=function(comname){
-        if(arguments[0]){
-            return God.coms(comname);
-        } else {
-            return sm;
-        }
+        this.__proto__=God;
+        this.whoami=comname;
     };
     sm.__proto__=God;
-    sm.whoami='sm';
+    sm.whoami="sm";
 }
 God.whoami='God';
 God.sm=sm;//完善链式操作-自身
-God.$=jQuery;//完善链式操作-自身与Jquery
 God.run=function(func){func.apply(this);return this;};//完善链式操作-自身与普通函数代码
+}
+//原型定义-结束:--sm及God原型定义，链式操作
 
-//组件机制
+//组件机制-开始：组件的定义，成员添加，定义快捷别名等
 if(true) {
-God.coms=function(comname){//简化组件的定义
+God.coms=function(comname){//简化组件的定义原型连链：sm.xx->God.xx->sm->God
     if (sm.hasOwnProperty(comname)){return sm[comname];}
     God[comname]={__proto__:sm,whoami:'God.'+comname};
     sm[comname]={__proto__:God[comname],whoami:'sm.'+comname};
-    God[comname].selector='div.'+comname;
-    God[comname].defaultselector='div.'+comname;
    return sm[comname];
 };
 God.define=function(func){func.apply(this);return this;};//简化组件成员添加 - 函数方式
 God.extend=function(newobj){$$.merge.apply(this,[newobj]);return this;};//简化组件成员添加-对象方式
 God.extendproto=function(newobj){$$.merge.apply(this.__proto__,[newobj]);return this;};//简化组件成员添加-对象方式
-God.defaultselector=document;//似乎无意义
-God.selector=document;//似乎无意义
 God.alias=function(newname){window[newname]=this;return this;};//为组件生成别名，简化组件的调用方式
-__autoinit__={};
-__autoinited__={};
-God.autoinit=function(funcname,func){
-    __autoinit__[funcname]=func;
-    if(arguments.length>0){return this;}
-    for (f in __autoinit__){
-        if(typeof __autoinit__[f]=="function"){
-            //alert("找到一个函数：\n\r"+__autoinit__[f]);
-            if(__autoinited__.hasOwnProperty(f)){
-                
-            } else {
-                __autoinit__[f]();
-                __autoinited__[f]=__autoinit__[f];
-            }
-        }
+}
+//组件机制-结束：组件的定义，成员添加，定义快捷别名等
+
+//组件的公共方法：设置，显示自己，程序执行错误状态，回调
+if(true){
+God.setup=function (os){
+    if(!this.hasOwnProperty("_setup")){this._setup={};}
+    if(arguments.length<1){
+        return this._setup;
+    } else {
+        $$.merge.apply(this._setup,[os]);//为了考虑链式操作，这样好不？
+        return this;
     }
-    __autoinit__={};
+};
+God.showme=function(){alert(this.whoami);return this;}
+God.clearstat=function(){this._stat={error:0,info:""};return this;}
+God.error=function(e,i){
+    if($$.isfunction(e)){
+        if(this._error!==0){
+            e.apply(this,[this._stat.error,this._stat.info]);
+        }
+    } else {
+        this._stat.error=e;this._stat.info=i;
+    }
     return this;
 };
+God.taskfail=function(cb){return this.error.apply(this,arguments);}
+God.success=function(cb){
+    if($$.isfunction(e)){
+        if(this._error==0){
+            cb.apply(this);
+        }
+    } 
+    return this;
+}
+God.taskok=function(cb){return this.success.apply(this,arguments);}
+God.new=function(){
+    var newist=new function(){};
+    newist.__proto__=this.__proto__;
+    return newist;
+}//创建一个新实例
+}
+//组件的公共方法：设置，显示自己，程序执行错误状态，回调
 
 }
-//简单的配置信息存取机制
-God.setup=function (os){$$.merge.apply(this._setup,[os]);return this;};
-God._setup={};
-//基本的执行状态控制机制-开始
-//作用：1，错误检查调试协助；2，日志记录；3，链式操作的执行成败分支
-if(true) {
-God._info="";
-God._error=0;
-God._taskok=false;
-God._taskresult="";
-God._taskstat={};
-God._data=null;
-God._log=[];
-God.clearstat=function(){
-    this._error=0;
-    this._data=null;
-    this._info="";
-    this._taskok=false;
-    this._taskresult="";
-    this._taskstat={code:0,info:"未初始化！"};
-    return this;
-}
-God._datarules={};
-God.datarules=function(rules){
-	if(arguments[0]){
-		this._datarules=rules;
-	} 
-	return this;
-}
-God.validdata=function(data,rules){
-	!this.hasOwnProperty('_datarules')&&(this._datarules={});
-	!arguments[0]&&(data=this._data);
-	!arguments[1]&&(rules=this._datarules);
-	var me=this;
-	$.each(data,function(k,v){
-		if(typeof rules[k]!=="undefined"){
-			if($$.isfunction(rules[k])){
-				if(!rules[k].apply(me,[v,data])){
-					me.logerror(1,k+"不符合验证规则！");
-				}
-			} else {
-				if(!v.match(rules[k])){
-					me.logerror(1,k+"不符合验证规则！");
-				}
-			}
-		}
-	});
-	return this;
-}
-God.error=function (func,args){
-        if(this._error>0) {
-            return func.apply(this,[this._error,this._info,args]);
-        }
-    return this;
-}
-God.logerror=function(errcode,info){
-	(!this.hasOwnProperty("_error"))&&(this._error=0);
-        (!this.hasOwnProperty("_info"))&&(this._info="");
-        this._error=this._error+errcode;
-        this._info=this._info+info;
-        this.log("Error Occur:code-"+errcode+";info-"+info);
-        return this;
-}
 
-God.success=function (func,args){
-        if(this._error==0) {
-            return func.apply(this,[this._data,this._info,args]);
-        }
-     return this;    
-}
-God.logsuccess=function(rsdata,info){
-	(!this.hasOwnProperty("_error"))&&(this._error=0);
-        (!this.hasOwnProperty("_info"))&&(this._info="");
-        (!this.hasOwnProperty("_data"))&&(this._data=null);
-        this._error=0;
-        this._info=info;
-        this._data=rsdata;
-        this.log("success:info-"+info);
-        return this;
-}
-God.logtaskok=function(trs,tstat){
-    this._taskok=true;
-    this._taskresult=trs;
-    this._taskstat=tstat;
-    return this;
-}
-God.logtaskfail=function(trs,tstat){
-    this._taskok=false;
-    this._taskresult=trs;
-    this._taskstat=tstat;    
-    return this;
-}
-God.taskok=function (func,args){
-    if(this._taskok) {
-        return func.apply(this,[this._taskresult,this._taskstat,args]);
-    }
-     return this;    
-}
-God.taskfail=function (func,args){
-    if(!this._taskok) {
-        return func.apply(this,[this._taskresult,this._taskstat,args]);
-    }
-     return this;    
-}
-God.log=function(logtxt){  //日志不能清除
-    (!this.hasOwnProperty("_log"))&&(this._log=[]);
-    this._log.push(this.whoami+':'+logtxt);
-    return this;
-}
-God.debug=function(c){
-    c=arguments[0]?c:'<br>';
-    //$('html').html("调试信息:");
-    $('html').html(this._log.join(c));
-    return this;
-}
-God.showme=function(){
-    alert(this.whoami);
-    alert(this.selector);
-}
-God.show=function(){
-    alert(this.whoami);
-    alert(this.jq().outerhtml());
-    return this;
-}
-God.selfcheck=function(){
-    this.log('Start selfcheck:');
-    this.log('sm.god.js已经加载!');
-    //检查是否加载了jquery和JSON2
-    if(typeof jQuery !=='undefined') {this.log('jQuery已经加载!');} else {this.log('jQuery没有加载xxxxxxxxx!');}
-    if(typeof JSON !=='undefined') {this.log('JSON已经加载!');} else {this.log('JSON没有加载xxxxxxxxx!');}
-    //检查God加载了哪些组件
-    for (x in God){
-    	if(Object.prototype.toString.call(God[x])=='[object Object]') {
-        	this.log(Object.prototype.toString.call(God[x])+":"+x);
-        }
-    }
-    return this;
-}
-}
-//全局函数定义
+//----------------God.js Core 结束：sm及原型定义，链式操作--------------------
+
+
+//-----------------------------全局函数定义:数据类型判断，数据合并处理等--------------
+
+if (true){
+
 if(true) {
 God.func={};
-__delaycalls__=[];
-God.func.delaycall=function(func){
-    funcname=$$.rndid("delaycall");
-    if(typeof __delaycalls__==="undefined"){__delaycalls__=[];}
-    __delaycalls__[funcname]=func;
-    //alert(funcname);
-    //alert(func);
-    //alert(__delaycalls__[funcname]);
-    
-    $(this).attr("delaycall",funcname);
-    return this;
-};
-God.func.dodelaycall=function(){
-    $('[delaycall]').each(function(){
-        funcname=$(this).attr('delaycall');
-        $(this).removeAttr('delaycall');
-        me=$(this);
-        //alert(funcname);
-        //alert(JSON.stringify(__delaycalls__));
-        if(__delaycalls__&&__delaycalls__[funcname]){
-            __delaycalls__[funcname].apply(me,arguments);
-        }
-    });
-    return this;
-};
 God.func.isempty=function(varname){return !varname;}
 God.func.isnull=function(varname){return  (!varname&& typeof(varname)!="undefined" && varname!=0);}
 God.func.isobj=function(varname){return Object.prototype.toString.call(varname) === '[object Object]'; }
@@ -238,453 +103,576 @@ God.func.maxim=function(varname,valifna){
 		return valifna;
 	}
 }
-God.func._htmlvar_getvalue=function(oj,varvalue,valueifnoexist){
-    var rsvalue=valueifnoexist;
-    $(oj).each(function(){
-        if(varvalue.match(/^\=/)) {
-            rsvalue=varvalue.replace(/^\=/,"");
-        } else if(varvalue=="text"){
-            rsvalue=$(this).text();
-        }  else if(varvalue=="value"){
-            rsvalue=$(this).val();
-        }  else if(varvalue=="html"){
-            rsvalue=$(this).html();
-        } else if(varvalue=="checked"){
-            rsvalue=$(this).is(":checked");
-        } else {
-            rsvalue=$(this).prop(varvalue);
-            if(typeof rsvalue=="undefined"){rsvalue=$(this).attr(varvalue);}
-            if(typeof rsvalue=="undefined" || $$.isempty(rsvalue)){
-                rsvalue=valueifnoexist;
-            } else {
-                rsvalue=rsvalue;
-            }
-
-        } 
-        
-    })
-    return rsvalue;
-},//获取HTML变量值
-God.func.jqhtmlvar=function(varname){
-    return $("[varname='"+varname+"']");
-},//选定指定varname的元素
-God.func.htmlvar=function(varname,valueifnoexist){
-        var returnarr=false;
-        var rsvalue=valueifnoexist;
-        var rsarr=[];
-    $("[varname='"+varname+"']").each(function(){
-        varvalue=$(this).attr("varvalue");
-        varrefto=$(this).attr("varrefto");
-        if(typeof varrefto=="undefined" || $$.isempty(varrefto) || varrefto=="[]"){
-            rsvalue=God.func._htmlvar_getvalue(this,varvalue,null);
-        } else {
-            //如果varrefto不为空的话，优先使用varrefto
-            if(varrefto.match(/^\[.*\]$/)) {
-                returnarr=true;
-                varrefto=varrefto.replace(/^\[/,'');
-                varrefto=varrefto.replace(/\]$/,'');
-            } 
-            $(varrefto).each(function(){
-                rsarr.push(God.func._htmlvar_getvalue(this,varvalue,null));
-            });
-            rsvalue=returnarr?rsarr:(rsarr.length<1?null:rsarr.shift());
-        }
-    });
-    return rsvalue;
-},//获取HTML变量
-God.func.autominheighttowindow=function(selector){
-	!arguments[0]&&(selector=".automin-heighttowindow:last");
-    if($(selector).length<1){return this;}
-    /*
-    var s = ""; 
-    s += " 网页可见区域宽："+ document.body.clientWidth; 
-    s += " 网页可见区域高："+ document.body.clientHeight; 
-    s += " 网页可见区域宽："+ document.body.offsetWidth + " (包括边线和滚动条的宽)"; 
-    s += " 网页可见区域高："+ document.body.offsetHeight + " (包括边线的宽)"; 
-    s += " 网页正文全文宽："+ document.body.scrollWidth; 
-    s += " 网页正文全文高："+ document.body.scrollHeight; 
-    s += " 网页被卷去的高(ff)："+ document.body.scrollTop; 
-    s += " 网页被卷去的高(ie)："+ document.documentElement.scrollTop; 
-    s += " 网页被卷去的左："+ document.body.scrollLeft; 
-    s += " 网页正文部分上："+ window.screenTop; 
-    s += " 网页正文部分左："+ window.screenLeft; 
-    s += " 屏幕分辨率的高："+ window.screen.height; 
-    s += " 屏幕分辨率的宽："+ window.screen.width; 
-    s += " 屏幕可用工作区高度："+ window.screen.availHeight; 
-    s += " 屏幕可用工作区宽度："+ window.screen.availWidth; 
-    s += " 你的屏幕设置是 "+ window.screen.colorDepth +" 位彩色"; 
-    s += " 你的屏幕设置 "+ window.screen.deviceXDPI +" 像素/英寸"; 
-    */
-    //获取浏览器窗口高度(1)
-    var winHeight=0;
-    if (window.innerHeight)
-        winHeight = window.innerHeight;
-    else if ((document.body) && (document.body.clientHeight))
-        winHeight = document.body.clientHeight;
-    //通过深入Document内部对body进行检测，获取浏览器窗口高度
-    if (document.documentElement && document.documentElement.clientHeight)
-        winHeight = document.documentElement.clientHeight;
-    //获取网页正文全高（2）
-    //ch=document.body.scrollHeight
-    ch=document.body.offsetHeight;
-    //alert(winHeight);
-    //alert(ch);
-
-    //设置所有含有".automin-heighttowindow"的元素设置min-height来撑满到窗口高度
-    var adjust=0;
-    var jqlast=$(".automin-heightlast");
-    if(jqlast.length>0){
-    	adjust=jqlast.offset().top+jqlast.height();
-    }
-    //alert(winHeight);
-    //alert(adjust);
-    $(selector).css("min-height",$(selector).height()+winHeight-adjust-20);
-    return this;
-}
-God.func.htmlvars=function(filter){
-	!arguments[0]&&(filter="");
-	rsobj={};
-	$(filter+"[varname]").each(function(){
-		varname=$(this).attr("varname");
-		rsobj[varname]=God.func.htmlvar(varname);
-	});
-	return rsobj;
-}
-
 God.func.hasmaxim=function(){return (typeof (maxim)!='undefined') && $$.isobj(maxim);}//是否存在maxim
 God.func.merge=function(o){for (x in o) {this[x]=o[x];} return this;},//把给定的对象的全部属性融合到自身中
 God.func.safemerge=function(o){for (x in o) {this.hasOwnProperty(x)&&(this[x]=o[x]);} return this;}//把给定的对象中与自身相交的属性值更新到自身中
 //God.func.isarray=function(obj){return obj&& typeof obj==='object' && Array === obj.constructor;}
 God.func.rndid=function(prix){prix=arguments[0]?(arguments[0]+"_"):"";return prix+parseInt(1000000*Math.random());}
-God.func.checkurl=function(ou){
-  var bp=$$.maxim('htmlrootpath','/');
-  var tp=arguments[0]?ou:'/';
-  return tp.replace(/^\//,bp);
-};
-God.func.adjusthtmlurl=function(){
-    $("[src]").each(function(){
-        var oldurl=$(this).attr('src');
-        $(this).attr('src',$$.checkurl(oldurl));
-    });
-    $("[href]").each(function(){
-        var oldurl=$(this).attr('href');
-        $(this).attr('href',$$.checkurl(oldurl));
-    });
-    return this;    
-};
-God.func.copyobj=function(obj){
-    //浅拷贝
-    //var rs={};
-    //for (x in obj) {rs[x]=obj[x];} 
-  
-    //$.extend( [deep ], target, object1 [, objectN ] )
-    return $.extend(true,{},obj);
-};
-$$=God.func;//方便对全局函数的引用
+window.$$=God.$$=God.func;//方便对全局函数的引用
+(function () {
+   var ie = !!(window.attachEvent && !window.opera);
+   var wk = /webkit\/(\d+)/i.test(navigator.userAgent) && (RegExp.$1 < 525);
+   var fn = [];
+   var run = function () { for (var i = 0; i < fn.length; i++) fn[i](); };
+   var d = document;
+   d.ready = function (f) {
+      if (!ie && !wk && d.addEventListener)
+      return d.addEventListener('DOMContentLoaded', f, false);
+      if (fn.push(f) > 1) return;
+      if (ie)
+         (function () {
+            try { d.documentElement.doScroll('left'); run(); }
+            catch (err) { setTimeout(arguments.callee, 0); }
+         })();
+      else if (wk)
+      var t = setInterval(function () {
+         if (/^(loaded|complete)$/.test(d.readyState))
+         clearInterval(t), run();
+      }, 0);
+   };
+})();//增加document.ready功能
 }
 
 }
-//God.js Core 结束
 
+//-----------------------------全局函数定义:数据类型判断，数据合并处理等---------------
 
+//-----------------------基础组件定义:-----------------------------------------------
 
-//扩充Jquery-开始
 if(true){
-
-jQuery.fn.extend({//扩充Jquery开始
-sm:sm,//完善与sm的链式操作
-outerhtml:function(){
-    if(this.length){
-        return this.eq(0).prop("outerHTML");   
-    }
-    return "";
-},//获取当前节点的outerhtml
-innertext:function(txt){
-        if(!arguments[0]){
-        	var ta=$(this).clone();
-        	ta.children().remove();
-        	return ta.text();
-        } else {
-            if(this.children().length){
-                this.html(this.children().wrapAll("<div></div>").parent().html()+txt);
-            } else {
-                return this.text(txt);
-            }
-        }
-        return this;
-},//这个函数的目的是在设置节点下面的文本时而不删除子节点
-showme:function(){
-	rs="Total length:"+this.length+"\r\n";
-	
-	this.each(function(i,k){
-		rs=rs+"\r\n"+i+":\r\n"+$(this).outerhtml();
-	});
-	alert(rs);
-	return this;
-},//打印出当前集合中的outerhtml
-safedo:function(f){
-    paras=[];
-    $.each(arguments,function(i,v){
-        if(i>0){paras.push(v)}
-    });
-    if(this.length){
-        f.apply(this,paras);
+window.varfuns=[];//{varstr:[{node:node,attr:attr,updatecb:updatecb},{node:node,attr:attr,updatecb:updatecb}]}
+window.data={};
+    
+God.coms("document").extendproto({//目的是定义页面跳转，页面信息，用户界面刷新等一系列操作
+ready:function(){document.ready.apply(this,arguments);return this;},//请注意This指针无法传递到函数内部
+reload:function(newurl){
+    if(arguments[0]) {
+        window.location.href=newurl;
+    } else {
+    	location.reload();
     }
     return this;
-},//当集合不为空的时候才执行
-naming:function(id){
-	i=0;
-	this.each(function(){
-		$(this).attr("id",i>0?(id+"_"+i):id);
-		i=i+1;
-	});
+},
+open:function(newurl){
+    window.open(newurl);
+    return this;
+},
+href:function(){
+    return window.location.href;
+},
+});
+God.coms("ajax").extend({
+    _setup:{
+        data:{},
+        type:"POST",
+        async:true,
+        url:"#",
+    },   
+}).extendproto({
+type:function(newtype){this.setup({type:newtype});return this;},
+data:function(newdata){this.setup({data:newdata});return this;},
+url:function(newurl){this.setup({url:newurl});return this;},
+async:function(b){this.setup({async:b});return this;},
+post:function(data,url,async){
+    arguments.length>2&&(this.async(async));
+    arguments.length>1&&(this.url(url));
+    arguments.length>0&&(this.data(data));
+    
+    return this.type("POST").doxhr();
+},
+doxhr:function(paraobj){
+    var me=this;
+    const promise = new Promise(function(resolve, reject) {
+        //请求的5个阶段，对应readyState的值
+        //0: 未初始化，send方法未调用；
+        //1: 正在发送请求，send方法已调用；
+        //2: 请求发送完毕，send方法执行完毕；
+        //3: 正在解析响应内容；
+        //4: 响应内容解析完毕；
+        me.setup(paraobj);
+        var data = me.setup().data;
+        var xhr = new XMLHttpRequest();        //创建一个ajax对象
+        xhr.onreadystatechange = function(event){    //对ajax对象进行监听
+            if(xhr.readyState == 4){    //4表示解析完毕
+                if(xhr.status == 200){    //200为正常返回
+                    return resolve(xhr.responseText);
+                } else {
+                    me.error(1,xhr.status);
+                    return reject(xhr.status);
+                }
+            }
+        };
+        xhr.open(me.setup().type,me.setup().url,me.setup().async);    //建立连接，参数一：发送方式，二：请求地址，三：是否异步，true为异步
+        xhr.setRequestHeader('Content-type','application/x-www-form-urlencoded');    //可有可无
+        xhr.send(data); 
+    });
+    return promise;
+},
+
+});
+God.coms("view").extendproto({//对话框
+
+
+comget:function (com,dataspace="",deepinit=0){
+    (dataspace=="")&&(dataspace="common");
+    var $el = com.nodeType == 1 ? com : document.querySelector(com);
+    this.elget($el,1,1,dataspace,deepinit);
+    return this;
+},//对某个组件实行全局get
+comset:function (com,dataspace="",deepinit=0){
+    (dataspace=="")&&(dataspace="common");
+    var $el = com.nodeType == 1 ? com : document.querySelector(com);
+    this.elset($el,1,1,dataspace,deepinit);
+    return this;
+},//对某个组件实行全局set
+init:function (com,deepinit=1){
+    
+    //首先检查当前元素是不是组件，不是的话就拒绝初始化
+    var $el = com.nodeType == 1 ? com : document.querySelector(com);
+    if(!this.checkiscom($el)){return this;}
+    //如果是组件的话，先确定当前组件的数据空间在哪里
+    var dataspace=$el.getAttribute("com:dataspace");
+    dataspace||(dataspace="common");
+    //console.log("开始初始化一个组件："+dataspace);
+    this.comset($el,dataspace,deepinit);
+    this.comget($el,dataspace,deepinit);
+    //this.watchdata(window.data);
+    this.watchdata(sm.view.data,dataspace);
+    return this;
+},//View组件初始化，搜索全部的View组件并逐一进行一遍Get，Set然后对变量进行watch
+checkiscom:function(com){
+    var $el = com.nodeType == 1 ? com : document.querySelector(com);
+    var nodeAttrs = $el.attributes;
+    var iscom=false;
+    [].slice.call(nodeAttrs).forEach(function(attr) {
+        var attrName = attr.name;
+        var regisget = /^com\:/;
+        if (regisget.test(attrName)) {iscom=true;}
+    });
+    return iscom;
+},
+elget:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0){
+    (dataspace=="")&&(dataspace="common");
+    //先判断当前节点是否是可操作的节点
+    if(el.nodeType !== 1){
         return this;
-},//这个函数的作用是给当前集合按顺序打上一个id标签
-additems:function(type,items){
-        if($$.isarray(type)){
-            items=type;
-            type="append";
+    }
+    //如果当前节点是一个com，那么就对当前数据空间添加对该节点的关注
+    if(this.checkiscom(el)){
+        var relateddataspaces=el.getAttribute("relateddataspaces");
+        if(relateddataspaces){
+            if(relateddataspaces.indexOf(dataspace+",")<0){
+                //console.log("再次添加关注该DOM的命名空间:"+relateddataspaces+dataspace+",");
+                el.setAttribute("relateddataspaces",relateddataspaces+dataspace+",");
+            }
+        } else {
+            //console.log("首次添加关注该DOM的命名空间:"+dataspace);
+            el.setAttribute("relateddataspaces",dataspace+",");
         }
-        me=this;
-        $.each(items,function(i,k){
-            hascontainer=false;//这里的$(k)是要添加的东西
-            $(k).filter("[filler]").each(function(i,v){
-                container=$(this).attr("filler");
-                rs=me.filter("[container='"+container+"']")[type]($(this));
-                rs.length&&(hascontainer=true);
-                rs=me.find("[container='"+container+"']")[type]($(this));
-                rs.length&&(hascontainer=true);
-            });
-            if(!hascontainer){
-            	me=me[type]($(k));
+        
+    }
+    //console.log("elget:"+el.innerHTML);
+    me=this;
+    //解析属性并将其指定的值赋值到变量
+    var nodeAttrs = el.attributes;
+    [].slice.call(nodeAttrs).forEach(function(attr) {
+        var attrName = attr.name;
+        var regisget = /(^|\:)get\:/;
+        if (regisget.test(attrName)) {
+            var varname = attr.value;
+            
+            attrName=attrName.replace(/^(get\:)|(set\:)/,"").replace(/^(get\:)|(set\:)/,"");
+            var realattr=attrName.split("=")[0];
+            
+            //这里要判断一下varname是不是多个！
+            //这里要判断一下realattr是不是多个！如果varname是表达式，那么不予执行
+            if(/^\s*[_\.a-zA-Z0-9\,]*$/.test(varname)){
+                var varnames=varname.split(',');
+                var pureattr=realattr.split('@')[0].split('-')[0];//获取属性值到变量时只允许一对多
+                //console.log(realattr+"-elget:"+varname+"-dataspace:"+dataspace+"-value:"+me.getattrvalue(el,realattr));
+                varnames.forEach(function(varname){
+                    me.setvar(varname,me.getattrvalue(el,pureattr),dataspace);
+                });
+                var getevents=realattr.substr(realattr.split('@')[0].length+1);
+                //判断是否绑定自动更新
+                getevents||(getevents="input");
+                getevents.split("@").forEach(function(ename){
+                    autoupdate&&(me.watchdom(el,dataspace,ename));
+                });
+            }
+            
+        }
+    });
+    //Get模式中不会操作其文本子节点，因为文本子节点一般只是用来set的
+    //检查是否需要递归子节点
+    if(deep){
+        childNodes = el.childNodes,
+        [].slice.call(childNodes).forEach(function(node) {
+            if((node.nodeType == 1)&&me.checkiscom(node)){
+                me.elget(node,0,1,dataspace);//如果子组件是一个com，就获取这个节点的信息后不深入递归
+                if(deepinit){
+                    me.init(node,deepinit);//如果需要对子组件进行递归初始化就进行递归初始化
+                }
+            } else {
+                me.elget(node,deep,autoupdate,dataspace,deepinit);
+            }
+            
+        });
+    }
+    return this;
+},//对node进行解析看有哪些属性与变量关联
+elset:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0){
+    (dataspace=="")&&(dataspace="common");
+    //先判断当前节点是否是可操作的节点
+    me=this;
+    if(el.nodeType == 1){
+        //解析属性并将其指定的值赋值到变量
+        var nodeAttrs = el.attributes;
+        [].slice.call(nodeAttrs).forEach(function(attr) {
+            var attrName = attr.name;
+            var regisset = /(^|\:)set\:/;
+            if (regisset.test(attrName)) {
+                //找到了一个关联属性，开始执行set动作
+                //这里判断是否有多绑定的现象
+                var varname = attr.value;//1，简单变量；2，字符串模版；3，表达式
+                attrName=attrName.replace(/^(get\:)|(set\:)/,"").replace(/^(get\:)|(set\:)/,"");
+                var realattr=attrName.split("=")[0].split("@")[0];//attr可能有多个，由-分开，下面请注意
+                
+                
+                if(/^\s*[_\.a-zA-Z0-9\,]*$/.test(varname)){//简单变量或变量列表，只有第一个变量绑定，理论上不允许多个变量同时给同一个元素赋值
+                    varname=varname.split(",")[0];//从变量到属性设置时，只允许一个对多个
+                    var realattrs=realattr.split("-");
+                    realattrs.forEach(function(realattr){
+                        me.setattrvalue(el,realattr,me.getvar(varname,dataspace));
+                    });
+                    //console.log(realattr+"-elset:"+varname+"-dataspace:"+dataspace+"-value:"+me.getvar(varname,dataspace));
+                    //判断是否要给当前变量增加跟随变量更新后的自动更新
+                    autoupdate&&(me.varfunsadd(varname,el,dataspace));
+                } else {
+                    if(/^\(.*\)$/.test(varname)){//如果是显式表达式的话，进行一次转换，与模版替换一样统一进行处理
+                        varname="{{"+varname+"}}";
+                    }
+                    var varvalue=varname.replace(/\{\{(.*?)\}\}/g,function(t,exp){
+                        //如果是隐式单变量或者单函数，加上this指针
+                        if(/(^[_\.a-zA-Z0-9]*$|^[_\.a-zA-Z0-9]+\(.*\)$)/.test(exp)){
+                            exp="$"+exp;
+                        }
+                        //替换变量，并且添加变量的关联
+                        var tidyexp=exp.replace(/(^|[^\\])\s*\$([_\.a-zA-Z0-9]*)/g,function(t,v0,v){
+                            //找到一个变量
+                            autoupdate&&(me.varfunsadd(v,el,dataspace));
+                            return v0+"this."+v;
+                        });
+                        //替换函数
+                        tidyexp=tidyexp.replace(/(^|[^\\])@/g,function(t,v){return v+"this.";});
+                        
+                        var evalstr="(function(){ return "+tidyexp+";}).apply(sm.view.data."+dataspace+")";
+                        console.log(evalstr);
+                        var rsvalue="";
+                            try{
+                                rsvalue=eval(evalstr);
+                            } catch (ex) {
+
+                            }
+                        
+                        return rsvalue;
+                    });
+                    me.setattrvalue(el,realattr,varvalue);
+                } 
+                
             }
         });
-    return this;
-},//这个函数的目的是想把关键字中container和filler匹配的上的才append进来，不匹配的自动忽略
-addto:function(selector,type){
-    $(selector).additems(type,[this]);
-    return this;
-},//和additems相同，调用者不同
-//定义鼠标右键方法，接收一个函数参数   
-rightclick:function(fn){  
-    //调用这个方法后将禁止系统的右键菜单   
-    $(this).bind('contextmenu',function(e){  
-        return false;  
-    });   
-    //为这个对象绑定鼠标释放事件   
-    $(this).mouseup(function(e){  
-        //如果按下的是右键，则执行函数   
-        if(3 == e.which){  
-            fn(e);  
-        }  
-    });   
-    return this;
-},
-stopcontextmenu:function(fn){  
-    //禁用整个文档的邮件菜单  
-    document.oncontextmenu = function() {
-        return false;
-    } 
-    return this;
-},
-
-});//扩充Jquery结束
-
-}
-//扩充Jquery-结束
-
-
-//数据交换组件
-if(God.coms("ajax")){
-
- 
-God.ajax._ajaxing=false;
-God.ajax._silence=false;
-God.ajax._usercallbackfunc={success:[],error:[],complete:[],taskok:[],taskfail:[]};
-God.ajax.ajaxing=function(){
-	if(!this._setup.async){
-		this._ajaxing=false;
-	} 
-	return this._ajaxing;
-}
-God.ajax.silence=function(){this._silence=true;return this;};
-God.ajax.url=function (newurl){this._setup.url=newurl;return this;}
-God.ajax.async=function (asyncv){this._setup.async=asyncv;return this;}
-
-God.ajax.clearusercallback=function(){this._usercallbackfunc={success:[],error:[],complete:[],taskok:[],taskfail:[]};return this;}
-God.ajax.addusercallback=function(type,cb){this._usercallbackfunc[type]=cb;return this;}
-God.ajax.callback_beforeSend=function (xhr){
-	//alert("进入到before");
-    if(this._silence){return this;}
-    async=this._setup.async?"异步":"同步";
-    sm.dialog.show("Ajaxing","正在["+async+"]请求数据，请稍等....",{});
-    //alert(xhr.readyState);
-    //alert("结束before");
-    return this;
-}
-God.ajax.callback_success=function (data,stat,xhr){
-	//alert("执行成功了吗？");
-    sm.datasource.extend({lastrawresponse:data});
-    //alert("执行成功了");
-    //alert(this._usercallbackfunc["success"].length);
-    //alert(this._usercallbackfunc["success"][0]);
-    while (this._usercallbackfunc["success"].length){
-        this._usercallbackfunc["success"].shift()(data,stat,xhr);//执行
-    }
-    this.logsuccess(data,stat);
-    try {
-       rsobj=JSON.parse(data);
-    } catch(err) {
-       //如果返回的值不是有效的JSON格式，视为Ajax Success，但是属于TaskFail
-        this.logtaskfail(data,{code:-2,info:"返回非JSON格式"});
-        while (this._usercallbackfunc["taskfail"].length){
-            this._usercallbackfunc["taskfail"].shift()(data,{code:-2,info:"返回非JSON格式"});//执行
-        }
-       return this;
-    }
-    //只要返回的是对象，就直接加到datasource中
-    sm.datasource.extend(rsobj._taskresult);
-    if($$.isobj(rsobj)&&(typeof rsobj._taskstat!=="undefined")&&(rsobj._taskstat.code!==0)){
-        this.logtaskfail(($$.isobj(rsobj._taskresult)||$$.isarray(rsobj._taskresult))?JSON.stringify(rsobj._taskresult):rsobj._taskresult,rsobj._taskstat);
-        //交互成功，但是服务器端判定执行任务不成功！交互成功的前提是包含_taskstat和result两个属性，并且_taskstat中含有code和info两个属性，result必须是数组
-        while (this._usercallbackfunc["taskfail"].length){
-            this._usercallbackfunc["taskfail"].shift()(($$.isobj(rsobj._taskresult)||$$.isarray(rsobj._taskresult))?JSON.stringify(rsobj._taskresult):rsobj._taskresult,rsobj._taskstat);//执行
-        }
-        return this;
-    } else {
-        if(!$$.isobj(rsobj)&&(typeof rsobj._taskstat=="undefined")){
-            //交互成功，但是返回的格式不符合百步规则
-            this.logtaskfail(data,{code:-3,info:"返回的JSON不符合百步规则！"});
-            while (this._usercallbackfunc["taskfail"].length){
-                this._usercallbackfunc["taskfail"].shift()(data,{code:-3,info:"返回的JSON不符合百步规则！"});//执行
+        //set模式中还要操作其文本子节点，因为文本子节点一般只是用来set的
+        //检查你是不是改了一个com节点，如果是，则触发全部关联的getter读取一下
+        if(me.checkiscom(el)){
+            var relateddataspaces=el.getAttribute("relateddataspaces");
+            if(relateddataspaces){
+                //console.log("开始遍历关联的数据空间:"+relateddataspaces);
+                relateddataspaces.split(",").forEach(function(curdataspace){
+                    //console.log(curdataspace);
+                    if(curdataspace!==""){
+                        //console.log("设定了一个com的属性，触发关联数据空间的更新："+curdataspace);
+                        me.elget(el,0,0,curdataspace);
+                    }
+                });
             }
-            return this;
         }
-        //严格成功！如果结果是对象，就再更新到datasource中
-        this.logtaskok(rsobj._taskresult,rsobj._taskstat);
-        $$.isobj(rsobj._taskresult)&&sm.datasource.extend(rsobj._taskresult);
-        while (this._usercallbackfunc["taskok"].length){
-            this._usercallbackfunc["taskok"].shift()(rsobj._taskresult,rsobj._taskstat);//执行
+        //检查是否需要递归子节点
+        if(deep){
+            childNodes = el.childNodes,
+            [].slice.call(childNodes).forEach(function(node) {
+                if((node.nodeType==1)&&me.checkiscom(node)){
+                    me.elset(node,0,1,dataspace);//如果子节点是组件，就只执行一次，不递归
+                } else  {
+                    me.elset(node,1,autoupdate,dataspace,deepinit);//如果子节点不是组件，就递归
+                }
+            });        
+        }  
+    } else if (el.nodeType==3) {
+        //先不实现吧
+        if(el.parentNode&&el.parentNode.getAttribute('origintext')){
+            var origintext=el.parentNode.getAttribute('origintext');
+        } else {
+            var origintext=el.textContent;
+            el.parentNode.setAttribute('origintext',origintext);
         }
-    }
-    return this;
-}
-God.ajax.callback_error=function (xhr,stat,oerror){
-//alert("进入到error");
-    //alert(xhr.status);
-    if(xhr.status==200 && xhr.readyState==4){
-    	return sm.ajax.callback_success(xhr.responseText,stat,xhr);
+        var varpreg=/\{\{(.*?)\}\}/g;//如果有多个怎么办？
+        textstr=origintext;
+        /*
+        textstr=origintext.replace(varpreg,function(t,varname){
+            autoupdate&&(me.varfunsadd(varname,el,dataspace));//添加粉丝，先后关系不大吧？
+            return me.getvar(varname,dataspace);
+        });*/
+        
+                    textstr=origintext.replace(/\{\{(.*?)\}\}/g,function(t,exp){
+                        //如果是隐式单变量或者单函数，加上this指针
+                        if(/(^[_\.a-zA-Z0-9]*$|^[_\.a-zA-Z0-9]+\(.*\)$)/.test(exp)){
+                            exp="$"+exp;
+                        }
+                        //替换变量，并且添加变量的关联
+                        console.log("--------------------why---------------");
+                        var tidyexp=exp.replace(/(^|[^\\])\s*\$([_\.a-zA-Z0-9]*)/g,function(t,v0,v){
+                            //找到一个变量
+                            console.log("------------正则匹配了--------------");
+                            autoupdate&&(me.varfunsadd(v,el,dataspace));
+                            return v0+"this."+v;
+                        });
+                        console.log(tidyexp);
+                        console.log("------------结束--------------");
+                        //替换函数
+                        tidyexp=tidyexp.replace(/(^|[^\\])@/g,function(t,v){return v+"this.";});
+                        
+                        var evalstr="(function(){ return "+tidyexp+";}).apply(sm.view.data."+dataspace+")";
+                        console.log(evalstr);
+                        return eval(evalstr);
+                    });
+       
+        
+        
+        el.textContent=textstr;
+        
     } else {
-    	this.logerror(1,xhr.readyState+":"+stat+"Ajax 调用失败！");
-        this.logtaskfail(xhr.readyState+":"+stat+"Ajax 调用失败！",{code:-1,info:"Ajax执行失败！"});
-    }
-    while (this._usercallbackfunc["error"].length){
-        this._usercallbackfunc["error"].shift()(xhr,stat,oerror);//执行
-    }
-    while (this._usercallbackfunc["taskfail"].length){
-        this._usercallbackfunc["taskfail"].shift()(xhr.readyState+":"+stat+"Ajax 调用失败！",{code:-1,info:"Ajax执行失败！"});//执行
+
     }
     return this;
-}
-God.ajax._popshow=false;
-God.ajax.popshow=function(){this._popshow=true;return this;};
-God.ajax.callback_complete=function (xhr,stat){
-//alert("进入到complete");
-    async=sm.ajax._setup.async;
-    this._ajaxing=false;
-    if(!this._silence){
-        sm.dialog.close("div.auto.dialog:visible");
-    } 
-    //复位silence标志位
-    this._silence=false;
-    while (this._usercallbackfunc["complete"].length){
-        this._usercallbackfunc["complete"].shift()(xhr,stat);//执行
+},//对node进行解析看有哪些属性与变量关联
+getattrvalue:function (el,attr){
+    if(!el){return "";}
+    switch(attr){
+        case 'value':
+            return el.value;
+            break;
+        case 'display':
+            //console.log("查询状态呢:"+el.style.display);
+            if(el.style.display=='none'){return 0;}else{return 1;}//这里的值你无法实时获取，因为它没有input事件啊！
+            break;
+        case 'removewhen':
+            //无意义
+            break;
+        case '':
+            break;
+        default:
+            return el.getAttribute(attr);
     }
-    //alert(xhr.readyState);
-    //清空所有的回调函数，执行的顺序是success，error，complete？
-    this.clearusercallback();
-    return this;
-}
-
-
-God.ajax.post=function(data){
+    return el.getAttribute(attr);
+},//对识别出来的关联属性进行取值操作
+setattrvalue:function (el,attr,value){
+    if(!el) {return;}
+    switch(attr){
+        case 'value':
+            el.value=value;
+            break;
+        case 'display':
+            if(value){el.style.display='block';}else{el.style.display='none';}
+            break;
+        case 'removewhen':
+            //console.log("why");
+            if(value){el&&el.parentNode&&el.parentNode.removeChild(el);}else{}//这玩意不可逆啊！
+            break;
+        default:
+            el.setAttribute(attr,value);
+    }
+},//对识别出来的关联属性进行赋值操作
+getexp:function(exp,dataspace=""){
     
-    this._setup.data=data;
-    this._setup.type="POST";
+},
+getvar:function (varname,dataspace=""){
+    (dataspace=="")&&(dataspace="common");
+    //如果没有变量，就创建
+    //window.data||(window.data={});//这个需要view实例来调用，否则大家共享同一个空间了
+    //var val=window.data;
+    (arguments.length>1)&&(dataspace!=="")&&(varname=dataspace+"."+varname);
+    if(!sm.view.hasOwnProperty('data')){sm.view.data={};}
+    var val=sm.view.data;
+    var exp = varname.split('.');
+    exp.forEach(function(k, i) {
+        if(i<exp.length-1){
+            (typeof val[k]=='undefined') && ( val[k]={});
+            val = val[k];
+        } else {
+            //对于最后一个，必须不能是对象，因为HTML模版中不允许使用对象
+            //alert('here?');
+            (typeof val[k]=='undefined') && ( val[k]="");
+            val=val[k];
+        }
+    });
+    return val;
+},//按照变量地区获取变量值
+setvar:function (varname,value,dataspace=""){
+    (dataspace=="")&&(dataspace="common");
+    //如果没有变量，就创建
+    //window.data||(window.data={});
+    //var val=window.data;
+    (arguments.length>2)&&(dataspace!=="")&&(varname=dataspace+"."+varname);
+    if(!sm.view.hasOwnProperty('data')){sm.view.data={};}
+    var val=sm.view.data;
+    
+    var exp = varname.split('.');
+    exp.forEach(function(k, i) {
+        // 非最后一个key，更新val的值
+        if (i < exp.length - 1) {
+            (typeof val[k]=='undefined') && ( val[k]={});
+            val=val[k];
+        } else {
+            val[k] = value;
+        }
+    });
+},//按照变量地区找到变量给其赋值
 
-    if(this._setup.async){this._ajaxing=true;} else {this._ajaxing=false;}
-    //alert(JSON.stringify(this._setup));
-    //清空一下Log状态
-    this.clearstat();
-    //this._setup.beforeSend=function(){alert("检测是否执行了回调函数");};
-    //this._setup.success=sm.ajax.callback_success;
-    //this._setup.error=sm.ajax.callback_error;
-    if(this._popshow){
-    	this._popshow=false;
-    	alert(JSON.stringify(this._setup.data));
-    }
-    $.ajax(this._setup);
-//alert("提交了啊！为什么没有反映？");
-//alert(JSON.stringify(this._setup));
-    return this;
-}
-God.ajax.get=function(data){
-    this._setup.data=data;
-    this._setup.type="GET";
-    if(this._setup.async){this._setup.async=true;}
-    //清空一下Log状态
-    this.clearstat();
-    $.ajax(this._setup);
-    return this;
-}
+watchdata:function (proxyobj,dataspace="",varname=""){
+    (dataspace=="")&&(dataspace="common");
+    me=this;
+    Object.keys(proxyobj).forEach(function(k){
+        if(!proxyobj.hasOwnProperty(k)){
+            
+        } else if(Object.prototype.toString.call(proxyobj[k]) === '[object Object]'){
+             var realvarname=varname==""?k:varname+'.'+k;
+             if(realvarname.substr(0,dataspace.length)==dataspace){//只需要关心自己dataspace中的变量即可
+                //console.log("解析："+realvarname);
+                me.watchdata(proxyobj[k],dataspace,varname==""?k:varname+'.'+k);
+            } else {
+                //console.log("不解析："+realvarname);
+            }
+        } else if(typeof proxyobj[k]=="undefined"){
 
-God.ajax.success=function(func){
-    //如果是异步的Ajax，并且还没执行完，那么就暂存起来等调用完成再执行
-    if(this.ajaxing()){
-    	//alert("这就对了啦！");
-            this._usercallbackfunc["success"].push(func);
+        } else if (typeof(proxyobj[k]) == "function") {
+
+        } else {
+            //找到了一个属性，把他弄为get,set形式
+            var realvarname=varname==""?k:varname+'.'+k;
+            if(realvarname.substr(0,dataspace.length)==dataspace){//如果当前变量地图不在dataspace下，则不允许修改人家的get，set函数
+                if(dataspace!==""){
+                    realvarname=realvarname.substr(dataspace.length+1);
+                }
+                //console.log("设定getset："+realvarname);
+                var tstr=proxyobj[k];
+                //alert(tstr);
+                //console.log("proxy data:"+varname+"."+k+"-dataspace:"+dataspace);
+                Object.defineProperty(proxyobj, '_'+k, {
+                    value : tstr,
+                    writable : true,
+                    enumerable : false,//不可枚举
+                    configurable : true
+                });
+                Object.defineProperty(proxyobj, k, {//因为这个变量的变动在初始化的时候要绑定命名空间，只能绑定一个？
+                    enumerable : true,//可枚举
+                    configurable : true,
+                    get:function() {
+                        return this['_'+k];
+                    },
+                    set:function(newVal){
+                        //console.log("enter set of "+k+"-old-"+this['_'+k]+'-new-'+newVal);
+                        if(this['_'+k]==newVal) return;
+                        this['_'+k]=newVal;
+                        //alert(varmap==""?k:varmap+'.'+k);
+                        //console.log("enter set of "+k);
+                        //在通知notify的时候
+                        
+                        
+                        //console.log("检测到变量更改了，执行notify函数:"+realvarname+","+dataspace);
+                        me.varfunsnotify&&me.varfunsnotify(realvarname,dataspace);
+                    }
+                });                
+            } else {
+                //console.log("不设定getset："+realvarname);
+            }
+
+        }
+    });
+},//对一个对象进行解析自动对其属性转换成getter，setter模式(初始化后自动调用)
+watchdom:function(el,dataspace="",ename="input") {
+    (dataspace=="")&&(dataspace="common");
+    me=this;
+    var eventlist=el.getAttribute('eventlist');
+    //var watchingpreg=/(^|\,)input\.watching(\,|$)/;
+    var tag=dataspace+"."+ename+".watching";
+    if(eventlist){
+        if(eventlist.indexOf(tag)<0){
+            el.addEventListener(ename,function(){
+                //alert("执行第二个绑定函数"+dataspace);
+                //console.log("执行第二个绑定函数"+dataspace);
+                //console.log(sm.view.data);
+                me.elget(el,0,0,dataspace);
+            });
+            //console.log("居然多次添加拉？"+eventlist+tag);
+            el.setAttribute('eventlist',eventlist+','+tag);
+        }
     } else {
-    		//alert("没有在过程中，直接执行！");
-            God.success.apply(this,arguments);
+        el.addEventListener(ename,function(){
+            //console.log("执行第一个绑定函数"+dataspace);
+                //console.log(sm.view.data);
+            me.elget(el,0,0,dataspace);
+        });
+        //console.log("首次添加事件？"+tag);
+        el.setAttribute('eventlist',','+tag);
     }
-    return this;
-}
-God.ajax.error=function(func){
-    if(this.ajaxing()){
-            this._usercallbackfunc["error"].push(func);
+    
+},//对一个elment进行关注，添加oninput事件，事件内容就是自动进行elget，这个是在第一次get时自动添加进去的
+varfunsnotify:function (fullvarname,dataspace=""){
+    (dataspace=="")&&(dataspace="common");
+    //alert(fullvarname);
+    //alert(dataspace);
+    (typeof window.varfuns[fullvarname]=='undefined')&&(window.varfuns[fullvarname]=[]);
+    (typeof window.varfuns[fullvarname][dataspace]=='undefined')&&(window.varfuns[fullvarname][dataspace]=[]);
+    //console.log("执行变量到DOM回写:"+fullvarname+"-dataspace:"+dataspace);
+    //console.log(sm.view.data);
+    var i=0;
+    window.varfuns[fullvarname][dataspace].forEach(function(el){
+        //console.log(dataspace+i++);
+        me.elset(el,0,0,dataspace);
+    });
+},//watchdata中的任何一个属性更改，都会触发这里的notify，但并不是每个变量都有粉丝
+varfunshave:function (varname,el,dataspace=""){
+    (dataspace=="")&&(dataspace="common");
+    (arguments.length>2)&&(dataspace!=="")&&(varname=dataspace+"."+varname);
+    if(typeof window.varfuns[varname]=='undefined'){
+        return false;
     } else {
-            God.error.apply(this,arguments);
+        if(typeof window.varfuns[varname][dataspace]=='undefined'){
+            return false;
+        }
+        window.varfuns[varname][dataspace].forEach(function(item){
+            if(item==el){return true;}
+        });
+        return false;
     }
-    return this;
-}
-God.ajax.complete=function(func){
-    //如果是异步的Ajax，并且还没执行完，那么就暂存起来等调用完成再执行
-    if(this.ajaxing()){
-            this._usercallbackfunc["complete"].push(func);
-    } else {
-            God.success.apply(this,arguments);
-    }
-    return this;
-}
-God.ajax.taskok=function(func){
-    if(this.ajaxing()){
-            this._usercallbackfunc["taskok"].push(func);
-    } else {
-            God.taskok.apply(this,arguments);
-    }
-    return this;   
-}
-God.ajax.taskfail=function(func){
-    if(this.ajaxing()){
-        this._usercallbackfunc["taskfail"].push(func);
-    } else {
-        God.taskfail.apply(this,arguments);
-    }
-    return this;   
-}
-God.ajax._setup={type:'POST',url:'',async:true,success:sm.ajax.callback_success,beforeSend:sm.ajax.callback_beforeSend,complete:sm.ajax.callback_complete,error:sm.ajax.callback_error,data:{},context:sm.ajax};   
-   
-}
+},//检测变量是否有该粉丝
+varfunsadd:function (varname,el,dataspace=""){
+    (dataspace=="")&&(dataspace="common");
+    //(arguments.length>2)&&(dataspace!=="")&&(varname=dataspace+"."+varname);
+    //alert("添加粉丝："+varname);
+    (typeof window.varfuns[varname]=='undefined')&&(window.varfuns[varname]=[]);
+    (typeof window.varfuns[varname][dataspace]=='undefined')&&(window.varfuns[varname][dataspace]=[]);
+    !this.varfunshave(varname,el)&&window.varfuns[varname][dataspace].push(el);    
+},//为变量添加粉丝    
+    
+    
+    
+    
+        
+});
+
+
 God.coms("datasource").extendproto({//存储所有该页面用于交换的数据
 extend:function(newobj){
 	if(!$$.isobj(newobj)) {return this;}
@@ -779,24 +767,7 @@ define:function(dename,defnation){
 },
     
 });
-God.coms("page").extendproto({//目的是定义页面跳转，页面信息，用户界面刷新等一系列操作
-reload:function(newurl){
-    if(arguments[0]) {
-        window.location.href=newurl;
-    } else {
-    	location.reload();
-    }
-    return this;
-},
-ram:{},
-open:function(newurl){
-    window.open(newurl);
-    return this;
-},
-href:function(){
-    return window.location.href;
-},
-});
+
 God.coms("event").extendproto({//目的是定义事件相关的函数
 __eventprocs__:{},
 __eventrules__:{},
@@ -896,7 +867,6 @@ init:function(target,datalist,name){
 },
 
 });
-
 God.coms("ui").extendproto({//对话框
 make:function(model,data,curlevel,extradata,datafunc){
     !arguments[2]&&(curlevel=0);
@@ -1031,4 +1001,6 @@ modelreplace:function(str,obj){
 },//模版的简单替换动作
 
 });
+}
 
+//-----------------------基础组件定义:-----------------------------------------------
