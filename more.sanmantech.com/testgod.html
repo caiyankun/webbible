@@ -3,27 +3,19 @@
         <title>TODO supply a title</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="./static/js/sm.god.js"></script>
+        <script src="./sm/sm.god.js"></script>
     </head>
-    
+    <style>
+        p {
+            background-color:#0f0;
+        }
+        
+        
+    </style>
     <body>
-     <div id="vmcom" com:vm="test" com:dataspace="xxx">
-         <div  com:vm="test"  com:dataspace="yyy">
-            <input type="text" set:get:value="bbb" get:value="aaa"  value="123">
-            <input type="text" set:value="aaa" value="456">
-            <input type="text" set:value="bbb" value="456">
-            <p>我是yyy的bbb：{{bbb}} - 我是yyy的aaa:{{aaa}}</p>
-         </div>
-         <hr>
-    <input type="text" set:get:value-title@click@change="aaa.b.c" value="123">
-    <input type="text" set:get:value="bbb" value="456">
-    
-    <input type="text" set:value="aaa.b.c" value="456">
-    <input type="text" set:value="我是：{{($bbb)}},年龄：{{1+2}}" value="456">
-    <button onclick="getvarfn();">getvar</button>
-    <button onclick="setvarfn();">setvar</button>
-<p>asdfsdf---{{$bbb}}--{{3+4>6}}---{{$aaa.b.c+$bbb}}-asdfsadf</p>
-</div>  
+        <p>我是一个P
+        </p>
+        <div id="t"></div>
     </body>
     
     <script language="javascript" type="text/javascript">
@@ -32,22 +24,15 @@
         
         
         sm.document.ready(function(){
-
-            sm.view.init('#vmcom',1);
-
+//sm.ajax.loadjs("./static/js/test.js");
+sm.ajax.loadhtml("./test.html","#t",function(){
+    alert(aaa);
+});
+sm.ajax.loadcss("./test.css",function(){
+    alert("加载了css");
+});
         });
-      function getvarfn(){
-          var a=sm.view.data.xxx.aaa;
-          //a.replace(/(?:^|\(|\,|+|-|\*|\/)\s*([_a-zA-Z][_\.a-zA-Z0-9]*[_a-zA-Z0-9])\,$/g,function(v1,v2,v3,v4){
-          //a.replace(/^\s*[_\.a-zA-Z0-9\,\(\)]*$/g,function(v1,v2,v3,v4){
-          //a.replace(/(^[_\.a-zA-Z0-9]*$|^[_\.a-zA-Z0-9]*\(.*\)$)/g,function(v1,v2,v3,v4){
-          a.replace(/(?:^|[^\\])\s*\$([_\.a-zA-Z0-9]*)/gm,function(v1,v2,v3,v4){
-            alert(v2);
-        });
-      }
-      function setvarfn(){
-          sm.view.comset("#vmcom",'yyy');
-      }
+
         
     </script>
     
