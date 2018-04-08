@@ -1,0 +1,11 @@
+sm.route.watch({
+    "#user/login":function(){
+       document.body.innerText="userlogin.html";
+    },
+    "#user/register":function(){
+       document.body.innerText="userregister.html";
+    },
+    "(.*)":function(){
+       document.body.innerText="main.html";
+    },
+});

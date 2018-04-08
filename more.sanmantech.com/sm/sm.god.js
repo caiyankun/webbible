@@ -144,7 +144,7 @@ foreach:function(obj,cb){
     }
 },
 });
-window.$$=God.$$=God.func;//方便对全局函数的引用
+window.$$=God.$$=God.func;//方便对全局函数的引用，位置不能改
 God.coms("document").extendproto({//目的是定义页面跳转，页面信息，用户界面刷新等一系列操作
 ready:function(){document.ready.apply(this,arguments);return this;},//请注意This指针无法传递到函数内部
 reload:function(newurl){
@@ -235,14 +235,14 @@ loadhtml:function(htmlfile,target="body",cb=function(){}){
         cb();
     });
 },
-loadjs:function(jsfile){
+loadjs:function(jsfile,cb=function(){}){
     var script =document.createElement("script");
     script.src=jsfile;
     script.onload = script.onreadystatechange = function(){
         if( ! this.readyState     //这是FF的判断语句，因为ff下没有readyState这人值，IE的readyState肯定有值
               || this.readyState=='loaded' || this.readyState=='complete'   // 这是IE的判断语句
         ){
-              alert('loaded');
+              cb();
         }
     }
     document.body.appendChild(script);
@@ -297,7 +297,8 @@ new:function(dataspace){
     return val;
 },//创建一个新的view实例
 eventhandeler:function(e,dataspace){
-    me=this;
+    alert("you are here:"+e.type+":"+dataspace);
+    var me=this;
     if(typeof window.domevent_cb[dataspace]=='undefined'){return this;}
     for (var selector in window.domevent_cb[dataspace]){
         var match=e.matches(selector);
@@ -315,32 +316,10 @@ eventhandeler:function(e,dataspace){
             }
         }
     }
-},
-method:{
-    data:function(mapobj){
-        me=this;
-        $$.foreach(mapobj,function(k,v){
-            this[k]=v;
-        });
-    },
-    method:function(mapobj){
-        me=this;
-        $$.foreach(mapobj,function(k,v){
-            this[k]=v;
-        });
-    },
-    watchdom:function(mapobj,watch=true,stopbuble=false){
-        var me=this;
-        //获取顶层节点
-        var dataspace=me._dataspace;
-        var rootnode=document.querySelector(dataspace);
-        if(!rootnode){return this;}
-        
+    
+    return this;
+    
         (typeof window.domevent_cb[dataspace]=='undefined')&&(window.domevent_cb[dataspace]={});
-        (typeof window.domevent_listener[dataspace]=='undefined')&&(window.domevent_listener[dataspace]={});
-        
-        
-        
         var defaultevent="click";
         Object.keys(mapobj).forEach(function(k){
             var cb=mapobj[k];
@@ -368,6 +347,52 @@ method:{
                     (typeof window.domevent_cb[dataspace][selector][realevent][suffix]!=='undefined')&&(window.domevent_cb[dataspace][selector][realevent][suffix]=undefined);
                 }
             });
+        });
+        return this;
+    
+    
+    
+    
+},
+method:{
+    data:function(mapobj){
+        var me=this;
+        $$.foreach(mapobj,function(k,v){
+            me[k]=v;
+        });
+    },
+    method:function(mapobj){
+        var me=this;
+        $$.foreach(mapobj,function(k,v){
+            me[k]=v;
+        });
+    },
+    alias:function(newalias){window[newalias]=this;return this;},
+    watchdom:function(mapobj,stopbuble=false){
+        var me=this;
+        //获取顶层节点
+        var dataspace=me._dataspace;
+        var rootnode=document.querySelector("[dataspace='"+dataspace+"']");
+        if(!rootnode){return this;}
+        if(!me.hasOwnProperty("domwatchingtree")){me.domwatchingtree={};}
+        $$.merge.apply(me.domwatchingtree,[mapobj]);
+        //给顶层节点增加事件处理函数，将其指向eventhandeler
+        (typeof window.domevent_listener[dataspace]=='undefined')&&(window.domevent_listener[dataspace]={});
+        var defaultevent="click";
+        Object.keys(mapobj).forEach(function(k){
+            var selector=k.split("@")[0];
+            var curevent=k.substr(selector.length+1);
+            if(curevent==""){curevent=defaultevent;} else {defaultevent=curevent;}
+            curevent.split("@").forEach(function(ce){
+                var realevent=ce.split(".")[0];
+                //1,确保函数代理中心能响应该事件
+                if(typeof window.domevent_listener[dataspace][realevent]=='undefined'){
+                    window.domevent_listener[dataspace][realevent]=true;
+                    rootnode.addEventListener(realevent,function(e){
+                        sm.view.eventhandeler.apply(me,[e,dataspace]);
+                    });
+                }
+            });   
         });
         return this;
     },
@@ -470,6 +495,7 @@ groupelget:function(el,autoupdate,dataspace="",gselector="",gby="value",gas="",g
 },//通过给定的参数，获取一组元素的值，并组装成array或者obj
 checkiscom:function(com){
     var $el = com.nodeType == 1 ? com : document.querySelector(com);
+    if ($el==document.querySelector("body")){return true;}
     var nodeAttrs = $el.attributes;
     var iscom=false;
     [].slice.call(nodeAttrs).forEach(function(attr) {
@@ -963,7 +989,7 @@ do:function(){
     return this;
 },
 watch:function(wathcingtree={}){
-    me=this;
+    var me=this;
     if(!me.watched){
         document.body.onhashchange=function(){
             me.newhash=location.hash;
@@ -972,11 +998,11 @@ watch:function(wathcingtree={}){
         }
         me.watched=true;
     }
-    $$.merge(me.watchingtree,wathcingtree);
+    $$.merge.apply(me.watchingtree,[wathcingtree]);
     return this;
 },
 hashhandler:function(oldhash,newhash){
-    me=this;
+    var me=this;
     var watchingtree=me.watchingtree;
     for(var route in watchingtree){
         var watchold=false;
@@ -985,20 +1011,20 @@ hashhandler:function(oldhash,newhash){
             return v;
         });
         var hashstr=watchold?oldhash:newhash;
-        if(/^\//.test(route)){
+        if(!/^\#/.test(route)){
             var reg=new RegExp(route);
             if(reg.test(hashstr)){
-                watchingtree[route].apply(me,[newhash,oldhash]);
+                return watchingtree[route].apply(me,[newhash,oldhash]);
             }
         } else {
             if(route==hashstr){
-                watchingtree[route].apply(me,[newhash,oldhash]);
+                return watchingtree[route].apply(me,[newhash,oldhash]);
             }
         }
     }
 },
 to:function(newhash){location.hash=newhash;return this;},
-load:function(routejs){},
+load:function(routejs){this.ajax.loadjs(routejs);return this;},
 run:function(wathcingtree={}){
     this.watch(wathcingtree);
     //执行router
@@ -1006,6 +1032,7 @@ run:function(wathcingtree={}){
     return this;
 },
 history:function(){return window.history;},
+startup:function(routejs){return this.load(routejs,this.run);},
 });
 God.coms("data").extendproto({
 });

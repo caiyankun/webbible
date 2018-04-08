@@ -12,8 +12,8 @@
         
         
     </style>
-    <body>
-        <p>我是一个P
+    <body set:display="display" dataspace="common">
+        <p dom-id="p">我是一个P
         </p>
         <div id="t"></div>
     </body>
@@ -24,16 +24,13 @@
         
         
         sm.document.ready(function(){
-//sm.ajax.loadjs("./static/js/test.js");
-sm.ajax.loadhtml("./test.html","#t",function(){
-    alert(aaa);
-});
-sm.ajax.loadcss("./test.css",function(){
-    alert("加载了css");
-});
+            //sm.route.startup("view/route.js");
+            sm.view.init("body");
+            sm.view.find("common").alias("view");
+            view.watchdom({
+                "id:p":function(){alert("you clicked,haha");},
+            });
         });
-
-        
     </script>
     
 
