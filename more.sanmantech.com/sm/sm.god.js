@@ -163,6 +163,15 @@ href:function(){
     return window.location.href;
 },
 title:function(newtitle=""){document.title=newtitle==""?document.title:newtitle;return this;},
+create:function(str){
+    var t=document.createElement("div");
+    t.innerHTML=str;
+    var rs=[];
+    var nodes=t.childNodes;
+    var n=nodes.length;
+    for (var i=0;i<n;i++){rs.push(nodes[i]);}
+    return rs;
+},
 });
 God.coms("ajax").extend({
     _setup:{
@@ -210,8 +219,8 @@ doxhr:function(paraobj){
     });
     return promise;
 },
-loadhtml:function(htmlfile,target="body",cb=function(){}){
-    if(!$$.isobj(target)){
+loadhtml:function(htmlfile,target="body",cb=function(){},cleartarget=false){
+    if(target.nodeType!==1){
         target=document.querySelector(target);
         if(!target){return this;}
     }
@@ -231,7 +240,13 @@ loadhtml:function(htmlfile,target="body",cb=function(){}){
             script.text=scriptstr;
             document.body.appendChild(script);
         }
-        target.appendChild(htmldiv);
+        var cnodes=htmldiv.childNodes;
+        cleartarget&&(target.innerHTML="");
+        var nodenum=cnodes.length;
+        for(var i=0;i<nodenum;i++){
+            target.appendChild(cnodes[0]);
+        }
+       //console.log("执行完了啊！");
         cb();
     });
 },
@@ -256,7 +271,6 @@ loadcss:function(cssfile,cb){
     });
 },
 load:function(file,async=true){return sm.ajax.async(async).url(file).post();},
-    
 });
 God.coms("view").extendproto({//对话框
 find:function(dataspace){
@@ -297,62 +311,30 @@ new:function(dataspace){
     return val;
 },//创建一个新的view实例
 eventhandeler:function(e,dataspace){
-    alert("you are here:"+e.type+":"+dataspace);
     var me=this;
-    if(typeof window.domevent_cb[dataspace]=='undefined'){return this;}
-    for (var selector in window.domevent_cb[dataspace]){
-        var match=e.matches(selector);
-        if(!match){
-            selector.replace(/^text\:(.*)$/,function(t,v){
-                if(e.textContent==v){match=true;}
-            });
+    var dwtree=me.domwatchingtree;
+    var defaultevent="click";
+    for (var k in dwtree){
+        var cb=dwtree[k];
+        var selector=k.split("@")[0];
+        selector=selector.replace(/^id\:(.*)$/,function(t,v){return "[dom-id='"+v+"']";});
+        var match=false;
+        selector.replace(/^text\:(.*)$/,function(t,v){e.target.textContent==v && (match=true);});
+        try{
+            e.target.matches(selector)&&(match=true);
+        } catch(e){
+            
         }
-        if(match){
-            if(typeof window.domevent_cb[dataspace][selector][e.type]!=='undefined'){
-                for(var cbk in window.domevent_cb[dataspace][selector][e.type]){
-                    let cb=window.domevent_cb[dataspace][selector][e.type][cbk];
-                    cb.apply(me,[e,dataspace,selector,e.type,cbk]);
-                }
-            }
+        
+        var curevent=k.substr(selector.length+1);
+        if(curevent==""){curevent=defaultevent} else {defaultevent=curevent;}
+        if(match&&("@"+curevent+"@").indexOf("@"+e.type+"@")>-1){
+            //console.log(e.target.textContent+e.type+dataspace);
+            cb.apply(me,[e,dataspace]);
         }
     }
     
-    return this;
-    
-        (typeof window.domevent_cb[dataspace]=='undefined')&&(window.domevent_cb[dataspace]={});
-        var defaultevent="click";
-        Object.keys(mapobj).forEach(function(k){
-            var cb=mapobj[k];
-            var selector=k.split("@")[0];
-            selector=selector.replace(/^id\:(.*)$/,function(t,v){return "[dom-id='"+v+"']";});
-            var curevent=k.substr(selector.length+1);
-            if(curevent==""){curevent=defaultevent} else {defaultevent=curevent;}
-            curevent.split("@").forEach(function(ce){
-                var realevent=ce.split(".")[0];
-                var suffix=ce.substr(realevent.length+1);
-                (typeof window.domevent_cb[dataspace][selector]=='undefined')&&(window.domevent_cb[dataspace][selector]={});
-                (typeof window.domevent_cb[dataspace][selector][realevent]=='undefined')&&(window.domevent_cb[dataspace][selector][realevent]={});
-                (typeof window.domevent_cb[dataspace][selector][realevent][suffix]=='undefined')&&(window.domevent_cb[dataspace][selector][realevent][suffix]={});
-                if(watch){
-                    //1,确保函数代理中心能响应该事件
-                    if(typeof window.domevent_listener[dataspace][realevent]=='undefined'){
-                        window.domevent_listener[dataspace][realevent]=true;
-                        rootnode.addEventListener(realevent,function(e){
-                            sm.view.eventhandeler.apply(me,[e,dataspace]);
-                        });
-                    }
-                    //2，向回调函数树添加回调函数
-                    window.domevent_cb[dataspace][selector][realevent][suffix]=function(){cb.apply(me,arguments);}
-                } else {
-                    (typeof window.domevent_cb[dataspace][selector][realevent][suffix]!=='undefined')&&(window.domevent_cb[dataspace][selector][realevent][suffix]=undefined);
-                }
-            });
-        });
-        return this;
-    
-    
-    
-    
+    return this;    
 },
 method:{
     data:function(mapobj){
@@ -360,12 +342,14 @@ method:{
         $$.foreach(mapobj,function(k,v){
             me[k]=v;
         });
+        return this;
     },
     method:function(mapobj){
         var me=this;
         $$.foreach(mapobj,function(k,v){
             me[k]=v;
         });
+        return this;
     },
     alias:function(newalias){window[newalias]=this;return this;},
     watchdom:function(mapobj,stopbuble=false){
@@ -398,11 +382,60 @@ method:{
     },
     watchdata:function(mapobj){
         var me=this;
+        var dataspace=me._dataspace;
         Object.keys(mapobj).forEach(function(k){
-            sm.view.varfunsadd(k,mapobj[k],me._dataspace);
+            sm.view.getvar(k,dataspace);
+            sm.view.varfunsadd(k,mapobj[k],dataspace);
         });
+        sm.view.watchdata(sm.view.data,dataspace);
+        return this;
     },
 },//这里的函数都需要有this指针，会把当前实例需要的函数再次封装在这里
+layout:{
+    load:function(views,cb=function(){}){
+        var curlayout=document.querySelector("[layout]");
+        if(!curlayout){
+            var nonamel=document.createElement("div");
+            nonamel.setAttribute("layout","noname");
+            nonamel.setAttribute("container","*");
+            document.body.appendChild(nonamel);
+            curlayout=nonamel;
+        } 
+        if(!curlayout.getAttribute("container")&&!curlayout.querySelector("[container]")){
+            var container=document.createElement("div");
+            container.setAttribute("container","*");
+            curlayout.appendChild(container);
+        }
+        views.forEach(function(view){
+            var viewname=view.split("@")[0];
+            var filler=view.substr(viewname.length+1);
+            if(filler==""){filler="*"}
+            if(curlayout.getAttribute("container")==filler){
+                sm.ajax.loadhtml(viewname,curlayout,function(){cb.apply(sm.view,[viewname])},true);
+            } else {
+                var selector="[container='"+filler+"']";
+                var target=curlayout.querySelector(selector);
+                if(target){
+                    sm.ajax.loadhtml(viewname,target,function(){cb.apply(sm.view,[viewname])},true);
+                }
+            }
+        });
+        return this;
+    },
+    clear:function(){},
+},
+makeui:function(lname="",views=[],cb=function(){}){
+    if(lname==""){lname="noname";}
+    //先判断当前是否有layout，以及当前的layout是否是lname
+    var curlayout=document.querySelector("[layout]");
+    if(curlayout){curlayout=curlayout.getAttribute("layout");} 
+    if(curlayout!==lname){
+      sm.ajax.loadhtml("./view/layout/"+lname+".layout.html","body",function(){sm.view.layout.load(views,cb);},true);  
+    }  else {
+        sm.view.layout.load(views,cb);
+    }
+    return sm.view.layout;
+},
 comget:function (com,dataspace="",deepinit=0){
     (dataspace=="")&&(dataspace="common");
     var $el = com.nodeType == 1 ? com : document.querySelector(com);
@@ -794,7 +827,6 @@ getexp:function(expstr,dataspace=""){
             rsvalue=eval(evalstr);
         } catch (ex) {
         }
-
     return rsvalue;
 },
 getvar:function (varname,dataspace=""){
@@ -845,7 +877,6 @@ watchdata:function (proxyobj,dataspace="",varname=""){
     me=this;
     Object.keys(proxyobj).forEach(function(k){
         if(!proxyobj.hasOwnProperty(k)){
-            
         } else if(Object.prototype.toString.call(proxyobj[k]) === '[object Object]'){
              var realvarname=varname==""?k:varname+'.'+k;
              if(realvarname.substr(0,dataspace.length)==dataspace){//只需要关心自己dataspace中的变量即可
@@ -882,15 +913,13 @@ watchdata:function (proxyobj,dataspace="",varname=""){
                         return this['_'+k];
                     },
                     set:function(newVal){
-                        //console.log("enter set of "+k+"-old-"+this['_'+k]+'-new-'+newVal);
                         if(this['_'+k]==newVal) return;
                         this['_'+k]=newVal;
-                        //alert(varmap==""?k:varmap+'.'+k);
-                        //console.log("enter set of "+k);
-                        //在通知notify的时候
-                        
-                        
                         //console.log("检测到变量更改了，执行notify函数:"+realvarname+","+dataspace);
+                        //if(Object.prototype.toString.call(newVal) === '[object Object]'){
+                            //console.log("new obj setted:"+dataspace+":"+realvarname);
+                            //sm.view.watchdata(this['_'+k],dataspace,realvarname);
+                        //}
                         me.varfunsnotify&&me.varfunsnotify(realvarname,dataspace);
                     }
                 });                
@@ -931,6 +960,8 @@ watchdom:function(el,dataspace="",ename="input",targetel="") {
     
 },//对一个elment进行关注，添加oninput事件，事件内容就是自动进行elget，这个是在第一次get时自动添加进去的
 varfunsnotify:function (fullvarname,dataspace=""){
+    //console.log(fullvarname+":changing");
+    var me=this;
     (dataspace=="")&&(dataspace="common");
     //alert(fullvarname);
     //alert(dataspace);
@@ -947,6 +978,17 @@ varfunsnotify:function (fullvarname,dataspace=""){
             me.elset(el,0,0,dataspace);
         }
     });
+    //采用冒泡的方式，将父节点逐一进行“变更更新”
+    if(fullvarname=="*"){
+        return;
+    } else if(fullvarname==""){
+        return me.varfunsnotify("*",dataspace);
+    } else {
+        fullvarname=fullvarname.split(".");
+        fullvarname.pop();
+        fullvarname=fullvarname.join(".");
+        return me.varfunsnotify(fullvarname,dataspace);
+    }
 },//watchdata中的任何一个属性更改，都会触发这里的notify，但并不是每个变量都有粉丝
 varfunshave:function (varname,el,dataspace=""){
     (dataspace=="")&&(dataspace="common");
@@ -1042,15 +1084,6 @@ God.coms("data").extendproto({
 
 //以下还没整理
 God.coms("datavalidation").extendproto({//目的是定义数据验证相关的函数相关的函数
-success:function(){
-	
-},
-fail:function(dename){
-	sm.dialog.countshow(3,'validation fail!',"Data validation fail!"+dename);
-},
-checkhtmlvars:function(filter){
-	return this.check($$.htmlvars(filter)); 
-},
 check:function(datas){
 	checkpass=true;
         var me=this;
@@ -1081,7 +1114,6 @@ check:function(datas){
 		sm.datavalidation.success();
 	}
 	return checkpass;
-
 },
 });
 God.coms("dialog").extendproto({//对话框
@@ -1089,9 +1121,16 @@ God.coms("dialog").extendproto({//对话框
 show:function(title,content,funcmap){
     code_bg='<div id="code_bg" style="position:absolute;left:0px;top:0px;background-color:#000;width:100%;filter:alpha(opacity=60);opacity:0.6;z-Index:100;"></div>'
     code_msg='<div id="code_msg" style="position:absolute;width:100%;height:30px;text-align:center;line-height: 30px;top:0px;left:0px;background-color:#ddd;filter:alpha(opacity=40);opacity:0.4;cursor:pointer;z-Index:101;">'+content+'</div>'
-    $("body").prepend(code_bg);
-    $("body").prepend(code_msg);
-    $("#code_bg").height(document.body.clientHeight);
+    var nodes=sm.document.create(code_bg+code_msg);
+    var n=nodes.length;
+    for(var i=0;i<n;i++){document.body.prepend(nodes[i]);}
+    document.querySelector("#code_bg").style.height=document.body.clientHeight;
+    /*
+    document.querySelector("#code_msg").style.height=document.body.clientHeight/2;
+    document.querySelector("#code_msg").style.width=document.body.clientWidth/2;
+    document.querySelector("#code_msg").style.top=document.body.clientTop+document.body.clientHeight/4;
+    document.querySelector("#code_msg").style.left=document.body.clientLeft+document.body.clientWidth/4;
+    */
     return this;
 },
 countshow:function(s,title,content){
@@ -1105,89 +1144,14 @@ countshow:function(s,title,content){
 	return this;
 },
 close:function(filter){
-    $("#code_bg").remove();
-    $("#code_msg").remove();
+    try{
+        document.querySelector("#code_bg").remove();
+        document.querySelector("#code_msg").remove();
+    }catch(e){}
     return this;
 },
 
 });
-God.coms("ui").extendproto({
-part:function(partname,valueiffail){
-    var rsvalue=arguments[1]?valueiffail:"";
-    sm.ajax.async(false).url("/factory/getpart.func/"+partname).post().taskok(function(d){
-        rsvalue=d;
-    }).taskfail(function(d){
-               alert(d);     
-    });
-    
-    return rsvalue;
-},
-warehouse:function(modelname){
-    if($('#_warehouse_').length<1){$("body").prepend("<div id='_warehouse_' style='display:none'></div>");}
-    if($("#_warehouse_").children(".biblemodel."+modelname).length>0){
-        return $("<div></div>").append($("#_warehouse_").children(".biblemodel."+modelname).clone()).html();
-    } else {
-        var succ=false;
-        var modelcont="";
-        sm.ajax.async(false).url("/factory/getmodel.func/"+modelname).post().taskok(function(d){
-            succ=true;
-            modelcont=d;
-        });
-        if(succ && !$$.isempty(modelcont)){
-            $("#_warehouse_").append(modelcont);
-            if($("#_warehouse_").children(".biblemodel."+modelname).length>0){
-                return $("<div></div>").append($("#_warehouse_").children(".biblemodel."+modelname).clone()).html();
-            }
-        }
-        return modelname;
-    }
-},//从仓库中获取模版原型
-parsepara:function(paras,def){
-    if(!arguments[1]){
-        return paras;
-    }
-    if(!$$.isobj(def)){
-        var tobj={};
-        tobj[def]="";
-        def=tobj;
-    }
-    if(!$$.isarray(paras)){
-        return paras;
-    } else if(!$$.isarray(paras[0])) {
-        var i=0;
-        var rsobj={};
-        for (k in def){
-            rsobj[k]=(paras.length>i)?paras[i]:def[k];
-            i=i+1;
-        }
-        while(paras.length>i){
-            rsobj["para"+i]=paras[i];
-            i=i+1
-        }
-        return rsobj;
-    } else {
-        var i=0;
-        var rsarr=[];
-        for (i in paras){
-            rsarr.push(sm.ui.parsepara(paras[i],def));
-        }
-        return rsarr;
-    }
-},//把数组改为关联数组
-modelreplace:function(str,obj){
-    try{
-	    for (p in obj) {
-	        patt=new RegExp("\{"+p+"\}","m");
-	        str=str.replace(patt,obj[p]);
-	    }
-	    return str;
-    } catch (ex) {
-    	
-    }
-    return str;
-},//模版的简单替换动作
-});
-
 }
 
 //-----------------------基础组件定义:-----------------------------------------------
