@@ -191,7 +191,13 @@ post:function(data,url,async){
     arguments.length>0&&(this.data(data));
     return this.type("POST").clearstat().doxhr();
 },
-doxhr:function(paraobj){
+smpost:function(data,url,async){
+    arguments.length>2&&(this.async(async));
+    arguments.length>1&&(this.url(url));
+    arguments.length>0&&(this.data(data));
+    return this.type("POST").clearstat().doxhr({},true);
+},
+doxhr:function(paraobj,smfcheck=false){
     var me=this;
     const promise = new Promise(function(resolve, reject) {
         //请求的5个阶段，对应readyState的值
@@ -206,7 +212,15 @@ doxhr:function(paraobj){
         xhr.onreadystatechange = function(event){    //对ajax对象进行监听
             if(xhr.readyState == 4){    //4表示解析完毕
                 if(xhr.status == 200){    //200为正常返回
-                    return resolve(xhr.responseText);
+                    if(smfcheck){
+                        if(me.smfcheck(xhr.responseText)){
+                            return resolve(JSON.parse(xhr.responseText).data);
+                        } else {
+                            return reject(JSON.parse(xhr.responseText).stat.info);
+                        }
+                    } else {
+                        return resolve(xhr.responseText);
+                    }
                 } else {
                     me.error(1,xhr.status);
                     return reject(xhr.status);
@@ -215,42 +229,79 @@ doxhr:function(paraobj){
         };
         xhr.open(me.setup().type,me.setup().url,me.setup().async);    //建立连接，参数一：发送方式，二：请求地址，三：是否异步，true为异步
         xhr.setRequestHeader('Content-type','application/x-www-form-urlencoded');    //可有可无
-        xhr.send(data); 
+        //post参数要转换格式啊-_-!!!
+        console.log(me.formatdata(data));
+        xhr.send(me.formatdata(data)); 
     });
     return promise;
 },
-loadhtml:function(htmlfile,target="body",cb=function(){},cleartarget=false){
+formatdata:function(obj){
+    if(!obj) {return null;}
+    if(typeof obj!=="object"){return obj;}
+    var rs="";
+    for(var k in obj){
+        if(rs!==""){rs=rs+"&";}
+        rs=rs+k+"="+obj[k];
+    }
+    if(rs==""){
+        return null;
+    }
+    return rs;
+},
+loadhtml:function(htmlfile,target="body",cb=function(){},cleartarget=false,remote=true){
     if(target.nodeType!==1){
         target=document.querySelector(target);
         if(!target){return this;}
     }
-    this.load(htmlfile).then(function(d){
+    var me=this;
+    if(remote){
+        me.load(htmlfile).then(function(d){
+            me.loadhtml(d,target,cb,cleartarget,false);
+        });
+    }else {
+        cleartarget&&(target.innerHTML="");
+        cleartarget=false;
+        //难点在于js的加载是异步的
         var htmldiv =document.createElement("div");
         var bash=document.createElement("div");
-        htmldiv.innerHTML=d;
+        htmldiv.innerHTML=htmlfile;
         var scriptstr="";
         var scripts=htmldiv.getElementsByTagName('script');
+        var newscripts=[];
         var sl=scripts.length;
         for(var i=0;i<sl;i++){
-            scriptstr=scriptstr+"\r\n"+scripts.item(0).text;
-            bash.appendChild(scripts.item(0));
-        }
-        if(sl>0){
             var script=document.createElement("script");
-            script.text=scriptstr;
-            document.body.appendChild(script);
-        }
+            script.text=scripts.item(0).text;
+            scripts.item(0).src&&(script.src=scripts.item(0).src);
+            newscripts.push(script);
+            bash.appendChild(scripts.item(0));
+        }//剥离Script,约定script必须在html之后，没有顺序
+
         var cnodes=htmldiv.childNodes;
-        cleartarget&&(target.innerHTML="");
         var nodenum=cnodes.length;
         for(var i=0;i<nodenum;i++){
             target.appendChild(cnodes[0]);
         }
-       //console.log("执行完了啊！");
-        cb();
-    });
+        
+      if(sl>0){
+          var script=newscripts[0];
+          bash.getElementsByTagName('script').item(0).remove();
+          if(script.src){
+              me.loadjs(script.src,function(){me.loadhtml(bash.innerHTML,target,cb,false,false);},target);
+          } else {
+              target.appendChild(script);
+              me.loadhtml(bash.innerHTML,target,cb,false,false);
+          }
+      } else {
+          cb();
+      }  
+    }
 },
-loadjs:function(jsfile,cb=function(){}){
+loadjs:function(jsfile,cb=function(){},target="body"){
+    if(target.nodeType!==1){
+        target=document.querySelector(target);
+        if(!target){target=document.body;}
+    }
     var script =document.createElement("script");
     script.src=jsfile;
     script.onload = script.onreadystatechange = function(){
@@ -260,7 +311,10 @@ loadjs:function(jsfile,cb=function(){}){
               cb();
         }
     }
-    document.body.appendChild(script);
+    try{
+        target.appendChild(script);
+    }catch(e){}
+    
 },
 loadcss:function(cssfile,cb){
     this.load(cssfile).then(function(d){
@@ -271,6 +325,25 @@ loadcss:function(cssfile,cb){
     });
 },
 load:function(file,async=true){return sm.ajax.async(async).url(file).post();},
+smfcheck:function(d){
+    var me=this;
+    me.clearstat();
+    try{
+        var jd=JSON.parse(d);
+    }catch(e){
+        me.error(2,"Response Data is not JSON Format!");
+        return false;
+    }
+    if(typeof jd.stat=="undefined"||typeof jd.data=="undefined"){
+        me.error(3,"Response Data is not sm Format!!")
+        return false;
+    }
+    if(jd.stat.code!==0){
+        me.error(js.stat.code,js.stat.info);
+        return false;
+    }
+    return true;
+},
 });
 God.coms("view").extendproto({//对话框
 find:function(dataspace){
@@ -392,6 +465,10 @@ method:{
     },
 },//这里的函数都需要有this指针，会把当前实例需要的函数再次封装在这里
 layout:{
+    get:function(){
+        var curlayout=document.querySelector("[layout]");
+        return curlayout;
+    },
     load:function(views,cb=function(){}){
         var curlayout=document.querySelector("[layout]");
         if(!curlayout){
@@ -416,13 +493,25 @@ layout:{
                 var selector="[container='"+filler+"']";
                 var target=curlayout.querySelector(selector);
                 if(target){
-                    sm.ajax.loadhtml(viewname,target,function(){cb.apply(sm.view,[viewname])},true);
+                    sm.ajax.loadhtml(viewname,target,function(){sm.view.init();sm.view.doonloadinit();cb.apply(sm.view,[viewname]);},true);
                 }
             }
         });
         return this;
     },
-    clear:function(){},
+    clear:function(witch=""){
+        var me=this;
+        var curlayout=me.get();
+        if(curlayout){
+           if(curlayout.getAttribute("container")==witch||(curlayout.getAttribute("container")&&(witch==""))){curlayout.innerHTML="";}
+           var cts=curlayout.querySelectorAll("[container]");
+           var num=cts.length;
+           for(var i=0;i<num;i++){
+               if(cts[i]&&(cts[i].getAttribute("container")==witch||witch=="")){cts[i].innerHTML="";}
+           }
+        }
+        return this;
+    },
 },
 makeui:function(lname="",views=[],cb=function(){}){
     if(lname==""){lname="noname";}
@@ -430,7 +519,7 @@ makeui:function(lname="",views=[],cb=function(){}){
     var curlayout=document.querySelector("[layout]");
     if(curlayout){curlayout=curlayout.getAttribute("layout");} 
     if(curlayout!==lname){
-      sm.ajax.loadhtml("./view/layout/"+lname+".layout.html","body",function(){sm.view.layout.load(views,cb);},true);  
+      sm.ajax.loadhtml("./view/layout/"+lname+".layout.html","body",function(){sm.view.init();sm.view.doonloadinit();sm.view.layout.load(views,cb);},true);  
     }  else {
         sm.view.layout.load(views,cb);
     }
@@ -448,13 +537,13 @@ comset:function (com,dataspace="",deepinit=0){
     this.elset($el,1,1,dataspace,deepinit);
     return this;
 },//对某个组件实行全局set
-init:function (com,deepinit=1){
+init:function (com="body",deepinit=1){
     
     //首先检查当前元素是不是组件，不是的话就拒绝初始化
     var $el = com.nodeType == 1 ? com : document.querySelector(com);
     if(!this.checkiscom($el)){return this;}
     //如果是组件的话，先确定当前组件的数据空间在哪里
-    var dataspace=$el.getAttribute("com:dataspace");
+    var dataspace=$el.getAttribute("dataspace");
     dataspace||(dataspace="common");
     //console.log("开始初始化一个组件："+dataspace);
     this.comset($el,dataspace,deepinit);
@@ -740,7 +829,7 @@ elset:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0,noupdatelist=[],b
                     if((node.nodeType==1)&&me.checkiscom(node)){
                         me.elset(node,0,1,dataspace,false,noupdatelist,false);//如果子节点是组件，就只执行一次，不递归
                     } else  {
-                        me.elset(node,1,autoupdate,dataspace,deepinit,noupdatelist,true);//如果子节点不是组件，就递归
+                        (node.tagName!=="SCRIPT"&&node.tagName!=="STYLE")&&me.elset(node,1,autoupdate,dataspace,deepinit,noupdatelist,true);//如果子节点不是组件，不是script和style就递归
                     }
                 });        
             }  
@@ -749,12 +838,18 @@ elset:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0,noupdatelist=[],b
         //先不实现吧
         if(el.parentNode&&el.parentNode.getAttribute('origintext')){
             var origintext=el.parentNode.getAttribute('origintext');
+            if(origintext==""){
+                return this;
+            }
         } else {
             var origintext=el.textContent;
-            el.parentNode.setAttribute('origintext',origintext);
+            if(/\{\{\s*(.*?)\s*\}\}/.test(origintext)){
+                el.parentNode.setAttribute('origintext',origintext);
+            } else {
+                el.parentNode.setAttribute('origintext',"");
+            }
         }//把原始文本内容保存到属性中
-        var varpreg=/\{\{(.*?)\}\}/g;//如果有多个怎么办？
-        textstr=origintext;
+        var textstr=origintext;
         /*
         textstr=origintext.replace(varpreg,function(t,varname){
             autoupdate&&(me.varfunsadd(varname,el,dataspace));//添加粉丝，先后关系不大吧？
@@ -1013,7 +1108,18 @@ varfunsadd:function (varname,el,dataspace=""){
     (typeof window.varfuns[varname][dataspace]=='undefined')&&(window.varfuns[varname][dataspace]=[]);
     !this.varfunshave(varname,el)&&window.varfuns[varname][dataspace].push(el);    
 },//为变量添加粉丝    
-        
+onloadinitlist:[],
+onloadinitedlist:[],
+onloadinit:function(cb){this.onloadinitlist.push(cb);return this;},
+doonloadinit:function(){
+    var me=this;
+    var num=me.onloadinitlist.length;
+    for(var i=0;i<num;i++){
+        me.onloadinitlist[i].apply(me);
+        me.onloadinitedlist.push(me.onloadinitlist[i]);
+    }
+    me.onloadinitlist=[];
+},
 });
 God.coms("route").extend({
     watched:false,
@@ -1066,7 +1172,7 @@ hashhandler:function(oldhash,newhash){
     }
 },
 to:function(newhash){location.hash=newhash;return this;},
-load:function(routejs){this.ajax.loadjs(routejs);return this;},
+load:function(routejs,cb=function(){}){this.ajax.loadjs(routejs,cb);return this;},
 run:function(wathcingtree={}){
     this.watch(wathcingtree);
     //执行router
@@ -1074,12 +1180,39 @@ run:function(wathcingtree={}){
     return this;
 },
 history:function(){return window.history;},
-startup:function(routejs){return this.load(routejs,this.run);},
+startup:function(routejs){return this.load(routejs,function(){sm.route.run();});},
 });
 God.coms("data").extendproto({
 });
-
-
+God.coms("user").extend({
+    info:{"uid":0,"uname":"请登录","nickname":"请登录","ulevel":0,"token":""},
+}).extendproto({
+    logout:function(){},
+    checkright:function(right){
+        this.clearstat();
+        if(this.info.ulevel<right){this.error(1,"您没有权限！");}
+        return this;
+    },
+    getinfo:function(){},
+    login:function(){},
+});
+God.coms("localStorage").extendproto({
+    setobj:function(key,value){
+        localStorage.setItem(key,JSON.stringify(value));
+    },
+    getobj:function(key,value){
+        if(localStorage.getItem(key)){
+            try{
+               var rs=localStorage.getItem(key);
+               rs=JSON.parse(rs);
+            }catch(e){
+                return null;
+            }
+            return rs;
+        } 
+        return null;
+    },
+});
 
 
 //以下还没整理

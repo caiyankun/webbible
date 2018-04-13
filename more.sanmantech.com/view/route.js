@@ -1,11 +1,15 @@
 sm.route.watch({
-    "#user/login":function(){
-       document.body.innerText="userlogin.html";
+    "#login.html":function(){
+       sm.view.makeui("noname",["view/pages/login.html"]);
     },
-    "#user/register":function(){
-       document.body.innerText="userregister.html";
+    "#register.html":function(){
+       sm.view.makeui("noname",["view/pages/register.html"]);
     },
-    "(.*)":function(){
-       document.body.innerText="main.html";
+    "^\#?$":function(hash){
+       document.body.innerText="index.html";
     },
+    "(.*)":function(hash){
+       document.body.innerText="404";
+    },
+    
 });
