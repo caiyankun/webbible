@@ -6,10 +6,16 @@ sm.route.watch({
        sm.view.makeui("noname",["view/pages/register.html"]);
     },
     "^\#?$":function(hash){
-       document.body.innerText="index.html";
+       sm.route.to("#home.html");
+    },
+    "^(.*?)\.html":function(hash){
+       sm.user.checkright(801).success(function(){
+           document.body.innerHTML="恭喜你进入了管理界面！";
+       }).error(function(){
+           sm.route.to("#login.html");
+       });
     },
     "(.*)":function(hash){
        document.body.innerText="404";
     },
-    
 });

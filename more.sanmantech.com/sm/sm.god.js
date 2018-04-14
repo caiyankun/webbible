@@ -51,7 +51,7 @@ God.showme=function(){alert(this.whoami);return this;}
 God.clearstat=function(){this._stat={error:0,info:""};return this;}
 God.error=function(e,i){
     if($$.isfunction(e)){
-        if(this._error!==0){
+        if(this._stat.error!==0){
             e.apply(this,[this._stat.error,this._stat.info]);
         }
     } else {
@@ -59,11 +59,13 @@ God.error=function(e,i){
     }
     return this;
 };
+God.stat=function(){return this._stat;}
 God.taskfail=function(cb){return this.error.apply(this,arguments);}
 God.success=function(cb){
-    if($$.isfunction(e)){
-        if(this._error==0){
-            cb.apply(this);
+    var me=this;
+    if($$.isfunction(cb)){
+        if(me._stat.error==0){
+            cb.apply(me);
         }
     } 
     return this;
@@ -184,6 +186,7 @@ God.coms("ajax").extend({
 type:function(newtype){this.setup({type:newtype});return this;},
 data:function(newdata){this.setup({data:newdata});return this;},
 url:function(newurl){this.setup({url:newurl});return this;},
+smurl:function(su){return this.url(sm.server.url(su));},
 async:function(b){this.setup({async:b});return this;},
 post:function(data,url,async){
     arguments.length>2&&(this.async(async));
@@ -216,7 +219,12 @@ doxhr:function(paraobj,smfcheck=false){
                         if(me.smfcheck(xhr.responseText)){
                             return resolve(JSON.parse(xhr.responseText).data);
                         } else {
-                            return reject(JSON.parse(xhr.responseText).stat.info);
+                            try {
+                                var errorinfo=JSON.parse(xhr.responseText).stat.info;
+                            } catch(e){
+                                errorinfo=xhr.responseText;
+                            }
+                            return reject(errorinfo);
                         }
                     } else {
                         return resolve(xhr.responseText);
@@ -230,12 +238,14 @@ doxhr:function(paraobj,smfcheck=false){
         xhr.open(me.setup().type,me.setup().url,me.setup().async);    //建立连接，参数一：发送方式，二：请求地址，三：是否异步，true为异步
         xhr.setRequestHeader('Content-type','application/x-www-form-urlencoded');    //可有可无
         //post参数要转换格式啊-_-!!!
-        console.log(me.formatdata(data));
+        //console.log(me.formatdata(data));
         xhr.send(me.formatdata(data)); 
+        me.setup().data={};
     });
     return promise;
 },
 formatdata:function(obj){
+    sm.server.adjustdata.apply(obj);
     if(!obj) {return null;}
     if(typeof obj!=="object"){return obj;}
     var rs="";
@@ -339,7 +349,7 @@ smfcheck:function(d){
         return false;
     }
     if(jd.stat.code!==0){
-        me.error(js.stat.code,js.stat.info);
+        me.error(jd.stat.code,jd.stat.info);
         return false;
     }
     return true;
@@ -412,8 +422,9 @@ eventhandeler:function(e,dataspace){
 method:{
     data:function(mapobj){
         var me=this;
+        var dataspace=me._dataspace;
         $$.foreach(mapobj,function(k,v){
-            me[k]=v;
+            sm.view.setvar(k,v,dataspace);
         });
         return this;
     },
@@ -429,7 +440,12 @@ method:{
         var me=this;
         //获取顶层节点
         var dataspace=me._dataspace;
-        var rootnode=document.querySelector("[dataspace='"+dataspace+"']");
+        if(dataspace=="common"){
+            var selector="body";
+        }else {
+            var selector="[dataspace='"+dataspace+"']";
+        }
+        var rootnode=document.querySelector(selector);
         if(!rootnode){return this;}
         if(!me.hasOwnProperty("domwatchingtree")){me.domwatchingtree={};}
         $$.merge.apply(me.domwatchingtree,[mapobj]);
@@ -488,7 +504,7 @@ layout:{
             var filler=view.substr(viewname.length+1);
             if(filler==""){filler="*"}
             if(curlayout.getAttribute("container")==filler){
-                sm.ajax.loadhtml(viewname,curlayout,function(){cb.apply(sm.view,[viewname])},true);
+                sm.ajax.loadhtml(viewname,curlayout,function(){sm.view.init();sm.view.doonloadinit();cb.apply(sm.view,[viewname])},true);
             } else {
                 var selector="[container='"+filler+"']";
                 var target=curlayout.querySelector(selector);
@@ -1189,9 +1205,9 @@ God.coms("user").extend({
 }).extendproto({
     logout:function(){},
     checkright:function(right){
-        this.clearstat();
-        if(this.info.ulevel<right){this.error(1,"您没有权限！");}
-        return this;
+        sm.user.clearstat();
+        if((!sm.user.info.ulevel)||(sm.user.info.ulevel<right)){sm.user.error(1,"您没有权限！");}
+        return sm.user;
     },
     getinfo:function(){},
     login:function(){},
@@ -1213,40 +1229,57 @@ God.coms("localStorage").extendproto({
         return null;
     },
 });
-
+God.coms("server").extend({
+    host:"http://localhost/",
+    port:"",
+    adjustdata:function(){},
+    urls:{
+        login:"user/login.func",
+        logout:"user/logout.func",
+    },
+    url:function(shorturl="#"){
+        if(this.urls[shorturl]){
+            return this.host+this.port+this.urls[shorturl];
+        } else {
+            return "#";
+        }
+    },
+});
 
 //以下还没整理
 God.coms("datavalidation").extendproto({//目的是定义数据验证相关的函数相关的函数
 check:function(datas){
-	checkpass=true;
-        var me=this;
-	$.each(datas,function(k,v){
-		//alert("checking:"+k);
-		//检查是否有检验定义
-		if('undefined'===(typeof sm.datavalidation[k])){
-			
-		} else {
-			rule=sm.datavalidation[k];
-			if((typeof rule)==="function"){
-				//函数
-				if(!rule.apply(me)){
-					checkpass=false;
-					sm.datavalidation.fail(k);
-				}
-			} else {
-				//正则表达式
-				if(!v.match(rule)){
-					//不符合规则
-					checkpass=false;
-					sm.datavalidation.fail(k);
-				} 
-			}
-		}
-	});
-	if(checkpass){
-		sm.datavalidation.success();
-	}
-	return checkpass;
+    var checkpass=true;
+    this.clearstat();
+    var me=this;
+    for(var k in datas){
+        var v=datas[k];
+        //检查是否有检验定义
+        if('undefined'===(typeof sm.datavalidation[k])){
+
+        } else {
+            var rule=sm.datavalidation[k];
+            if((typeof rule)==="function"){
+                //函数
+                if(!rule.apply(datas)){
+                    checkpass=false;
+                    me.stat().error++;
+                    me.stat().info&&(me.stat().info+=",");
+                    me.stat().info+=k;
+                }
+            } else {
+                //正则表达式
+                if(!v.match(rule)){
+                    //不符合规则
+                    checkpass=false;
+                    me.stat().error++;
+                    me.stat().info&&(me.stat().info+=",");
+                    me.stat().info+=k;
+                } 
+            }
+        }
+    }
+    return checkpass;
 },
 });
 God.coms("dialog").extendproto({//对话框

@@ -1,5 +1,21 @@
-//如果路由中需要用到用户权限验证的功能，就必须重写框架中用户相关的函数：
-sm.host="http://more.sanmantech.com/";
+/**这个文件是项目自定义的文件，是对框架中默认方法，数据的重定义，会覆盖掉框架中默认的数据值，函数方法**/
+
+//(1)项目中所有遇到的远程url建议都定义在这里，主机地址，方便后续更改：
+sm.server.extend({
+    host:"http://more.sanmantech.com/",
+    adjustdata:function(){
+        //每次请求之前会自动执行一下这个函数：对数据进行矫正，这里自动添加token
+        if(!this.hasOwnProperty("token")&&sm.user.info.token){
+            this["token"]=sm.user.info.token;
+        }
+    },
+    urls:{
+        login:"user/login.func",
+        showme:"user/showme.func",
+        logout:"user/logout.func",
+    }
+});
+//(2)如果路由中需要用到用户权限验证的功能，就必须重写框架中用户登录相关的函数：
 sm.user.extend({
     info:{"uid":0,"uname":"请登录","nickname":"请登录","ulevel":0,"token":""},//游客状态中的用户信息
 }).extendproto({
@@ -9,28 +25,31 @@ sm.user.extend({
             me.info=sm.localStorage.getobj("userinfo");
             console.log(sm.user.info);
         }
-        remote&&sm.ajax.url(sm.host+"user/showme.func").smpost().then(function(d){
-            me.info=d;
-            console.log(sm.user.info);
+        remote&&sm.ajax.smurl("showme").smpost().then(function(d){
+            me.info=d;//后台showme函数故意没有返回token，这里会有问题！当token失效时
+            if(me.info.uid!==d.uid){
+                me.logout();
+            }
         });
-        
+        return me.info;
     },
     logout:function(){
-        sm.ajax.url(sm.host+"user/logout.func").post().then();
+        sm.ajax.smurl("logout").smpost().then();
         this.info={"uid":0,"uname":"请登录","nickname":"请登录","ulevel":0,"token":""};//恢复用户信息为游客状态
         localStorage.removeItem("userinfo");
         console.log(sm.user.info);
     },
-    login:function(uname,upass,vericode,keeplogin=false){
+    login:function(uname,upass,vericode,keeplogin=false,successcb=function(){},failcb=function(){}){
         var me=this;
-        sm.ajax.url(sm.host+"user/login.func").smpost({uname:uname,upass:upass,vericode:vericode,keeplogin:keeplogin}).then(function(d){
+        sm.ajax.smurl("login").smpost({uname:uname,upass:upass,vericode:vericode,keeplogin:keeplogin}).then(function(d){
         //sm.ajax.url(sm.host+"test/post.func").smpost({uname:uname,upass:upass,vericode:vericode,keeplogin:keeplogin}).then(function(d){
             me.info=d;
             sm.localStorage.setobj("userinfo",d);
-            console.log(sm.user.info);
+            successcb.apply(me,[d]);
         },function(i){
-            alert("登录失败："+i);
+            failcb.apply(me,[i]);
         });
     },
 });
+//(3)
 sm.user.getinfo();//获取一次本地登录状态
