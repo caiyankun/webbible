@@ -4,43 +4,22 @@
             <a data-toggle="dropdown" class="dropdown-toggle" href="#">
                 <span class="clear">
                     <span class="block m-t-xs" style="font-size:20px;">
-                        <i class="fa fa-area-chart"></i>
-                        <strong class="font-bold">More</strong>
+                        <i class="fa " set:addclass="{{$layout.navlogo}}"></i>
+                        <strong class="font-bold">{{layout.navtitle}}</strong>
                     </span>
                 </span>
             </a>
         </div>
-        <div class="logo-element">More
+        <div class="logo-element">{{layout.navtitle}}
         </div>
     </li>
-    <li for:="">
-        <a class="J_menuItem" href="index_v1.html">
-            <i class="fa fa-home"></i>
-            <span class="nav-label">主页</span>
+    <li for:="(i,k,v) in layout.navitems">
+        <a class="J_menuItem" set:href="{{$v.href}}">
+            <i class="fa" set:addclass="{{$v.icon}}"></i>
+            <span class="nav-label">{{$v.text}}</span>
         </a>
     </li>
-    <li set:display="(0)">
-        <a href="#">
-            <i class="fa fa fa-bar-chart-o"></i>
-            <span class="nav-label">统计图表</span>
-            <span class="fa arrow"></span>
-            <span class="label label-warning pull-right">16</span>
-        </a>
-        <ul class="nav nav-second-level">
-            <li>
-                <a class="J_menuItem" href="graph_echarts.html">百度ECharts</a>
-            </li>
-            <li>
-                <a href="#">文件上传 <span class="fa arrow"></span></a>
-                <ul class="nav nav-third-level">
-                    <li><a class="J_menuItem" href="form_webuploader.html">百度WebUploader</a>
-                    </li>
-                    <li><a class="J_menuItem" href="form_file_upload.html">DropzoneJS</a>
-                    </li>
-                </ul>
-            </li>
-        </ul>
-    </li>
+    
     <li class="line dk"></li>
 </ul>
 
@@ -48,6 +27,22 @@
 
 <script>
 sm.view.onloadinit(function () {
+    sm.view.find("common").alias("view");
+    view.data({
+       "layout.navlogo":"fa-medium",
+       "layout.navtitle":"More",
+       "layout.navitems":[
+           {text:"主页",icon:"fa-home",href:"#manage/home.html"},
+           {text:"会员管理",icon:"fa-user",href:"#manage/member.html"},
+           {text:"商品管理",icon:"fa-gift",href:"#manage/product.html"},
+           {text:"订单管理",icon:"fa-reorder",href:"#manage/order.html"},
+           {text:"营销管理",icon:"fa-user",href:"#manage/marketing.html"},
+           {text:"商城管理",icon:"fa-user",href:"#manage/shop.html"},
+           {text:"财务管理",icon:"fa-user",href:"#manage/finance.html"},
+           {text:"统计报表",icon:"fa-user",href:"#manage/report.html"},
+       ], 
+    });
+    //------------------------调用-------------------------------
     // MetsiMenu
     $('#side-menu').metisMenu();
 

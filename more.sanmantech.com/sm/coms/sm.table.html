@@ -1,0 +1,255 @@
+<div view-com-tpl="table">
+<div class="container-fluid table-responsive" >
+
+<ul class="nav pagination " set:display="setup.toolbar.enable">
+    <li >
+    <div class="btn-group "  role="group" aria-label="...">
+        <button type="button" class="btn btn-default">1</button>
+        <button type="button" class="btn btn-default">2</button>
+    </div>
+    </li>
+</ul>
+<table smtable-id="0.1" class="table table-hover table-bordered">
+    <thead >
+    <tr >
+
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">1</th>
+      <td>Mark</td>
+      <td>Otto</td>
+      <td>@mdo</td>
+    </tr>
+    <tr>
+      <th scope="row">2</th>
+      <td>Jacob</td>
+      <td>Thornton</td>
+      <td>@fat</td>
+    </tr>
+    <tr>
+      <th scope="row">3</th>
+      <td>Larry</td>
+      <td>the Bird</td>
+      <td>@twitter</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<ul class="nav  pagination pull-right" set:display="setup.pagination.enable">
+    <li >
+    <div class="btn-group "  role="group" aria-label="...">
+        <button type="button" class="btn btn-default">1</button>
+        <button type="button" class="btn btn-default">2</button>
+        <button type="button" class="btn btn-default">3</button>
+        <button type="button" class="btn btn-default">4</button>
+        <button type="button" class="btn btn-default">5</button>
+    </div>
+    </li>
+</ul>
+
+</div>
+</div>
+<script>
+sm.view.oncominit("table",function(view){
+    console.log("entered cominit");
+    console.log(view);
+    view.data({
+        "setup.toolbar.enable":true,
+    }).method({
+        testaa:function(){alert(0);},
+    }).watchdom({
+        "table@click":function(){console.log("you clicked table");},
+        "th@click":function(){console.log("you clicked field")},
+        "tr@click":function(){console.log("you clicked tr")},
+        "td@click":function(){console.log("you clicked td")},
+    });
+});
+God.coms("table").extend({
+    selector:"[smtable-id]",
+}).extendproto({
+    filter:function(selector=""){
+        (selector!=="") && (sm.table.selector=selector);
+        return this;        
+    },
+    el:function(){
+        if($$.isobj(sm.table.selector)) return sm.table.selector;
+        return document.body.querySelector(sm.table.selector);
+    },
+    appendto:function(){},
+    enable:function(){},
+    parsetd:function(){},//解析得出该单元格的row,col,value,changeed,selected,key,rowdata(parsetr的结果),title(field,name,type,visable,sortable....)
+    parsetr:function(){},//解析得出该行的row,value（Json格式）,changeed,selected,key
+    clear:function(){
+        this.data.clear();
+        this.title.clear();
+        return this;
+    },
+    data:{
+        write:function(datas){
+            var tableel=sm.table.el();
+            if(!tableel) return this;
+            var datael=tableel.querySelector("tbody");
+            if(!datael ) return this;
+            if(!$$.isarray(datas)){datas=[datas];}
+            for (var row in datas){
+                var rowdata=datas[row];
+                var rowel=document.createElement("tr");
+                datael.appendChild(rowel);
+                if(!$$.isarray(rowdata)){rowdata=[rowdata];}
+                for(var col in rowdata){
+                    var tdel=document.createElement("td");
+                    rowel.appendChild(tdel);
+                    var tddata=rowdata[col];
+                    tdel.innerHTML=tddata;
+                    
+                }
+            }
+        },
+        read:function(){},
+        clear:function(){
+            var tableel=sm.table.el();
+            if(tableel){
+               let datael=tableel.querySelector("tbody");
+               datael&&(datael.innerHTML="");
+            }
+            return this;
+        },
+        append:function(){}, 
+        settd:function(){},
+        gettd:function(){},
+        settr:function(){},
+        gettr:function(){},
+    },
+    selects:function(){},
+    changes:function(){},
+    title:{
+        _setup:{
+            field:"col",
+            name:"col",
+            type:"data",
+            visable:true,
+            editable:false,
+            options:"",
+        },
+        getdef:function(eq){
+            var fieldel=this.fieldel(eq);
+            if(!fieldel){return {};}
+            var attrs=fieldel.attributes;
+            var rsdef={};
+            attrs.forEach(function(attr){
+                rsdef[attr.split("-t")[0]]=fieldel.getAttribute(attr);
+            });
+            return rsdef;
+        },
+        fieldel:function(eq){
+            var tableel=sm.table.el();
+            if(tableel){
+                return tableel.querySelector("thead>tr>th:nth-child("+eq+")");
+            } else {
+                return null;
+            }
+        },
+        setup:function(){return sm.setup.apply(this,arguments);},
+        add:function(coldef){
+            var tableel=sm.table.el();
+            if(!tableel) return this;
+            var titleel=tableel.querySelector("thead>tr");
+            if(!titleel ) return this;
+            if(!$$.isobj(coldef)){
+                if($$.isarray(coldef)){
+                    var t=this.setup();
+                    var i=0;
+                    var tidy={};
+                    for(var k in t){
+                        if(i<coldef.length) {
+                            tidy[k]=coldef[i];
+                        } else {
+                            tidy[k]=t[k];
+                        }
+                        i++;
+                    }
+                    coldef=tidy;
+                } else {
+                    coldef={field:coldef,name:coldef};
+                }
+            }
+            var finalcoldef={}
+            $$.merge.apply(finalcoldef,[this.setup()]);
+            $$.merge.apply(finalcoldef,[coldef]);
+            var fieldel=document.createElement("td");
+            for (var k in finalcoldef){
+                var v=finalcoldef[k];
+                fieldel.setAttribute(k+"-t",v);
+                if(k=="name"){
+                    fieldel.innerHTML=v;
+                }
+            }
+            titleel.appendChild(fieldel);
+            return this;
+        },
+        define:function(defs){
+            var me=this;
+            !$$.isarray(defs)&&(defs=[defs]);
+            var i=1;
+            defs.forEach(function(def){
+                var fieldel=me.fieldel(i);
+                if(fieldel){
+                    if(!$$.isobj(def)){
+                        if($$.isarray(def)){
+                            var t=this.setup();
+                            var ii=0;
+                            var tidy={};
+                            for(var k in t){
+                                if(ii<def.length) {
+                                    tidy[k]=def[ii];
+                                } else {
+                                    tidy[k]=t[k];
+                                }
+                                ii++;
+                            }
+                            def=tidy;
+                        } else {
+                            def={field:def,name:def};
+                        }
+                    }
+                    for (var k in def){
+                        var v=def[k];
+                        fieldel.setAttribute(k+"-t",v);
+                        if(k=="name"){
+                            fieldel.innerHTML=v;
+                        }
+                    }
+                } else {
+                    me.add(def);
+                }
+                i++;
+            });
+        },
+        definefield:function(){},
+        definetype:function(){},//key,data,flex
+        definename:function(){},
+        definevisable:function(){},
+        definesortable:function(){},
+        defineeditable:function(){},
+        clear:function(){
+            var tableel=sm.table.el();
+            if(tableel){
+               let titleel=tableel.querySelector("thead>tr");
+               titleel&&(titleel.innerHTML="");
+            }
+            return this;
+        },
+        remove:function(){},
+    },
+    page:{
+        
+    },
+    toolbar:{
+        
+    },
+    watchdom:function(){},//watch tr,td,table
+});
+</script>

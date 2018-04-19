@@ -29,6 +29,63 @@ God.coms=function(comname){//简化组件的定义原型连链：sm.xx->God.xx->
     sm[comname]={__proto__:God[comname],whoami:'sm.'+comname};
    return sm[comname];
 };
+God.coms.loadedlist=[];
+God.coms.require=function(plugins=[]){
+    var me=this;
+    //预处理参数
+    !$$.isarray(plugins)&&(plugins=[plugins]);
+    var newplugins=[];
+    plugins.forEach(function(v){
+        let fullpath="sm/coms/sm."+v+".html";
+        if(me.loadedlist.indexOf(fullpath)<0){
+            newplugins.push(fullpath);
+            me.loadedlist.push(fullpath);
+        }
+    });
+    return sm.ajax.loadhtml(newplugins,"head");
+};
+God.coms.warehouse=function(com="",remote=false){
+    var me= this;
+    var wel=document.head.querySelector("#coms-warehouse");
+    if(!wel){
+        wel=document.createElement("div");
+        wel.setAttribute("id","coms-warehouse");
+        document.head.appendChild(wel);
+    }
+    if(com==""){
+        return wel;//简单的获取warehouse的element
+    } else {
+        wel=wel.querySelector('[view-com-tpl="'+com+'"]');
+        if(!remote) {return wel;}//简单的判断本地有没有这个组件
+        var promise=new Promise(function(resolve,reject){
+            if(wel){
+                return resolve(wel);
+            } else {
+                return me.deliver(com).then(function(d){
+                    return resolve(d);
+                },function(i){
+                    return reject(i);
+                });
+            }
+        });
+        return promise;
+    }
+};
+God.coms.deliver=function(com){
+    var promise=new Promise(function(resolve,reject){
+        sm.coms.require(com).then(function(){
+            var tel=sm.coms.warehouse(com);
+            if(tel){
+                return resolve(tel);
+            } else {
+                return reject("No view com defined!");
+            }
+        },function(i){
+            return reject(i);
+        });
+    });
+    return promise;
+};
 God.define=function(func){func.apply(this);return this;};//简化组件成员添加 - 函数方式
 God.extend=function(o){for (x in o) {this[x]=o[x];} return this;};//简化组件成员添加-对象方式
 God.extendproto=function(o){for (x in o) {this.__proto__[x]=o[x];} return this;};//简化组件成员添加-对象方式
@@ -90,26 +147,35 @@ if (true){
 
 
 (function () {
-   var ie = !!(window.attachEvent && !window.opera);
-   var wk = /webkit\/(\d+)/i.test(navigator.userAgent) && (RegExp.$1 < 525);
-   var fn = [];
-   var run = function () { for (var i = 0; i < fn.length; i++) fn[i](); };
-   var d = document;
-   d.ready = function (f) {
-      if (!ie && !wk && d.addEventListener)
-      return d.addEventListener('DOMContentLoaded', f, false);
-      if (fn.push(f) > 1) return;
-      if (ie)
-         (function () {
+    var ie = !!(window.attachEvent && !window.opera);
+    var wk = /webkit\/(\d+)/i.test(navigator.userAgent) && (RegExp.$1 < 525);
+    var fn = [];
+    var run = function () { for (var i = 0; i < fn.length; i++) fn[i](); };
+    var d = document;
+    console.log("load document.ready");
+    d.ready = function (f) {
+        console.log("enter document.ready");
+        if(/^(loaded|complete)$/.test(d.readyState)){
+            console.log("判断已经加载完了，直接运行之！");
+            run();
+            return f();
+        }
+        if (!ie && !wk && d.addEventListener){
+            console.log("判断还没加载完，添加一个监听！");
+            d.addEventListener('DOMContentLoaded', function(){console.log("enter domcontentloaded handeller:"+d.readyState);f();}, false);
+            return d.addEventListener('readystatechange', function(){if(/^(loaded|complete)$/.test(d.readyState)){console.log("enter readystateevent handeller:"+d.readyState);f();}}, false);
+        }
+        if (fn.push(f) > 1) return;
+        console.log("设置轮询检查reasyState状态");
+        if (ie)(function () {
             try { d.documentElement.doScroll('left'); run(); }
             catch (err) { setTimeout(arguments.callee, 0); }
-         })();
-      else if (wk)
-      var t = setInterval(function () {
-         if (/^(loaded|complete)$/.test(d.readyState))
-         clearInterval(t), run();
-      }, 0);
-   };
+        })();
+        else if (wk) var t = setInterval(function () {
+            if (/^(loaded|complete)$/.test(d.readyState))
+            clearInterval(t), run();
+        }, 0);
+    };
 })();//增加document.ready功能
 
 }
@@ -258,81 +324,189 @@ formatdata:function(obj){
     }
     return rs;
 },
-loadhtml:function(htmlfile,target="body",cb=function(){},cleartarget=false,remote=true){
+loadhtml:function(htmlfiles,target="body",cleartarget=false,remote=true){
     if(target.nodeType!==1){
         target=document.querySelector(target);
-        if(!target){return this;}
+        if(!target){return new Promise(function(resolve,reject){return reject("Target not valid!");});}
     }
     var me=this;
-    if(remote){
-        me.load(htmlfile).then(function(d){
-            me.loadhtml(d,target,cb,cleartarget,false);
+    if(!$$.isarray(htmlfiles)){htmlfiles=[htmlfiles];}
+    if(htmlfiles.length==0){
+        return new Promise(function(resolve,reject){return resolve("blank");});
+    } else if(htmlfiles.length==1){
+        const htmlfile=htmlfiles[0];
+        if(remote){
+            const promise = new Promise(function(resolve, reject) {
+                me.load(htmlfile).then(function(d){
+                    me.loadhtml(d,target,cleartarget,false).then(function(){
+                        return resolve(d);
+                    },function(i){
+                        return reject(i);
+                    });
+                });
+            });
+            return promise;
+        }else {
+            const promise = new Promise(function(resolve, reject) {
+                cleartarget&&(target.innerHTML="");
+                cleartarget=false;
+                //难点在于js的加载是异步的
+                var htmldiv =document.createElement("div");
+                var bash=document.createElement("div");
+                htmldiv.innerHTML=htmlfile;
+                var scriptstr="";
+                var scripts=htmldiv.getElementsByTagName('script');
+                var newscripts=[];
+                var sl=scripts.length;
+                for(var i=0;i<sl;i++){
+                    var script=document.createElement("script");
+                    script.text=scripts.item(0).text;
+                    scripts.item(0).src&&(script.src=scripts.item(0).src);
+                    newscripts.push(script);
+                    bash.appendChild(scripts.item(0));
+                }//剥离Script,约定script必须在html之后，没有顺序
+                var cnodes=htmldiv.childNodes;
+                var nodenum=cnodes.length;
+                for(var i=0;i<nodenum;i++){
+                    if(target==document.head){
+                        if(["STYLE","LINK","META"].indexOf(cnodes[0].nodeName)>-1){
+                            target.appendChild(cnodes[0]);
+                        }else{
+                            if(cnodes[0].nodeType==1 && cnodes[0].matches("[view-com-tpl]")){
+                                let tcom=cnodes[0].getAttribute("view-com-tpl");
+                                if(!sm.coms.warehouse(tcom)){
+                                    sm.coms.warehouse().appendChild(cnodes[0]);
+                                } else {
+                                    cnodes[0].remove();
+                                }
+                            } else {
+                                cnodes[0].remove();
+                            }
+                        }
+                    }else{
+                        target.appendChild(cnodes[0]);
+                    }
+                }
+                if(sl>0){
+                    var script=newscripts[0];
+                    bash.getElementsByTagName('script').item(0).remove();
+                    if(script.src){
+                        me.loadjs(script.src,target).then(function(d){
+                            me.loadhtml(bash.innerHTML,target,false,false).then(function(d){return resolve(d);},function(i){return reject(i);});
+                        });
+                    } else {
+                        target.appendChild(script);
+                        me.loadhtml(bash.innerHTML,target,false,false).then(function(d){return resolve(d);},function(i){return reject(i);});
+                    }
+                } else {
+                    return resolve(htmlfile);
+                }  
+            });
+            return promise;
+        } 
+    } else {
+        const htmlfile=htmlfiles.shift();
+        const promise = new Promise(function(resolve, reject) {
+            me.loadhtml(htmlfile,target,cleartarget,remote).then(function(){
+                me.loadhtml(htmlfiles,target,false,remote).then(function(d){
+                    return resolve(d);
+                },function(i){
+                    return reject(i);
+                });
+            },function(i){
+                return reject(i);
+            });
         });
-    }else {
-        cleartarget&&(target.innerHTML="");
-        cleartarget=false;
-        //难点在于js的加载是异步的
-        var htmldiv =document.createElement("div");
-        var bash=document.createElement("div");
-        htmldiv.innerHTML=htmlfile;
-        var scriptstr="";
-        var scripts=htmldiv.getElementsByTagName('script');
-        var newscripts=[];
-        var sl=scripts.length;
-        for(var i=0;i<sl;i++){
-            var script=document.createElement("script");
-            script.text=scripts.item(0).text;
-            scripts.item(0).src&&(script.src=scripts.item(0).src);
-            newscripts.push(script);
-            bash.appendChild(scripts.item(0));
-        }//剥离Script,约定script必须在html之后，没有顺序
-
-        var cnodes=htmldiv.childNodes;
-        var nodenum=cnodes.length;
-        for(var i=0;i<nodenum;i++){
-            target.appendChild(cnodes[0]);
-        }
-        
-      if(sl>0){
-          var script=newscripts[0];
-          bash.getElementsByTagName('script').item(0).remove();
-          if(script.src){
-              me.loadjs(script.src,function(){me.loadhtml(bash.innerHTML,target,cb,false,false);},target);
-          } else {
-              target.appendChild(script);
-              me.loadhtml(bash.innerHTML,target,cb,false,false);
-          }
-      } else {
-          cb();
-      }  
+        return promise;
     }
 },
-loadjs:function(jsfile,cb=function(){},target="body"){
+loadjs:function(jsfiles,target="body"){
+    var me=this;
     if(target.nodeType!==1){
         target=document.querySelector(target);
-        if(!target){target=document.body;}
+        if(!target){target=document.head;}
     }
-    var script =document.createElement("script");
-    script.src=jsfile;
-    script.onload = script.onreadystatechange = function(){
-        if( ! this.readyState     //这是FF的判断语句，因为ff下没有readyState这人值，IE的readyState肯定有值
-              || this.readyState=='loaded' || this.readyState=='complete'   // 这是IE的判断语句
-        ){
-              cb();
-        }
-    }
-    try{
-        target.appendChild(script);
-    }catch(e){}
-    
+    !$$.isarray(jsfiles)&&(jsfiles=[jsfiles]);
+    if(jsfiles.length==0){
+        return new Promise(function(resolve, reject){return resolve();});
+    }else if(jsfiles.length==1){
+        const jsfile=jsfiles[0];
+        const promise = new Promise(function(resolve, reject) {
+        var script =document.createElement("script");
+            script.src=jsfile;
+            script.onload = script.onreadystatechange = function(){
+                if( ! this.readyState     //这是FF的判断语句，因为ff下没有readyState这人值，IE的readyState肯定有值
+                      || this.readyState=='loaded' || this.readyState=='complete'   // 这是IE的判断语句
+                ){
+                      return resolve(jsfile);
+                }
+            }
+            try{
+                target.appendChild(script);
+            }catch(e){}
+        });
+        return promise;
+    }else{
+        const jsfile=jsfiles[0];
+        jsfiles.shift();
+        const promise = new Promise(function(resolve, reject) {
+        var script =document.createElement("script");
+            script.src=jsfile;
+            script.onload = script.onreadystatechange = function(){
+                if( ! this.readyState     //这是FF的判断语句，因为ff下没有readyState这人值，IE的readyState肯定有值
+                      || this.readyState=='loaded' || this.readyState=='complete'   // 这是IE的判断语句
+                ){
+                    me.loadjs(jsfiles,target).then(function(d){
+                        return resolve(d);
+                    },function(i){
+                        return reject(i);
+                    });
+                }
+            }
+            try{
+                target.appendChild(script);
+            }catch(e){}
+        });
+        return promise;
+    }  
 },
-loadcss:function(cssfile,cb){
-    this.load(cssfile).then(function(d){
-        var css =document.createElement("style");
-        css.textContent=d;
-        document.body.appendChild(css);
-        cb();
-    });
+loadcss:function(cssfiles){
+    var me=this;
+    !$$.isarray(cssfiles)&&(cssfiles=[cssfiles]);
+    if(cssfiles.length==0){
+            return new Promise(function(resolve, reject){return resolve();});
+    }else if(cssfiles.length==1){
+        const cssfile=cssfiles[0];
+        const promise = new Promise(function(resolve, reject) {
+            me.load(cssfile).then(function(d){
+                var css =document.createElement("style");
+                css.textContent=d;
+                document.head.appendChild(css);
+                return resolve(d);
+            },function(i){
+                return reject(i);
+            });
+        });
+        return promise;
+    } else {
+        const cssfile=cssfiles[0];
+        cssfiles.shift();
+        const promise = new Promise(function(resolve, reject) {
+            me.load(cssfile).then(function(d){
+                var css =document.createElement("style");
+                css.textContent=d;
+                document.head.appendChild(css);
+               me.loadcss(cssfiles).then(function(d){
+                   return resolve(d);
+               },function(i){
+                   return reject(i);
+               });
+            },function(i){
+                return reject(i);
+            });
+        });
+        return promise;
+    }
 },
 load:function(file,async=true){return sm.ajax.async(async).url(file).post();},
 smfcheck:function(d){
@@ -370,7 +544,6 @@ find:function(dataspace){
     });
     val._dataspace=dataspace;
     val.__proto__=this.method;
-    val.method={};//谁也不继承，全部自己使用
     return val;
 },
 new:function(dataspace){
@@ -385,7 +558,6 @@ new:function(dataspace){
                 val[k]={};
                 val._dataspace=dataspace;
                 val.__proto__=this.method;
-                val.method={};//谁也不继承，全部自己使用
             };
             val=val[k];
         }
@@ -393,6 +565,27 @@ new:function(dataspace){
     
     return val;
 },//创建一个新的view实例
+fillcomto:function(comname,target,dataspace,independent=false){
+    var promise=new Promise(function(resolve,reject){
+        sm.coms.warehouse(comname,true).then(function(com){
+            if(independent){
+                target.innerHTML="<div com:='"+comname+"' dataspace='"+dataspace+"'>"+com.innerHTML+"</div>";
+                sm.view.dooncominit(comname,dataspace);
+                sm.view.init().then(function(){
+                    return resolve(sm.view.find(dataspace));
+                },function(){
+                    return reject("初始化失败！");
+                });
+            } else {
+                target.innerHTML=com.innerHTML;
+                sm.view.dooncominit(comname,dataspace);
+                return resolve(com);
+            }
+            
+        },function(i){return reject(i);});
+    });
+    return promise;
+},
 eventhandeler:function(e,dataspace){
     var me=this;
     var dwtree=me.domwatchingtree;
@@ -485,13 +678,13 @@ layout:{
         var curlayout=document.querySelector("[layout]");
         return curlayout;
     },
-    load:function(views,cb=function(){}){
+    load:function(views){
         var curlayout=document.querySelector("[layout]");
         if(!curlayout){
             var nonamel=document.createElement("div");
             nonamel.setAttribute("layout","noname");
             nonamel.setAttribute("container","*");
-            document.body.appendChild(nonamel);
+            document.appendChild(nonamel);
             curlayout=nonamel;
         } 
         if(!curlayout.getAttribute("container")&&!curlayout.querySelector("[container]")){
@@ -499,47 +692,84 @@ layout:{
             container.setAttribute("container","*");
             curlayout.appendChild(container);
         }
-        views.forEach(function(view){
-            var viewname=view.split("@")[0];
-            var filler=view.substr(viewname.length+1);
-            if(filler==""){filler="*"}
-            if(curlayout.getAttribute("container")==filler){
-                sm.ajax.loadhtml(viewname,curlayout,function(){sm.view.init();sm.view.doonloadinit();cb.apply(sm.view,[viewname])},true);
-            } else {
-                var selector="[container='"+filler+"']";
-                var target=curlayout.querySelector(selector);
-                if(target){
-                    sm.ajax.loadhtml(viewname,target,function(){sm.view.init();sm.view.doonloadinit();cb.apply(sm.view,[viewname]);},true);
+        const promise=new Promise(function(resolve,reject){
+            views.forEach(function(view){
+                var viewname=view.split("@")[0];
+                var filler=view.substr(viewname.length+1);
+                if(filler==""){filler="*"}
+                if(curlayout.getAttribute("container")==filler){
+                    if(!curlayout.getAttribute("loaded")||!(curlayout.getAttribute("loaded")==viewname)){
+                        sm.ajax.loadhtml(viewname,curlayout,true).then(function(){
+                            curlayout.setAttribute("loaded",viewname);
+                            sm.view.init().then(function(){
+                                sm.view.doonloadinit();
+                                return resolve.apply(sm.view,[viewname]);
+                            },function(){
+                                return reject("初始化失败！");
+                            });
+                        },function(i){
+                            return reject(i);
+                        });
+                    } 
+                } else {
+                    var selector="[container='"+filler+"']";
+                    var target=curlayout.querySelector(selector);
+                    if(target){
+                        if(!target.getAttribute("loaded")||!(target.getAttribute("loaded")==viewname)){
+                            sm.ajax.loadhtml(viewname,target,true).then(function(){
+                                target.setAttribute("loaded",viewname);
+                                sm.view.init().then(function(){
+                                    sm.view.doonloadinit();
+                                    return resolve.apply(sm.view,[viewname]);
+                                },function(){
+                                    return reject("初始化失败！");
+                                });
+                            },function(i){
+                                return reject(i);
+                            });
+                        }
+                    } else {
+                        return reject.apply(sm.view,[viewname]);
+                    }
                 }
-            }
+            });
         });
-        return this;
+        return promise;
     },
     clear:function(witch=""){
         var me=this;
         var curlayout=me.get();
         if(curlayout){
-           if(curlayout.getAttribute("container")==witch||(curlayout.getAttribute("container")&&(witch==""))){curlayout.innerHTML="";}
+           if(curlayout.getAttribute("container")==witch||(curlayout.getAttribute("container")&&(witch==""))){curlayout.innerHTML="";curlayout.setAttribute("loaded","");}
            var cts=curlayout.querySelectorAll("[container]");
            var num=cts.length;
            for(var i=0;i<num;i++){
-               if(cts[i]&&(cts[i].getAttribute("container")==witch||witch=="")){cts[i].innerHTML="";}
+               if(cts[i]&&(cts[i].getAttribute("container")==witch||witch=="")){cts[i].innerHTML="";cts[i].setAttribute("loaded","");}
            }
         }
         return this;
     },
 },
-makeui:function(lname="",views=[],cb=function(){}){
-    if(lname==""){lname="noname";}
-    //先判断当前是否有layout，以及当前的layout是否是lname
-    var curlayout=document.querySelector("[layout]");
-    if(curlayout){curlayout=curlayout.getAttribute("layout");} 
-    if(curlayout!==lname){
-      sm.ajax.loadhtml("./view/layout/"+lname+".layout.html","body",function(){sm.view.init();sm.view.doonloadinit();sm.view.layout.load(views,cb);},true);  
-    }  else {
-        sm.view.layout.load(views,cb);
-    }
-    return sm.view.layout;
+makeui:function(lname="",views=[]){
+    const promise=new Promise(function(resolve,reject){
+       if(lname==""){lname="noname";}
+        //先判断当前是否有layout，以及当前的layout是否是lname
+        var curlayout=document.querySelector("[layout]");
+        if(curlayout){curlayout=curlayout.getAttribute("layout");} 
+        if(curlayout!==lname){
+            sm.ajax.loadhtml("./view/layout/"+lname+".layout.html","body",true).then(function(){
+                sm.view.init().then(function(){
+                    sm.view.doonloadinit();
+                    sm.view.layout.load(views).then(function(d){return resolve(d);},function(i){return reject(i);});
+                },function(){
+                    return reject(i);
+                });
+            },function(i){return reject(i);});  
+        }  else {
+            sm.view.layout.load(views).then(function(d){return resolve(d);},function(i){return reject(i);});
+        } 
+    });
+    return promise;
 },
 comget:function (com,dataspace="",deepinit=0){
     (dataspace=="")&&(dataspace="common");
@@ -553,20 +783,50 @@ comset:function (com,dataspace="",deepinit=0){
     this.elset($el,1,1,dataspace,deepinit);
     return this;
 },//对某个组件实行全局set
+comrefinit:function(){
+    var me=this;
+    var comref=document.querySelector("[view-com]");
+    if(!comref||comref.length<1) return new Promise(function(resolve,reject){return resolve("blank");});
+    var comname=comref.getAttribute("view-com");
+    var dataspace=comref.getAttribute("dataspace");
+    if(!dataspace) dataspace=comname;
+    comref.setAttribute("com:",comname);
+    comref.setAttribute("dataspace",dataspace);
+    comref.removeAttribute("view-com");
+    var promise=new Promise(function(resolve,reject){
+        me.fillcomto(comname,comref,dataspace).then(function(d){
+            me.comrefinit().then(function(d){
+                return resolve(d);
+            },function(i){
+                return reject(i);
+            });
+        },function(i){
+            return reject(i);
+        });
+    });
+    return promise;
+},
 init:function (com="body",deepinit=1){
-    
+    var me=this;
     //首先检查当前元素是不是组件，不是的话就拒绝初始化
     var $el = com.nodeType == 1 ? com : document.querySelector(com);
     if(!this.checkiscom($el)){return this;}
     //如果是组件的话，先确定当前组件的数据空间在哪里
     var dataspace=$el.getAttribute("dataspace");
     dataspace||(dataspace="common");
-    //console.log("开始初始化一个组件："+dataspace);
-    this.comset($el,dataspace,deepinit);
-    this.comget($el,dataspace,deepinit);
-    //this.watchdata(window.data);
-    this.watchdata(sm.view.data,dataspace);
-    return this;
+    //首先确保该组件下没有尚未实例化的组件引用，没有的话开始进行初始化
+    var promise=new Promise(function(resolve,reject){
+        me.comrefinit().then(function(d){
+            //console.log("开始初始化一个组件："+dataspace);
+            me.comset($el,dataspace,deepinit);
+            me.comget($el,dataspace,deepinit);
+            me.watchdata(sm.view.data,dataspace);
+            return resolve("初始化成功！");
+        },function(i){
+            return reject("初始化失败："+i);
+        });
+    });
+    return promise;
 },//View组件初始化，搜索全部的View组件并逐一进行一遍Get，Set然后对变量进行watch
 //下面函数虽是View类，但不是给用户用的，因此不可见
 groupelget:function(el,autoupdate,dataspace="",gselector="",gby="value",gas="",gon="input",gdeep=1){
@@ -656,6 +916,11 @@ checkislocked:function(com){
     //console.log("检查是否锁定");
     return (com.nodeType==1)&&com.getAttribute("view-locked");
 },
+checkiscomref:function(el){
+    if(el.nodeType!==1) return false;
+    if(el.matches("[view-com]")) return true;
+    return false;
+},
 elget:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0){
     (dataspace=="")&&(dataspace="common");
     me=this;
@@ -734,6 +999,7 @@ elget:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0){
 },//对node进行解析看有哪些属性与变量关联
 forelset:function(el,deep,autoupdate=1,dataspace="",deepinit=0){
     me=this;
+    if(!el.parentNode)return;
     //首先解析for循环的各种参数
     var forstr=el.getAttribute("for:");
     var i="i",k="k", v="v",data="nonamelist";
@@ -749,8 +1015,10 @@ forelset:function(el,deep,autoupdate=1,dataspace="",deepinit=0){
     if(!forid){forid=Math.random();el.setAttribute("for-id",forid);}
     //先确保el的数量和数据是对齐的。
     var nodes=document.querySelectorAll("[for-id='"+forid+"']");
+    
     var nodenum=nodes.length,itemnum=items.length;
-    while(nodenum!==itemnum&&!(itemnum==0&&nodenum==1)){
+    if(nodenum<1)return;//说明这个元素可能已经被删除了
+    while(nodenum>0&&nodenum!==itemnum&&!(itemnum==0&&nodenum==1)){
         if(nodenum>itemnum){
             //删除最后一个节点
             nodes[nodenum-1].parentNode.removeChild(nodes[nodenum-1]);
@@ -765,7 +1033,7 @@ forelset:function(el,deep,autoupdate=1,dataspace="",deepinit=0){
         nodenum=nodes.length,itemnum=items.length;
     }
     var index=0;
-    if(itemnum<1){
+    if(itemnum<1){ //如果数据是空的时候，
         me.setvar(v,"",dataspace);
         me.setvar(i,0,dataspace);
         me.setvar(k,0,dataspace);
@@ -783,7 +1051,7 @@ forelset:function(el,deep,autoupdate=1,dataspace="",deepinit=0){
 elset:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0,noupdatelist=[],bcheckfor=true){
     (dataspace=="")&&(dataspace="common");
     me=this;
-    if(me.checkislocked(el)){console.log("找到了一个锁定的el"+el);return this;}
+    if(me.checkislocked(el)){return this;}
     //先判断当前节点是否是可操作的节点
     if(el.nodeType == 1){
         if(bcheckfor&&me.checkisfor(el)){
@@ -814,7 +1082,10 @@ elset:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0,noupdatelist=[],b
                         varname=varname.replace(/\{\{\s*([_\.a-zA-Z0-9]*|[_\.a-zA-Z0-9]+\(.*\))\s*\}\}/g,function(t,v){return "{{$"+v+"}}";});//给单变量/函数加$统一格式，标准要求是函数一定加@
                         var varvalue=varname.replace(/\{\{\s*(.*?)\s*\}\}/g,function(t,exp){
                             autoupdate&&exp.replace(/(^|[^\\])\s*\$([_a-zA-Z][_\.a-zA-Z0-9]*)/g,function(t,v0,v){
-                                (noupdatelist.indexOf(v)<0)&&(me.varfunsadd(v,el,dataspace));//
+                                if(noupdatelist.indexOf(v)<0){
+                                   me.varfunsadd(v,el,dataspace); 
+                                   me.getvar(v,dataspace);
+                                }
                             });//给变量添加粉丝
                             return me.getexp(exp,dataspace);//完成表达式计算并完成替换
                         });//给所有表达式中的变量添加粉丝
@@ -874,7 +1145,10 @@ elset:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0,noupdatelist=[],b
         textstr=textstr.replace(/\{\{\s*([_\.a-zA-Z0-9]*|[_\.a-zA-Z0-9]+\(.*\))\s*\}\}/g,function(t,v){return "{{$"+v+"}}";});//校准格式给单变量/函数加$统一格式，标准要求是函数一定加@
         textstr=textstr.replace(/\{\{\s*(.*?)\s*\}\}/g,function(t,exp){
             autoupdate&&exp.replace(/(^|[^\\])\s*\$([_a-zA-Z][_\.a-zA-Z0-9]*)/g,function(t,v0,v){
-                (noupdatelist.indexOf(v)<0)&&(me.varfunsadd(v,el,dataspace));
+                if(noupdatelist.indexOf(v)<0){
+                   me.varfunsadd(v,el,dataspace); 
+                   me.getvar(v,dataspace);
+                }
             });//将表达式中的变量添加粉丝
             return me.getexp(exp,dataspace);//计算表达式的值并替换原字符串
         });//（1）给所有表达式中的变量添加粉丝（2）计算表达式值及完成替换
@@ -918,6 +1192,14 @@ setattrvalue:function (el,attr,value){
             //console.log("why");
             if(value){el&&el.parentNode&&el.parentNode.removeChild(el);}else{}//这玩意不可逆啊！
             break;
+        case 'addclass':
+            //console.log("why");
+            if(el){
+                let curclass=el.getAttribute("class");
+                (!curclass)&&(curclass="");
+                (curclass.split(" ").indexOf(value)<0)&&(el.setAttribute("class",curclass+" "+value));
+            }
+            break;
         default:
             el.setAttribute(attr,value);
     }
@@ -933,7 +1215,7 @@ getexp:function(expstr,dataspace=""){
         //var evalstr="var rsvalue='',try {rsvalue= (function(){ return "+tidyexp+";}).apply(sm.view.data."+dataspace+");} catch(ex){};if($$.isobj(rsvalue)){return JSON.stringify(rsvalue);}else{return rsvalue;}";
         var funcstr="("+tidyexp+")";
         var evalstr="(function(){ var rs="+funcstr+";if($$.isobj(rs)){return JSON.stringify(rs);}else{return rs;}}).apply(sm.view.data."+dataspace+");";
-        console.log(evalstr);              
+        //console.log(evalstr);              
         try{
             rsvalue=eval(evalstr);
         } catch (ex) {
@@ -1124,8 +1406,18 @@ varfunsadd:function (varname,el,dataspace=""){
     (typeof window.varfuns[varname][dataspace]=='undefined')&&(window.varfuns[varname][dataspace]=[]);
     !this.varfunshave(varname,el)&&window.varfuns[varname][dataspace].push(el);    
 },//为变量添加粉丝    
+oncominitlist:{},
+oncominitedlist:[],
 onloadinitlist:[],
 onloadinitedlist:[],
+oncominit:function(com,initcb=function(){}){this.oncominitlist[com]=initcb;},
+dooncominit:function(com,dataspace){
+    if(this.oncominitlist.hasOwnProperty(com)){
+        var cb=this.oncominitlist[com];
+        if($$.isfunction(cb)){cb(sm.view.find(dataspace));}
+    }
+    return this;
+},
 onloadinit:function(cb){this.onloadinitlist.push(cb);return this;},
 doonloadinit:function(){
     var me=this;
@@ -1155,7 +1447,7 @@ do:function(){
 watch:function(wathcingtree={}){
     var me=this;
     if(!me.watched){
-        document.body.onhashchange=function(){
+        window.onhashchange=function(){
             me.newhash=location.hash;
             me.hashhandler(me.oldhash,me.newhash);
             me.oldhash=me.newhash;
@@ -1188,7 +1480,7 @@ hashhandler:function(oldhash,newhash){
     }
 },
 to:function(newhash){location.hash=newhash;return this;},
-load:function(routejs,cb=function(){}){this.ajax.loadjs(routejs,cb);return this;},
+load:function(routejs){return this.ajax.loadjs(routejs,"head");},
 run:function(wathcingtree={}){
     this.watch(wathcingtree);
     //执行router
@@ -1196,7 +1488,7 @@ run:function(wathcingtree={}){
     return this;
 },
 history:function(){return window.history;},
-startup:function(routejs){return this.load(routejs,function(){sm.route.run();});},
+startup:function(routejs){return this.load(routejs).then(function(){sm.route.run();});},
 });
 God.coms("data").extendproto({
 });
@@ -1245,8 +1537,6 @@ God.coms("server").extend({
         }
     },
 });
-
-//以下还没整理
 God.coms("datavalidation").extendproto({//目的是定义数据验证相关的函数相关的函数
 check:function(datas){
     var checkpass=true;
@@ -1284,26 +1574,21 @@ check:function(datas){
 });
 God.coms("dialog").extendproto({//对话框
 
-show:function(title,content,funcmap){
+show:function(content="",funcmap=function(){},title=""){
     code_bg='<div id="code_bg" style="position:absolute;left:0px;top:0px;background-color:#000;width:100%;filter:alpha(opacity=60);opacity:0.6;z-Index:100;"></div>'
     code_msg='<div id="code_msg" style="position:absolute;width:100%;height:30px;text-align:center;line-height: 30px;top:0px;left:0px;background-color:#ddd;filter:alpha(opacity=40);opacity:0.4;cursor:pointer;z-Index:101;">'+content+'</div>'
     var nodes=sm.document.create(code_bg+code_msg);
     var n=nodes.length;
-    for(var i=0;i<n;i++){document.body.prepend(nodes[i]);}
-    document.querySelector("#code_bg").style.height=document.body.clientHeight;
-    /*
-    document.querySelector("#code_msg").style.height=document.body.clientHeight/2;
-    document.querySelector("#code_msg").style.width=document.body.clientWidth/2;
-    document.querySelector("#code_msg").style.top=document.body.clientTop+document.body.clientHeight/4;
-    document.querySelector("#code_msg").style.left=document.body.clientLeft+document.body.clientWidth/4;
-    */
+    for(var i=0;i<n;i++){document.prepend(nodes[i]);}
+    document.querySelector("#code_bg").style.height=document.clientHeight;
+
     return this;
 },
-countshow:function(s,title,content){
+countshow:function(s,content,title=""){
 	if(s>0) {
-		this.close().show(title,content+"("+s+")");
+		this.close().show(content+"("+s+")",title);
 		//alert('sm.dialog.countshow('+(s-1)+',"'+title+'","'+content+'")');
-		setTimeout('sm.dialog.countshow('+(s-1)+',"'+title+'","'+content+'")',1000);
+		setTimeout('sm.dialog.countshow('+(s-1)+',"'+content+'","'+title+'")',1000);
 	} else {
 		this.close();
 	}
@@ -1319,6 +1604,5 @@ close:function(filter){
 
 });
 }
-
 //-----------------------基础组件定义:-----------------------------------------------
 
