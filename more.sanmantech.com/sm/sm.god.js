@@ -152,21 +152,21 @@ if (true){
     var fn = [];
     var run = function () { for (var i = 0; i < fn.length; i++) fn[i](); };
     var d = document;
-    console.log("load document.ready");
+    //console.log("load document.ready");
     d.ready = function (f) {
-        console.log("enter document.ready");
+        //console.log("enter document.ready");
         if(/^(loaded|complete)$/.test(d.readyState)){
-            console.log("判断已经加载完了，直接运行之！");
+            //console.log("判断已经加载完了，直接运行之！");
             run();
             return f();
         }
         if (!ie && !wk && d.addEventListener){
-            console.log("判断还没加载完，添加一个监听！");
+            //console.log("判断还没加载完，添加一个监听！");
             d.addEventListener('DOMContentLoaded', function(){console.log("enter domcontentloaded handeller:"+d.readyState);f();}, false);
-            return d.addEventListener('readystatechange', function(){if(/^(loaded|complete)$/.test(d.readyState)){console.log("enter readystateevent handeller:"+d.readyState);f();}}, false);
+            return d.addEventListener('readystatechange', function(){if(/^(loaded|complete)$/.test(d.readyState)){f();}}, false);
         }
         if (fn.push(f) > 1) return;
-        console.log("设置轮询检查reasyState状态");
+       // console.log("设置轮询检查reasyState状态");
         if (ie)(function () {
             try { d.documentElement.doScroll('left'); run(); }
             catch (err) { setTimeout(arguments.callee, 0); }
@@ -530,47 +530,34 @@ smfcheck:function(d){
 },
 });
 God.coms("view").extendproto({//对话框
-find:function(dataspace){
-    var val=sm.view.data;
-    var exp = dataspace.split('.');
-    exp.forEach(function(k, i) {
-        if(i<exp.length-1){
-            (typeof val[k]=='undefined') && ( val[k]={});
-            val = val[k];
-        } else {
-            (typeof val[k]=='undefined') && ( val[k]={});
-            val=val[k];
-        }
-    });
-    val._dataspace=dataspace;
-    val.__proto__=this.method;
-    return val;
-},
+find:function(dataspace){return this.new(dataspace);},
 new:function(dataspace){
     var val=sm.view.data;
     var exp = dataspace.split('.');
-    exp.forEach(function(k, i) {
-        if(i<exp.length-1){
-            (typeof val[k]=='undefined') && ( val[k]={});
-            val = val[k];
-        } else {
-            if(typeof val[k]=='undefined') {
-                val[k]={};
-                val._dataspace=dataspace;
-                val.__proto__=this.method;
-            };
-            val=val[k];
-        }
-    });
+    for(var i=0;i<exp.length-1;i++){
+        var v=exp[i];
+        (typeof val[v]=="undefined")&&(val[v]={});
+        val=val[v];
+    }
+    (typeof val[exp[i]]=="undefined")&&(val[exp[i]]={});
+    val[exp[i]]._dataspace=dataspace;
+    val[exp[i]].__proto__=sm.view.method;
+    if(dataspace=="common"){
+        val[exp[i]].alias("$common");
+    } else {
+        let tidyspace=dataspace.replace(/^common\./,"$");
+        val[exp[i]].alias(tidyspace);
+        val[exp[i]]._iscom=true;
+    }
     
-    return val;
+    return val[exp[i]];
 },//创建一个新的view实例
 fillcomto:function(comname,target,dataspace,independent=false){
     var promise=new Promise(function(resolve,reject){
         sm.coms.warehouse(comname,true).then(function(com){
             if(independent){
-                target.innerHTML="<div com:='"+comname+"' dataspace='"+dataspace+"'>"+com.innerHTML+"</div>";
-                sm.view.dooncominit(comname,dataspace);
+                target.innerHTML="<div com:='"+comname+"' dataspace='"+dataspace+"' oncominit='true'>"+com.innerHTML+"</div>";
+                //sm.view.dooncominit(comname,dataspace);
                 sm.view.init().then(function(){
                     return resolve(sm.view.find(dataspace));
                 },function(){
@@ -578,7 +565,7 @@ fillcomto:function(comname,target,dataspace,independent=false){
                 });
             } else {
                 target.innerHTML=com.innerHTML;
-                sm.view.dooncominit(comname,dataspace);
+                //sm.view.dooncominit(comname,dataspace);
                 return resolve(com);
             }
             
@@ -619,7 +606,7 @@ method:{
         $$.foreach(mapobj,function(k,v){
             sm.view.setvar(k,v,dataspace);
         });
-        return this;
+        return me;
     },
     method:function(mapobj){
         var me=this;
@@ -628,17 +615,22 @@ method:{
         });
         return this;
     },
-    alias:function(newalias){window[newalias]=this;return this;},
+    alias:function(newalias){
+        var ns=newalias.split(".");
+        var k=window;
+        for (var i=0;i<ns.length-1;i++){
+            var v=ns[i];
+            (typeof k[v]=="undefined")&&(k[v]={});
+            k=k[v];
+        }
+        k[ns[i]]=this;
+        return this;
+    },
     watchdom:function(mapobj,stopbuble=false){
         var me=this;
         //获取顶层节点
         var dataspace=me._dataspace;
-        if(dataspace=="common"){
-            var selector="body";
-        }else {
-            var selector="[dataspace='"+dataspace+"']";
-        }
-        var rootnode=document.querySelector(selector);
+        var rootnode=me._el;
         if(!rootnode){return this;}
         if(!me.hasOwnProperty("domwatchingtree")){me.domwatchingtree={};}
         $$.merge.apply(me.domwatchingtree,[mapobj]);
@@ -669,7 +661,7 @@ method:{
             sm.view.getvar(k,dataspace);
             sm.view.varfunsadd(k,mapobj[k],dataspace);
         });
-        sm.view.watchdata(sm.view.data,dataspace);
+        sm.view.watchdata(dataspace);
         return this;
     },
 },//这里的函数都需要有this指针，会把当前实例需要的函数再次封装在这里
@@ -792,6 +784,7 @@ comrefinit:function(){
     if(!dataspace) dataspace=comname;
     comref.setAttribute("com:",comname);
     comref.setAttribute("dataspace",dataspace);
+    comref.setAttribute("oncominit",true);
     comref.removeAttribute("view-com");
     var promise=new Promise(function(resolve,reject){
         me.fillcomto(comname,comref,dataspace).then(function(d){
@@ -806,7 +799,7 @@ comrefinit:function(){
     });
     return promise;
 },
-init:function (com="body",deepinit=1){
+init:function (com="body",deepinit=1,pdataspace=""){
     var me=this;
     //首先检查当前元素是不是组件，不是的话就拒绝初始化
     var $el = com.nodeType == 1 ? com : document.querySelector(com);
@@ -814,13 +807,19 @@ init:function (com="body",deepinit=1){
     //如果是组件的话，先确定当前组件的数据空间在哪里
     var dataspace=$el.getAttribute("dataspace");
     dataspace||(dataspace="common");
+    (pdataspace!=="")&&(dataspace=pdataspace+"."+dataspace);
+    var comname=$el.getAttribute("com:");
+    var needinit=$el.getAttribute("oncominit");
     //首先确保该组件下没有尚未实例化的组件引用，没有的话开始进行初始化
     var promise=new Promise(function(resolve,reject){
         me.comrefinit().then(function(d){
             //console.log("开始初始化一个组件："+dataspace);
+            var view=sm.view.new(dataspace);
+            if(comname&&needinit){sm.view.dooncominit(comname,view,$el);}
+            $el.removeAttribute("oncominit");
             me.comset($el,dataspace,deepinit);
             me.comget($el,dataspace,deepinit);
-            me.watchdata(sm.view.data,dataspace);
+            me.watchdata(dataspace);
             return resolve("初始化成功！");
         },function(i){
             return reject("初始化失败："+i);
@@ -987,7 +986,8 @@ elget:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0){
             if((node.nodeType == 1)&&me.checkiscom(node)){
                 me.elget(node,0,1,dataspace);//如果子组件是一个com，就获取这个节点的信息后不深入递归
                 if(deepinit){
-                    me.init(node,deepinit);//如果需要对子组件进行递归初始化就进行递归初始化
+                    //console.log("初始化组件-------："+dataspace);
+                    me.init(node,deepinit,dataspace);//如果需要对子组件进行递归初始化就进行递归初始化
                 }
             } else {
                 me.elget(node,deep,autoupdate,dataspace,deepinit);
@@ -1265,30 +1265,32 @@ setvar:function (varname,value,dataspace=""){
     });
 },//按照变量地区找到变量给其赋值
 
-watchdata:function (proxyobj,dataspace="",varname=""){
+watchdata:function (dataspace="",varname=""){
     (dataspace=="")&&(dataspace="common");
-    me=this;
+    var me=this;
+    //console.log("enter watching data:"+dataspace+","+varname);
+    if(varname==""){
+        var proxyobj=me.find(dataspace);
+    } else {
+        var proxyobj=me.getvar(varname,dataspace);
+    }
+    
+    //console.log(proxyobj);
     Object.keys(proxyobj).forEach(function(k){
         if(!proxyobj.hasOwnProperty(k)){
         } else if(Object.prototype.toString.call(proxyobj[k]) === '[object Object]'){
-             var realvarname=varname==""?k:varname+'.'+k;
-             if(realvarname.substr(0,dataspace.length)==dataspace){//只需要关心自己dataspace中的变量即可
-                //console.log("解析："+realvarname);
-                me.watchdata(proxyobj[k],dataspace,varname==""?k:varname+'.'+k);
-            } else {
-                //console.log("不解析："+realvarname);
+            if(!proxyobj[k].hasOwnProperty("_com")){
+                var realvarname=varname==""?k:varname+'.'+k;
+                me.watchdata(dataspace,varname==""?k:varname+'.'+k);
             }
         } else if(typeof proxyobj[k]=="undefined"){
 
         } else if (typeof(proxyobj[k]) == "function") {
 
         } else {
-            //找到了一个属性，把他弄为get,set形式
-            var realvarname=varname==""?k:varname+'.'+k;
-            if(realvarname.substr(0,dataspace.length)==dataspace){//如果当前变量地图不在dataspace下，则不允许修改人家的get，set函数
-                if(dataspace!==""){
-                    realvarname=realvarname.substr(dataspace.length+1);
-                }
+            //找到了一个属性，把他弄为get,set形式，开头为_和&的永远不关注
+            if(!/^(\$|\_)/.test(k)){
+               var realvarname=varname==""?k:varname+'.'+k;
                 //console.log("设定getset："+realvarname);
                 var tstr=proxyobj[k];
                 //alert(tstr);
@@ -1308,7 +1310,7 @@ watchdata:function (proxyobj,dataspace="",varname=""){
                     set:function(newVal){
                         if(this['_'+k]==newVal) return;
                         this['_'+k]=newVal;
-                        //console.log("检测到变量更改了，执行notify函数:"+realvarname+","+dataspace);
+                       // console.log("检测到变量更改了，执行notify函数:"+realvarname+","+dataspace);
                         //if(Object.prototype.toString.call(newVal) === '[object Object]'){
                             //console.log("new obj setted:"+dataspace+":"+realvarname);
                             //sm.view.watchdata(this['_'+k],dataspace,realvarname);
@@ -1316,10 +1318,7 @@ watchdata:function (proxyobj,dataspace="",varname=""){
                         me.varfunsnotify&&me.varfunsnotify(realvarname,dataspace);
                     }
                 });                
-            } else {
-                //console.log("不设定getset："+realvarname);
             }
-
         }
     });
 },//对一个对象进行解析自动对其属性转换成getter，setter模式(初始化后自动调用)
@@ -1404,6 +1403,7 @@ varfunsadd:function (varname,el,dataspace=""){
     //console.log("添加粉丝："+dataspace+":"+varname);
     (typeof window.varfuns[varname]=='undefined')&&(window.varfuns[varname]=[]);
     (typeof window.varfuns[varname][dataspace]=='undefined')&&(window.varfuns[varname][dataspace]=[]);
+    //console.log("添加变量监控函数："+varname+","+dataspace);
     !this.varfunshave(varname,el)&&window.varfuns[varname][dataspace].push(el);    
 },//为变量添加粉丝    
 oncominitlist:{},
@@ -1411,10 +1411,11 @@ oncominitedlist:[],
 onloadinitlist:[],
 onloadinitedlist:[],
 oncominit:function(com,initcb=function(){}){this.oncominitlist[com]=initcb;},
-dooncominit:function(com,dataspace){
+dooncominit:function(com,view,el){
+    console.log("dooncominit");
     if(this.oncominitlist.hasOwnProperty(com)){
         var cb=this.oncominitlist[com];
-        if($$.isfunction(cb)){cb(sm.view.find(dataspace));}
+        if($$.isfunction(cb)){cb(view,el);}
     }
     return this;
 },

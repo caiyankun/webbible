@@ -41,11 +41,11 @@
 
 <hr/>
 <div com:vm="blocknav" dataspace="blocknav">
-<div for:="(i,k,v) in nav.blockmenues" class="col-sm-3" >
+<div for:="(_i,_k,_v) in nav.blockmenues" class="col-sm-3" >
 <div class="widget p-lg red-bg text-center" >
     <div class="m-b-md">
         <i class="fa fa-thumbs-up fa-4x"></i>
-        <h3 class="m-xs">{{v}}</h3>
+        <h3 class="m-xs">{{_v}}</h3>
     </div>
 </div>
 </div>
@@ -53,6 +53,6 @@
 
 <script>
 sm.view.onloadinit(function(){
-    sm.view.data.blocknav.nav.blockmenues=["会员管理","商品管理","订单管理","营销管理","商城管理","财务管理","统计报表"];
+    $blocknav.nav.blockmenues=["会员管理","商品管理","订单管理","营销管理","商城管理","财务管理","统计报表"];
 });
 </script>

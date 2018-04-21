@@ -225,7 +225,7 @@ comset:function (com,dataspace="",deepinit=0){
     this.elset($el,1,1,dataspace,deepinit);
     return this;
 },//对某个组件实行全局set
-init:function (com,deepinit=1){
+init:function (com,deepinit=1,pdataspace=""){
     
     //首先检查当前元素是不是组件，不是的话就拒绝初始化
     var $el = com.nodeType == 1 ? com : document.querySelector(com);
@@ -233,6 +233,7 @@ init:function (com,deepinit=1){
     //如果是组件的话，先确定当前组件的数据空间在哪里
     var dataspace=$el.getAttribute("com:dataspace");
     dataspace||(dataspace="common");
+    dataspace=pdataspace+dataspace;
     //console.log("开始初始化一个组件："+dataspace);
     this.comset($el,dataspace,deepinit);
     this.comget($el,dataspace,deepinit);
@@ -311,7 +312,7 @@ elget:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0){
             if((node.nodeType == 1)&&me.checkiscom(node)){
                 me.elget(node,0,1,dataspace);//如果子组件是一个com，就获取这个节点的信息后不深入递归
                 if(deepinit){
-                    me.init(node,deepinit);//如果需要对子组件进行递归初始化就进行递归初始化
+                    me.init(node,deepinit,dataspace);//如果需要对子组件进行递归初始化就进行递归初始化
                 }
             } else {
                 me.elget(node,deep,autoupdate,dataspace,deepinit);

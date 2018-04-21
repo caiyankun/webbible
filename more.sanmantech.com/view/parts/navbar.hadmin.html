@@ -13,10 +13,10 @@
         <div class="logo-element">{{layout.navtitle}}
         </div>
     </li>
-    <li for:="(i,k,v) in layout.navitems">
-        <a class="J_menuItem" set:href="{{$v.href}}">
-            <i class="fa" set:addclass="{{$v.icon}}"></i>
-            <span class="nav-label">{{$v.text}}</span>
+    <li for:="(_i,_k,_v) in layout.navitems">
+        <a class="J_menuItem" set:href="{{$_v.href}}">
+            <i class="fa" set:addclass="{{$_v.icon}}"></i>
+            <span class="nav-label">{{$_v.text}}</span>
         </a>
     </li>
     
