@@ -50,11 +50,14 @@ class user
         } 
         \Response::returntaskok(\User::info());          
     }
-
     public function showme() {
-        \Response::returntaskok(\User::info());
+        $rsarray=\User::info();
+        $rsarray["token"]= \Token::create(\User::info());
+        if(is_numeric($rsarray['uname'])){
+            $rsarray['uname']= substr_replace($rsarray['uname'], '****', 3, 4);
+        }
+        \Response::returntaskok($rsarray);
     }
-
     public function getuserinfo() {
         \User::checkright(100)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
         if(!\Db::simplecall("more.getuserinfo", array(\User::uid()))){
@@ -63,7 +66,6 @@ class user
             \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
-
     public function upduserinfo() {
         $content="";
         $requestdata=\Request::data();
