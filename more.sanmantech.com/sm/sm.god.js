@@ -324,6 +324,32 @@ formatdata:function(obj){
     }
     return rs;
 },
+adjusturl:function(d,htmlpath){
+    var nd=document.createElement("div");
+    nd.innerHTML=d;
+    var fullpath=htmlpath.split("/");
+    fullpath.pop();
+    var path=fullpath.join("/")+"/";
+    var srcs=nd.querySelectorAll("[src]");
+    for(var i=0;i<srcs.length;i++){
+        var el=srcs[i];
+        var src=el.getAttribute("src");
+        if(!/^\//.test(src)){
+            src=path+src;
+            el.setAttribute("src",src);
+        }
+    }
+    var srcs=nd.querySelectorAll("link[href]");
+    for(var i=0;i<srcs.length;i++){
+        var el=srcs[i];
+        var src=el.getAttribute("href");
+        if(!/^\//.test(src)){
+            src=path+src;
+            el.setAttribute("href",src);
+        }
+    }
+    return nd.innerHTML;
+},
 loadhtml:function(htmlfiles,target="body",cleartarget=false,remote=true){
     if(target.nodeType!==1){
         target=document.querySelector(target);
@@ -338,6 +364,7 @@ loadhtml:function(htmlfiles,target="body",cleartarget=false,remote=true){
         if(remote){
             const promise = new Promise(function(resolve, reject) {
                 me.load(htmlfile).then(function(d){
+                    //me.loadhtml(me.adjusturl(d,htmlfile),target,cleartarget,false).then(function(){
                     me.loadhtml(d,target,cleartarget,false).then(function(){
                         return resolve(d);
                     },function(i){
