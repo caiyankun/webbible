@@ -1,6 +1,6 @@
 /**这个文件是项目自定义的文件，是对框架中默认方法，数据的重定义，会覆盖掉框架中默认的数据值，函数方法**/
 
-sm.coms.require(["hadmin.global"]).then(function(){
+sm.coms.require(["jquery","bootstrap.v3","awesome","animate","hadmin","metismenu","slimscroll","pace"]).then(function(){
     
     //(1)项目中所有遇到的远程url建议都定义在这里，主机地址，方便后续更改：
     sm.server.extend({
@@ -25,7 +25,7 @@ sm.coms.require(["hadmin.global"]).then(function(){
             var me=this;
             if(sm.localStorage.getobj("userinfo")){
                 me.info=sm.localStorage.getobj("userinfo");
-                console.log(sm.user.info);
+                //console.log(sm.user.info);
             }
             remote&&sm.ajax.smurl("showme").smpost().then(function(d){
                 me.info=d;//后台showme函数故意没有返回token，这里会有问题！当token失效时
@@ -39,7 +39,7 @@ sm.coms.require(["hadmin.global"]).then(function(){
             sm.ajax.smurl("logout").smpost().then();
             this.info={"uid":0,"uname":"请登录","nickname":"请登录","ulevel":0,"token":""};//恢复用户信息为游客状态
             localStorage.removeItem("userinfo");
-            console.log(sm.user.info);
+            //console.log(sm.user.info);
         },
         login:function(uname,upass,vericode,keeplogin=false,successcb=function(){},failcb=function(){}){
             var me=this;

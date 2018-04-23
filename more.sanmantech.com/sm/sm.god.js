@@ -166,7 +166,7 @@ if (true){
             return d.addEventListener('readystatechange', function(){if(/^(loaded|complete)$/.test(d.readyState)){f();}}, false);
         }
         if (fn.push(f) > 1) return;
-       // console.log("设置轮询检查reasyState状态");
+       //console.log("设置轮询检查reasyState状态");
         if (ie)(function () {
             try { d.documentElement.doScroll('left'); run(); }
             catch (err) { setTimeout(arguments.callee, 0); }
@@ -364,8 +364,8 @@ loadhtml:function(htmlfiles,target="body",cleartarget=false,remote=true){
         if(remote){
             const promise = new Promise(function(resolve, reject) {
                 me.load(htmlfile).then(function(d){
-                    //me.loadhtml(me.adjusturl(d,htmlfile),target,cleartarget,false).then(function(){
-                    me.loadhtml(d,target,cleartarget,false).then(function(){
+                    me.loadhtml(me.adjusturl(d,htmlfile),target,cleartarget,false).then(function(){
+                    //me.loadhtml(d,target,cleartarget,false).then(function(){
                         return resolve(d);
                     },function(i){
                         return reject(i);
@@ -557,8 +557,12 @@ smfcheck:function(d){
 },
 });
 God.coms("view").extendproto({//对话框
-find:function(dataspace){return this.new(dataspace);},
+find:function(dataspace){
+    //console.log("find");
+    return this.new(dataspace);
+},
 new:function(dataspace){
+    //console.log("new:"+dataspace);
     var val=sm.view.data;
     var exp = dataspace.split('.');
     for(var i=0;i<exp.length-1;i++){
@@ -567,8 +571,11 @@ new:function(dataspace){
         val=val[v];
     }
     (typeof val[exp[i]]=="undefined")&&(val[exp[i]]={});
+    //console.log("11111");
     val[exp[i]]._dataspace=dataspace;
     val[exp[i]].__proto__=sm.view.method;
+    //console.log(val[exp[i]]);
+    //console.log(sm.view.data.common);
     if(dataspace=="common"){
         val[exp[i]].alias("$common");
     } else {
@@ -643,6 +650,7 @@ method:{
         return this;
     },
     alias:function(newalias){
+        //console.log("进入组件自己的Alias");
         var ns=newalias.split(".");
         var k=window;
         for (var i=0;i<ns.length-1;i++){
@@ -722,7 +730,7 @@ layout:{
                             curlayout.setAttribute("loaded",viewname);
                             sm.view.init().then(function(){
                                 sm.view.doonloadinit();
-                                return resolve.apply(sm.view,[viewname]);
+                                return resolve();
                             },function(){
                                 return reject("初始化失败！");
                             });
@@ -739,7 +747,7 @@ layout:{
                                 target.setAttribute("loaded",viewname);
                                 sm.view.init().then(function(){
                                     sm.view.doonloadinit();
-                                    return resolve.apply(sm.view,[viewname]);
+                                    return resolve();
                                 },function(){
                                     return reject("初始化失败！");
                                 });
@@ -835,6 +843,8 @@ init:function (com="body",deepinit=1,pdataspace=""){
     var dataspace=$el.getAttribute("dataspace");
     dataspace||(dataspace="common");
     (pdataspace!=="")&&(dataspace=pdataspace+"."+dataspace);
+    //console.log("root begin of Init:"+dataspace);
+    //console.log(sm.view.data.common);
     var comname=$el.getAttribute("com:");
     var needinit=$el.getAttribute("oncominit");
     //首先确保该组件下没有尚未实例化的组件引用，没有的话开始进行初始化
@@ -842,6 +852,9 @@ init:function (com="body",deepinit=1,pdataspace=""){
         me.comrefinit().then(function(d){
             //console.log("开始初始化一个组件："+dataspace);
             var view=sm.view.new(dataspace);
+            view._el=$el;
+            //console.log("init el"+$el);
+            //console.log($el);
             if(comname&&needinit){sm.view.dooncominit(comname,view,$el);}
             $el.removeAttribute("oncominit");
             me.comset($el,dataspace,deepinit);
@@ -1118,7 +1131,6 @@ elset:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0,noupdatelist=[],b
                         });//给所有表达式中的变量添加粉丝
                         me.setattrvalue(el,realattr,varvalue);//将表达式的值写入属性中
                     } //如果是要set一个表达式的话
-
                 }//获取到set：关键词
             });//逐个分析属性，查找set：关键字
             //set模式中还要操作其文本子节点，因为文本子节点一般只是用来set的
@@ -1254,42 +1266,25 @@ getvar:function (varname,dataspace=""){
     //如果没有变量，就创建
     //window.data||(window.data={});//这个需要view实例来调用，否则大家共享同一个空间了
     //var val=window.data;
-    (arguments.length>1)&&(dataspace!=="")&&(varname=dataspace+"."+varname);
-    if(!sm.view.hasOwnProperty('data')){sm.view.data={};}
-    var val=sm.view.data;
+    var val=sm.view.find(dataspace);
     var exp = varname.split('.');
-    exp.forEach(function(k, i) {
-        if(i<exp.length-1){
-            (typeof val[k]=='undefined') && ( val[k]={});
-            val = val[k];
-        } else {
-            //对于最后一个，必须不能是对象，因为HTML模版中不允许使用对象
-            //alert('here?');
-            (typeof val[k]=='undefined') && ( val[k]="");
-            val=val[k];
-        }
-    });
-    return val;
+    for(var i=0;i<exp.length-1;i++){
+        (typeof val[exp[i]]=='undefined')&&(val[exp[i]]={});
+        val=val[exp[i]];
+    }
+    (typeof val[exp[i]]=='undefined')&&(val[exp[i]]="");
+    return val[exp[i]];
 },//按照变量地区获取变量值
 setvar:function (varname,value,dataspace=""){
     (dataspace=="")&&(dataspace="common");
-    //如果没有变量，就创建
-    //window.data||(window.data={});
-    //var val=window.data;
-    (arguments.length>2)&&(dataspace!=="")&&(varname=dataspace+"."+varname);
-    if(!sm.view.hasOwnProperty('data')){sm.view.data={};}
-    var val=sm.view.data;
-    
+    var val=sm.view.find(dataspace);
     var exp = varname.split('.');
-    exp.forEach(function(k, i) {
-        // 非最后一个key，更新val的值
-        if (i < exp.length - 1) {
-            (typeof val[k]=='undefined') && ( val[k]={});
-            val=val[k];
-        } else {
-            val[k] = value;
-        }
-    });
+    for(var i=0;i<exp.length-1;i++){
+        (typeof val[exp[i]]=='undefined')&&(val[exp[i]]={});
+        val=val[exp[i]];
+    }
+    val[exp[i]]=value;
+    return value;
 },//按照变量地区找到变量给其赋值
 
 watchdata:function (dataspace="",varname=""){
@@ -1297,9 +1292,9 @@ watchdata:function (dataspace="",varname=""){
     var me=this;
     //console.log("enter watching data:"+dataspace+","+varname);
     if(varname==""){
-        var proxyobj=me.find(dataspace);
+        var proxyobj=sm.view.find(dataspace);
     } else {
-        var proxyobj=me.getvar(varname,dataspace);
+        var proxyobj=sm.view.getvar(varname,dataspace);
     }
     
     //console.log(proxyobj);
@@ -1352,7 +1347,7 @@ watchdata:function (dataspace="",varname=""){
 watchdom:function(el,dataspace="",ename="input",targetel="") {
     (dataspace=="")&&(dataspace="common");
     (targetel=="")&&(targetel=el);
-    me=this;
+    var me=this;
     var eventlist=el.getAttribute('eventlist');
     //var watchingpreg=/(^|\,)input\.watching(\,|$)/;
     var tag=dataspace+"."+ename+".watching";
@@ -1439,7 +1434,7 @@ onloadinitlist:[],
 onloadinitedlist:[],
 oncominit:function(com,initcb=function(){}){this.oncominitlist[com]=initcb;},
 dooncominit:function(com,view,el){
-    console.log("dooncominit");
+    //console.log("dooncominit");
     if(this.oncominitlist.hasOwnProperty(com)){
         var cb=this.oncominitlist[com];
         if($$.isfunction(cb)){cb(view,el);}

@@ -1,4 +1,4 @@
-<link href="static/css/plugins/iCheck/custom.css" rel="stylesheet">
+
 <div class="middle-box text-center loginscreen   animated fadeInDown">
     <div>
         <div>
@@ -34,12 +34,17 @@
     </div>
 </div>
 
-<script src="static/js/plugins/iCheck/icheck.min.js" ></script>
+
 <script>
+
 sm.view.onloadinit(function () {
-    $('.i-checks').iCheck({
-        checkboxClass: 'icheckbox_square-green',
-        radioClass: 'iradio_square-green',
+    sm.coms.require(["icheck"]).then(function(){
+        $('.i-checks').iCheck({
+            checkboxClass: 'icheckbox_square-green',
+            radioClass: 'iradio_square-green',
+        });
+    },function(i){
+        alert("程序运行必要的插件加载失败："+i);
     });
 });
 </script>

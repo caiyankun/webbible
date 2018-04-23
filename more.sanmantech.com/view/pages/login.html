@@ -19,10 +19,14 @@
 </div>
 
 <script>
+    console.log("loaded");
 sm.view.onloadinit(function(){
-    sm.view.find("common").alias("view");
-    view.watchdom({
+    console.log("enter onloadinit");
+    console.log($common);
+    $common.watchdom({
         "text:管理员登录":function(){
+            console.log("事件");
+            console.log(this);
             sm.user.login(this.login.input.uname,this.login.input.upass,"0000",true,function(d){
                 alert("登录成功:"+JSON.stringify(d));
                 sm.route.to("#home.html");
