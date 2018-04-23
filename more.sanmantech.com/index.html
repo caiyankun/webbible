@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>摩尔衣橱</title>
-<link rel="stylesheet" href="static/css/sm.jquery.fullpage.css">
+<link rel="stylesheet" href="sm/coms/jqueryplugin/fullpage/jquery.fullpage.min.css">
 <style>
     #preloader {
         position: fixed;
@@ -25,12 +25,10 @@
         background-position: center;
         margin: -150px 0 0 -150px;
     }
-    
     .section1 { background-image: url(static/img/1.jpg);}
     .section2 { background-image: url(static/img/2.jpg);}
     .section3 { background-image: url(static/img/3.jpg);}
     .section4 { background-image: url(static/img/4.jpg);}
-
     .section2 p { position: relative; left: -120%;}
     .section3 p { position: relative; bottom: -120%;}
     .section4 p { display: none;}
@@ -55,16 +53,33 @@
         padding:0;
     }
 </style>
-<script src="static/js/jquery/jquery2.1.4.js"></script>
-<script src="static/js/jquery/jquery-ui.js"></script>
-<script src="static/js/sm.jquery.fullpage.js"></script>
+<script src="sm/coms/jquery/jquery2.1.4.min.js"></script>
+<script src="sm/coms/jqueryui/jquery-ui-1.10.4.min.js"></script>
+<script src="sm/coms/jqueryplugin/fullpage/jquery.fullpage.min.js"></script>
 </head>
-
-
-
 <body>
-    
-
+<div id="preloader">
+    <div id="status">&nbsp;</div>
+</div>
+<div id="fullpage">
+    <div class="section section1">
+        <h3>第一屏</h3>
+        <p>fullPage.js — 回调函数演示</p>
+    </div>
+    <div class="section section2">
+        <h3>第二屏</h3>
+        <p>滚动到第二屏后的回调函数执行的效果</p>
+    </div>
+    <div class="section section3">
+        <h3>第三屏</h3>
+        <p>滚动到第三屏后的回调函数执行的效果</p>
+    </div>
+    <div class="section section4">
+        <h3>第四屏</h3>
+        <p>滚动到第四屏后的回调函数执行的效果</p>
+    </div>
+</div>
+</body>
 <script>
     $(document).ready(function() {
         setTimeout(function () {
@@ -134,43 +149,4 @@
         }, 2000);
     });
 </script>
-    
-<div id="preloader">
-    <div id="status">&nbsp;</div>
-</div>
-
-<div id="fullpage">
-<div class="section section1">
-
-    <h3>第一屏</h3>
-
-    <p>fullPage.js — 回调函数演示</p>
-
-</div>
-
-<div class="section section2">
-
-    <h3>第二屏</h3>
-
-    <p>滚动到第二屏后的回调函数执行的效果</p>
-
-</div>
-
-<div class="section section3">
-
-    <h3>第三屏</h3>
-
-    <p>滚动到第三屏后的回调函数执行的效果</p>
-
-</div>
-
-<div class="section section4">
-
-    <h3>第四屏</h3>
-
-    <p>滚动到第四屏后的回调函数执行的效果</p>
-
-</div>
-</div>
-</body>
 </html>
