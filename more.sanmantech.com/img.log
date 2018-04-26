@@ -1,0 +1,11 @@
+enter uploading<pre class='xdebug-var-dump' dir='ltr'>
+<small>E:\GoogleDrive\WebBible\model\model\img.php:29:</small>
+<b>array</b> <i>(size=1)</i>
+  'file' <font color='#888a85'>=&gt;</font> 
+    <b>array</b> <i>(size=5)</i>
+      'name' <font color='#888a85'>=&gt;</font> <small>string</small> <font color='#cc0000'>'开发平台已搭建.png'</font> <i>(length=25)</i>
+      'type' <font color='#888a85'>=&gt;</font> <small>string</small> <font color='#cc0000'>'image/png'</font> <i>(length=9)</i>
+      'tmp_name' <font color='#888a85'>=&gt;</font> <small>string</small> <font color='#cc0000'>'C:\wamp64\tmp\php7C10.tmp'</font> <i>(length=25)</i>
+      'error' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>0</font>
+      'size' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>90768</font>
+</pre>enter saveas文件存储在: E:/GoogleDrive/WebBible/more.sanmantech.com/res/imgs/product/rrr/ttt18-04-25_1524627554_8077.pngentered resize------------------E:/GoogleDrive/WebBible/more.sanmantech.com/res/imgs/product/rrr/ttt18-04-25_1524627554_8077.png

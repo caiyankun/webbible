@@ -1,3 +1,5 @@
+<div class="container-fluid">
+<div class="row">
 <div class="col-sm-6">
     <div class="widget style1 yellow-bg">
         <div class="row">
@@ -24,35 +26,31 @@
         </div>
     </div>
 </div>
-<div  class="col-sm-12">
-    <div class="collapse" id="saldetail">
-        <h3>&nbsp;销售额详细内容:<h3>
-        <div class="well">
-        ...
-        </div>
-    </div>
-    <div class="collapse" id="newuserdetail">
-        <h3>&nbsp;新增会员详细内容:<h3>
-        <div class="well">
-        ...
-        </div>
-    </div>
+</div>
+<div class="row">
+<div class="col-sm-12">
+<div class="panel panel-success">
+  <div class="panel-heading">
+    <h3 class="panel-title">今日销售额统计详情</h3>
+  </div>
+  <div class="panel-body">
+    统计详情
+  </div>
 </div>
 
-<hr/>
-<div com:vm="blocknav" dataspace="blocknav">
-<div for:="(_i,_k,_v) in nav.blockmenues" class="col-sm-3" >
-<div class="widget p-lg red-bg text-center" >
-    <div class="m-b-md">
-        <i class="fa fa-thumbs-up fa-4x"></i>
-        <h3 class="m-xs">{{_v}}</h3>
+<div class="panel panel-success">
+    <div class="panel-heading">
+        <h3 class="panel-title">今日新增会员统计详情</h3>
+    </div>
+    <div class="panel-body table-responsive">
+
     </div>
 </div>
 </div>
 </div>
-
+</div>
 <script>
 sm.view.onloadinit(function(){
-    $blocknav.nav.blockmenues=["会员管理","商品管理","订单管理","营销管理","商城管理","财务管理","统计报表"];
+
 });
 </script>
