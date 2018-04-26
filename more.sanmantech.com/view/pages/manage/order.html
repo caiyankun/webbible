@@ -1,1 +1,253 @@
-订单
+<style>
+    .ibox-tools a {
+        margin-right: 7px;
+    }
+
+    .ml10:nth-child(2) {
+        margin-left: 10px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    table th, table td {
+        border: 1px solid #e6e6e6;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+    }
+
+    #editTab td input {
+        width: 112px;
+        text-align: center;
+        border: none;
+    }
+</style>
+<div class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>订单统计</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link" id="countTabBtn">
+                            <i class="fa fa-chevron-up countTabIcon"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content" id="countTabWrap">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>所有订单</th>
+                            <th>待支付订单</th>
+                            <th>待发货订单</th>
+                            <th>待确认订单</th>
+                            <th>已完成订单</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>1000</td>
+                            <td>200</td>
+                            <td>300</td>
+                            <td>100</td>
+                            <td>400</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>订单列表</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link" id="listTabBtn">
+                            <i class="fa fa-chevron-up listTabIcon"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content" id="listTabWrap">
+                    <div id="toolbar" class="btn-group">
+                        <button type="button" class="btn btn-default" data-toggle="modal" data-target="#addmember">
+                            <i class="glyphicon glyphicon-plus"></i>
+                        </button>
+                    </div>
+                    <table data-toggle="table"
+                           data-url="js/demo/bootstrap_table_test.json"
+                           data-pagination="true"
+                           data-page-list="[5, 10, 20, 50, 100, 200]"
+                           data-search="true"
+                           data-show-refresh="true"
+                           data-show-toggle="false"
+                           data-show-columns="true"
+                           data-toolbar="#toolbar">
+                        <thead>
+                        <tr>
+                            <th data-field="name">订单ID</th>
+                            <th data-field="sex">姓名</th>
+                            <th data-field="sex">联系方式</th>
+                            <th data-field="age" data-sortable="true">收货地址</th>
+                            <th data-field="mobile">下单金额</th>
+                            <th data-field="address">下单时间</th>
+                            <th data-field="action" data-formatter="actionFormatter" data-events="actionEvents">操作</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="modal inmodal" id="addmember" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content animated flipInY">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                            class="sr-only">Close</span></button>
+                    <h4 class="modal-title">新增订单</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal m-t" id="commentForm" novalidate="novalidate">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">订单ID：</label>
+                            <div class="col-sm-8">
+                                <input id="orderId" name="name" minlength="2" type="text"
+                                       class="form-control"
+                                       required="" aria-required="true">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">姓名：</label>
+                            <div class="col-sm-8">
+                                <input id="name" type="email" class="form-control" name="email"
+                                       required="" aria-required="true">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">联系方式：</label>
+                            <div class="col-sm-8">
+                                <input id="mobile" type="email" class="form-control" name="email"
+                                       required="" aria-required="true">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">收货地址：</label>
+                            <div class="col-sm-8">
+                                <input id="address" type="url" class="form-control" name="url">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">下单金额：</label>
+                            <div class="col-sm-8">
+                                <input id="amount" type="url" class="form-control" name="url">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">下单时间：</label>
+                            <div class="col-sm-8">
+                                <input id="time" type="url" class="form-control" name="url">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-3">
+                                <button class="btn btn-primary" type="submit">提交</button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+
+        //点击表格右上角的图标可以折叠表格
+        $('#countTabBtn').click(function () {
+            //右上角小图标切换
+            if ($('#countTabWrap').css('display') === 'block') {
+                $('.countTabIcon').addClass('fa-chevron-down')
+            } else {
+                $('.countTabIcon').removeClass('fa-chevron-down')
+            }
+            $('#countTabWrap').slideToggle()
+
+        })
+
+        //点击表格右上角的图标可以折叠表格
+        $('#listTabBtn').click(function () {
+            if ($('#listTabWrap').css('display') === 'block') {
+                $('.listTabIcon').addClass('fa-chevron-down')
+            } else {
+                $('.listTabIcon').removeClass('fa-chevron-down')
+            }
+            $('#listTabWrap').slideToggle()
+        })
+
+        window.actionEvents = {
+            'click .edit': function (e, value, row, index) {
+                layer.open({
+                    type: 1,
+                    area: ['720px'],
+                    shadeClose: true,
+                    title: '修改订单',
+                    content: '<div style="padding:20px;" class="aaa"><table id="editTab">' +
+                    '<thead><tr><th>订单Id</th><th>姓名</th><th>联系方式</th><th>收货地址</th><th>下单金额</th><th>下单时间</th></tr></thead>' +
+                    '<tbody><tr><td><input type="text" value="' + row.name + '"></td>' +
+                    '<td><input type="text" value="' + row.sex + '"></td>' +
+                    '<td><input type="text" value="' + row.sex + '"></td>' +
+                    '<td><input type="text" value="' + row.age + '"></td>' +
+                    '<td><input type="text" value="' + row.mobile + '"></td>' +
+                    '<td><input type="text" value="' + row.address + '"></td></tr></tbody></table></div>',
+                    btn: ['提交'],
+                    yes: function (index, layero) {
+                        layer.confirm('确定要修改该订单信息吗?', {icon: 3, title: '提示'}, function (index) {
+                            layer.closeAll()
+                        });
+                    }
+                });
+            },
+            'click .remove': function (e, value, row, index) {
+                layer.confirm('确定要删除订单<strong style="color:red">' + row.name + '</strong>吗?', {
+                    icon: 3,
+                    title: '提示'
+                }, function (index) {
+                    layer.close(index);
+                });
+            }
+        };
+
+    })
+
+    function actionFormatter(value, row, index) {
+        return [
+            '<a class="edit ml10" href="javascript:void(0)" title="Edit">',
+            '<i class="glyphicon glyphicon-edit"></i>',
+            '</a>',
+            '<a class="remove ml10" href="javascript:void(0)" title="Remove">',
+            '<i class="glyphicon glyphicon-remove"></i>',
+            '</a>'
+        ].join('');
+    }
+
+    function detailFormatter(value, row, index) {
+        return [
+            '<a class="view ml10" href="javascript:void(0)" title="View">',
+            '<i class="glyphicon glyphicon-zoom-in"></i>',
+            '</a>'
+        ].join('');
+    }
+</script>
