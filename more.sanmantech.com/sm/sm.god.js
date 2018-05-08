@@ -3,7 +3,6 @@
 //---------------God.js Core 开始：sm及原型定义，链式操作--------------------
 
 if (true){
-    
 //原型定义-开始:--sm及God原型定义，链式操作
 if(true){
 if (typeof God==='undefined') {God={};}//定义分开是为了方便弱化对js文件的加载顺序的要求
@@ -196,6 +195,41 @@ isna:function(varname){return isNaN(varname);},
 isundefined:function(varname){return typeof(varname) == "undefined";},
 isdefined:function(varname){return !(typeof(varname) == "undefined");},
 isfunction:function(varname){return (typeof(varname) == "function");},
+toobj:function(arr,objdef){
+    //如果传进来的是一个数组，那么遍历数组把每个元素按照顺序赋值到objdef
+    //如果传进来的是一个对象，那么便利对象属性，那么把这个对象属性合并到objdef
+    if($$.isobj(arr)){
+        var rso= $$.merge.apply({},objdef);
+        $$.merge.apply(rso,[arr]);
+        return rso;
+    }
+    !$$.isarray(arr)&&(arr=[arr]);
+    var rso=$$.merge.apply({},[objdef]);
+    var i=0;
+    for(prop in rso){
+        if(i <arr.length){
+            rso[prop]=arr[i];
+        }
+        i++;
+    }
+    return rso;
+},
+toobjarr:function(arr,objdef){
+    //如果传进来的是一个数组，那么遍历数组把每个元素转换成一个objdef
+    //如果传进来的是一个对象，那么便利对象属性，把每个属性转换成一个objdef其中的name=key，value=value，text=key
+    var rso=[];
+    if($$.isobj(arr)){
+        for (var k in arr){
+            rso.push($$.toobj({name:k,value:arr[k],text:k},objdef));
+        }
+        return rso;
+    }
+    !$$.isarray(arr)&&(arr=[arr]);
+    arr.forEach(function(item){
+        rso.push($$.toobj(item,objdef));
+    });
+    return rso;
+},
 merge:function(o){for (x in o) {this[x]=o[x];} return this;},//把给定的对象的全部属性融合到自身中
 safemerge:function(o){for (x in o) {this.hasOwnProperty(x)&&(this[x]=o[x]);} return this;},//把给定的对象中与自身相交的属性值更新到自身中
 rndid:function(prix){prix=arguments[0]?(arguments[0]+"_"):"";return prix+parseInt(1000000*Math.random());},
@@ -238,6 +272,8 @@ create:function(str){
     var nodes=t.childNodes;
     var n=nodes.length;
     for (var i=0;i<n;i++){rs.push(nodes[i]);}
+    var n=rs.length;
+    for(var i=0;i<n;i++){document.body.prepend(rs[i]);}
     return rs;
 },
 });
@@ -252,7 +288,7 @@ God.coms("ajax").extend({
 type:function(newtype){this.setup({type:newtype});return this;},
 data:function(newdata){this.setup({data:newdata});return this;},
 url:function(newurl){this.setup({url:newurl});return this;},
-smurl:function(su){return this.url(sm.server.url(su));},
+smurl:function(su,ex=""){return this.url(sm.server.url(su)+ex);},
 async:function(b){this.setup({async:b});return this;},
 post:function(data,url,async){
     arguments.length>2&&(this.async(async));
@@ -279,7 +315,9 @@ doxhr:function(paraobj,smfcheck=false){
         var data = me.setup().data;
         var xhr = new XMLHttpRequest();        //创建一个ajax对象
         xhr.onreadystatechange = function(event){    //对ajax对象进行监听
+            //console.log(xhr.readyState);
             if(xhr.readyState == 4){    //4表示解析完毕
+                //console.log(xhr);
                 if(xhr.status == 200){    //200为正常返回
                     if(smfcheck){
                         if(me.smfcheck(xhr.responseText)){
@@ -305,6 +343,8 @@ doxhr:function(paraobj,smfcheck=false){
         xhr.setRequestHeader('Content-type','application/x-www-form-urlencoded');    //可有可无
         //post参数要转换格式啊-_-!!!
         //console.log(me.formatdata(data));
+        //console.log(me.setup());
+        
         xhr.send(me.formatdata(data)); 
         me.setup().data={};
     });
@@ -559,6 +599,7 @@ smfcheck:function(d){
 God.coms("view").extendproto({//对话框
 find:function(dataspace){
     //console.log("find");
+    if(typeof dataspace!=="string"){alert("1");}
     return this.new(dataspace);
 },
 new:function(dataspace){
@@ -593,6 +634,7 @@ fillcomto:function(comname,target,dataspace,independent=false){
                 target.innerHTML="<div com:='"+comname+"' dataspace='"+dataspace+"' oncominit='true'>"+com.innerHTML+"</div>";
                 //sm.view.dooncominit(comname,dataspace);
                 sm.view.init().then(function(){
+                    if(typeof dataspace!=="string"){alert("fillcomto");}
                     return resolve(sm.view.find(dataspace));
                 },function(){
                     return reject("初始化失败！");
@@ -608,6 +650,7 @@ fillcomto:function(comname,target,dataspace,independent=false){
     return promise;
 },
 eventhandeler:function(e,dataspace){
+    var maxi=e.path.indexOf(e.currentTarget)
     var me=this;
     var dwtree=me.domwatchingtree;
     var defaultevent="click";
@@ -618,7 +661,12 @@ eventhandeler:function(e,dataspace){
         var match=false;
         selector.replace(/^text\:(.*)$/,function(t,v){e.target.textContent==v && (match=true);});
         try{
-            e.target.matches(selector)&&(match=true);
+            var i=0;
+            var matchedel=e.target;
+            while(i<=maxi){
+                e.path[i].matches(selector)&&(match=true,matchedel=e.path[i]);
+                i++;
+            }
         } catch(e){
             
         }
@@ -627,17 +675,24 @@ eventhandeler:function(e,dataspace){
         if(curevent==""){curevent=defaultevent} else {defaultevent=curevent;}
         if(match&&("@"+curevent+"@").indexOf("@"+e.type+"@")>-1){
             //console.log(e.target.textContent+e.type+dataspace);
-            cb.apply(me,[e,dataspace]);
+            cb.apply(sm.view.find(dataspace),[e,matchedel,dataspace]);
         }
     }
     
     return this;    
 },
 method:{
+    find:function(subdataspace){
+        var me=this;
+        var ms=me._dataspace;
+        var fs=ms+"."+subdataspace;
+        return sm.view.find(fs);
+    },
     data:function(mapobj){
         var me=this;
         var dataspace=me._dataspace;
         $$.foreach(mapobj,function(k,v){
+            if(typeof dataspace!=="string"){alert("method.data");}
             sm.view.setvar(k,v,dataspace);
         });
         return me;
@@ -698,6 +753,30 @@ method:{
         });
         sm.view.watchdata(dataspace);
         return this;
+    },
+    group:function(which=""){
+        this._group=[];
+        var me=this;
+        var items=this._el.querySelectorAll("[group]");
+        items.forEach(function(item){
+            var gstr=item.getAttribute("group");
+            var gby=gstr.split(" as ")[0];
+            var gas=((gstr==gby)?"":gstr.split(" as ").pop());
+            if(gas==""){
+                me._group.push(sm.view.getattrvalue(item,gby));
+            } else if(/\[(.*)\]/.test(gas)) {
+                var t=RegExp.$1;
+                (typeof me._group[t]=="undefined")&&(me._group[t]=[]);
+                me._group[t].push(sm.view.getattrvalue(item,gby));
+            } else if(/([^\.]*)\.([^\.]*)/.test(gas)) {
+                var t=RegExp.$1;
+                var tt=RegExp.$2;
+                (typeof me._group[t]=="undefined")&&(me._group[t]={});
+                me._group[t][tt]=sm.view.getattrvalue(item,gby);
+            }
+        });
+        if(which=="") {return this._group;}
+        else {return this._group[which];}
     },
 },//这里的函数都需要有this指针，会把当前实例需要的函数再次封装在这里
 layout:{
@@ -810,23 +889,28 @@ comset:function (com,dataspace="",deepinit=0){
     this.elset($el,1,1,dataspace,deepinit);
     return this;
 },//对某个组件实行全局set
-comrefinit:function(){
+comrefinit:function(el=document.body,pds=""){
     var me=this;
-    var comref=document.querySelector("[view-com]");
+    var comref=el.querySelector("[view-com]");
     if(!comref||comref.length<1) return new Promise(function(resolve,reject){return resolve("blank");});
     var comname=comref.getAttribute("view-com");
     var dataspace=comref.getAttribute("dataspace");
     if(!dataspace) dataspace=comname;
+    //var fds=dataspace;
+    //if(!pds) fds=pds+"."+fds;
     comref.setAttribute("com:",comname);
     comref.setAttribute("dataspace",dataspace);
     comref.setAttribute("oncominit",true);
     comref.removeAttribute("view-com");
     var promise=new Promise(function(resolve,reject){
         me.fillcomto(comname,comref,dataspace).then(function(d){
-            me.comrefinit().then(function(d){
-                return resolve(d);
-            },function(i){
-                return reject(i);
+            //sm.view.find(dataspace);
+            sm.view.init(comref,1,pds).then(function(d){
+                me.comrefinit(el,pds).then(function(d){
+                    return resolve(d);
+                },function(i){
+                    return reject(i);
+                });
             });
         },function(i){
             return reject(i);
@@ -842,6 +926,7 @@ init:function (com="body",deepinit=1,pdataspace=""){
     //如果是组件的话，先确定当前组件的数据空间在哪里
     var dataspace=$el.getAttribute("dataspace");
     dataspace||(dataspace="common");
+    (typeof dataspace!=="string")&&(dataspace="common");
     (pdataspace!=="")&&(dataspace=pdataspace+"."+dataspace);
     //console.log("root begin of Init:"+dataspace);
     //console.log(sm.view.data.common);
@@ -849,7 +934,7 @@ init:function (com="body",deepinit=1,pdataspace=""){
     var needinit=$el.getAttribute("oncominit");
     //首先确保该组件下没有尚未实例化的组件引用，没有的话开始进行初始化
     var promise=new Promise(function(resolve,reject){
-        me.comrefinit().then(function(d){
+        me.comrefinit($el,dataspace).then(function(d){
             //console.log("开始初始化一个组件："+dataspace);
             var view=sm.view.new(dataspace);
             view._el=$el;
@@ -1002,6 +1087,7 @@ elget:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0){
                 var pureattr=realattr.split('@')[0].split('-')[0];//获取属性值到变量时只允许一对多
                 //console.log(realattr+"-elget:"+varname+"-dataspace:"+dataspace+"-value:"+me.getattrvalue(el,realattr));
                 varnames.forEach(function(varname){
+                    if(typeof dataspace!=="string"){alert("elget");}
                     me.setvar(varname,me.getattrvalue(el,pureattr),dataspace);
                 });
                 var getevents=realattr.substr(realattr.split('@')[0].length+1);
@@ -1015,6 +1101,7 @@ elget:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0){
         else if(regisgroup.test(attrName)){
             //开始获取
             //console.log("识别到了一个group变量需要提取："+attrName);
+            if(typeof dataspace!=="string"){alert("elget2");}
             me.setvar(varname,me.groupelget(el,autoupdate,dataspace),dataspace);
         }//如果符合getlist:的话的处理方式：结束
     });
@@ -1050,6 +1137,7 @@ forelset:function(el,deep,autoupdate=1,dataspace="",deepinit=0){
     autoupdate&&(me.varfunsadd(data,el,dataspace));
     var items=me.getvar(data,dataspace);
     $$.isempty(items)&&(items=[]);
+    if(typeof dataspace!=="string"){alert("forelset");}
     if(!$$.isarray(items)){items=[items];me.setvar(data,dataspace,items);}
     var forid=el.getAttribute("for-id");
     if(!forid){forid=Math.random();el.setAttribute("for-id",forid);}
@@ -1073,6 +1161,7 @@ forelset:function(el,deep,autoupdate=1,dataspace="",deepinit=0){
         nodenum=nodes.length,itemnum=items.length;
     }
     var index=0;
+    if(typeof dataspace!=="string"){alert("forelset2");}
     if(itemnum<1){ //如果数据是空的时候，
         me.setvar(v,"",dataspace);
         me.setvar(i,0,dataspace);
@@ -1193,8 +1282,27 @@ elset:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0,noupdatelist=[],b
         });//（1）给所有表达式中的变量添加粉丝（2）计算表达式值及完成替换
         el.textContent=textstr;//结果赋值到元素的文本内容中
         
-    } else {
-
+    } else if (el.nodeType==8){
+        //return this;
+        var ct=el.textContent;
+        if(/^sm\:/.test(ct)){
+            var t=document.createElement("div");
+            t.innerHTML=ct.replace(/^sm\:/,"");
+            var tt=t.firstElementChild;
+            var varname=tt.getAttribute("set:exist");
+            
+            if(/^\(.*\)$/.test(varname)){varname="{{"+varname+"}}";}//给显式表达式加括号，统一格式
+            varname=varname.replace(/\{\{\s*([_\.a-zA-Z0-9]*|[_\.a-zA-Z0-9]+\(.*\))\s*\}\}/g,function(t,v){return "{{$"+v+"}}";});//给单变量/函数加$统一格式，标准要求是函数一定加@
+            var varvalue=varname.replace(/\{\{\s*(.*?)\s*\}\}/g,function(t,exp){
+                return me.getexp(exp,dataspace);//完成表达式计算并完成替换
+            });//给所有表达式中的变量添加粉丝
+            if(!varvalue||varvalue=="0"||varvalue=="undefined"||varvalue==""){
+                
+            } else {
+                el.before(t.firstElementChild);
+                el&&el.parentNode&&el.parentNode.removeChild(el);
+            }
+        }
     }
     return this;
 },//对node进行解析看有哪些属性与变量关联
@@ -1206,6 +1314,7 @@ getattrvalue:function (el,attr){
             break;
         case 'display':
             //console.log("查询状态呢:"+el.style.display);
+            //console.log(el);
             if(el.style.display=='none'){return 0;}else{return 1;}//这里的值你无法实时获取，因为它没有input事件啊！
             break;
         case 'removewhen':
@@ -1225,18 +1334,53 @@ setattrvalue:function (el,attr,value){
             el.value=value;
             break;
         case 'display':
-            if(value){el.style.display='block';}else{el.style.display='none';}
+            //console.log("enter display:"+value);
+            //console.log(el);
+            if(!value||value=="0"||value=="undefined"||value==""){
+                el.style.display='none';
+            }else{
+                el.style.display='';
+            }
+            //console.log(el.style.display);
             break;
-        case 'removewhen':
-            //console.log("why");
-            if(value){el&&el.parentNode&&el.parentNode.removeChild(el);}else{}//这玩意不可逆啊！
+        case 'exist':
+            //break;
+            if(!value||value=="0"||value=="undefined"||value==""){
+                var t=document.createComment("sm:"+el.outerHTML);
+                el.before(t);
+                el&&el.parentNode&&el.parentNode.removeChild(el);//这玩意不可逆啊！
+            }
             break;
         case 'addclass':
             //console.log("why");
-            if(el){
+            if(el&&value){
                 let curclass=el.getAttribute("class");
                 (!curclass)&&(curclass="");
-                (curclass.split(" ").indexOf(value)<0)&&(el.setAttribute("class",curclass+" "+value));
+                var acs=value.split("!")[0];
+                var rcs=value.substr(acs.length+1);
+                acs&&acs.split(",").forEach(function(c){
+                    (curclass.split(" ").indexOf(c)<0)&&(curclass=curclass+" "+c);
+                });
+                curclass=" "+curclass+" ";
+                rcs&&rcs.split(",").forEach(function(c){
+                    curclass=curclass.replace(" "+c+" "," ");
+                });
+                curclass=curclass.replace(/^\s+|\s+$/gm,'');
+                el.setAttribute("class",curclass);
+            }
+            break;
+        case 'addattr':
+            if(el&&value){
+                var acs=value.split("!")[0];
+                var rcs=value.substr(acs.length+1);
+                acs&&acs.split(",").forEach(function(c){
+                    var an=c.split("=")[0];
+                    var av=c.substr(an.length+1);
+                    an&&(el.setAttribute(an,av));
+                });
+                rcs&&rcs.split(",").forEach(function(c){
+                    el.removeAttribute(c);
+                });
             }
             break;
         default:
@@ -1257,7 +1401,9 @@ getexp:function(expstr,dataspace=""){
         //console.log(evalstr);              
         try{
             rsvalue=eval(evalstr);
+            //console.log(rsvalue+"-----:"+evalstr);   
         } catch (ex) {
+            //console.log("Error-----:"+evalstr);      
         }
     return rsvalue;
 },
@@ -1266,6 +1412,7 @@ getvar:function (varname,dataspace=""){
     //如果没有变量，就创建
     //window.data||(window.data={});//这个需要view实例来调用，否则大家共享同一个空间了
     //var val=window.data;
+    if(typeof dataspace!=="string"){alert("getvar");}
     var val=sm.view.find(dataspace);
     var exp = varname.split('.');
     for(var i=0;i<exp.length-1;i++){
@@ -1277,6 +1424,7 @@ getvar:function (varname,dataspace=""){
 },//按照变量地区获取变量值
 setvar:function (varname,value,dataspace=""){
     (dataspace=="")&&(dataspace="common");
+    if(typeof dataspace!=="string"){alert("setvar");}
     var val=sm.view.find(dataspace);
     var exp = varname.split('.');
     for(var i=0;i<exp.length-1;i++){
@@ -1292,6 +1440,7 @@ watchdata:function (dataspace="",varname=""){
     var me=this;
     //console.log("enter watching data:"+dataspace+","+varname);
     if(varname==""){
+        if(typeof dataspace!=="string"){alert("watchdata");}
         var proxyobj=sm.view.find(dataspace);
     } else {
         var proxyobj=sm.view.getvar(varname,dataspace);
@@ -1387,6 +1536,7 @@ varfunsnotify:function (fullvarname,dataspace=""){
     window.varfuns[fullvarname][dataspace].forEach(function(el){
         //console.log(dataspace+i++);
         if($$.isfunction(el)){
+            if(typeof dataspace!=="string"){alert("varfunsnotify");}
             el.apply(sm.view.find(dataspace));
         } else {
             me.elset(el,0,0,dataspace);
@@ -1406,17 +1556,19 @@ varfunsnotify:function (fullvarname,dataspace=""){
 },//watchdata中的任何一个属性更改，都会触发这里的notify，但并不是每个变量都有粉丝
 varfunshave:function (varname,el,dataspace=""){
     (dataspace=="")&&(dataspace="common");
-    (arguments.length>2)&&(dataspace!=="")&&(varname=dataspace+"."+varname);
+    (!/^common/.test(dataspace))&&(dataspace="common."+dataspace);
+    //(arguments.length>2)&&(dataspace!=="")&&(varname=dataspace+"."+varname);
     if(typeof window.varfuns[varname]=='undefined'){
         return false;
     } else {
         if(typeof window.varfuns[varname][dataspace]=='undefined'){
             return false;
         }
+        var matched=false;
         window.varfuns[varname][dataspace].forEach(function(item){
-            if(item==el){return true;}
+            if(item==el){matched= true;}
         });
-        return false;
+        return matched;
     }
 },//检测变量是否有该粉丝
 varfunsadd:function (varname,el,dataspace=""){
@@ -1426,20 +1578,33 @@ varfunsadd:function (varname,el,dataspace=""){
     (typeof window.varfuns[varname]=='undefined')&&(window.varfuns[varname]=[]);
     (typeof window.varfuns[varname][dataspace]=='undefined')&&(window.varfuns[varname][dataspace]=[]);
     //console.log("添加变量监控函数："+varname+","+dataspace);
-    !this.varfunshave(varname,el)&&window.varfuns[varname][dataspace].push(el);    
+    !this.varfunshave(varname,el,dataspace)&&window.varfuns[varname][dataspace].push(el);    
 },//为变量添加粉丝    
 oncominitlist:{},
 oncominitedlist:[],
+aftercominitlist:[],
 onloadinitlist:[],
 onloadinitedlist:[],
 oncominit:function(com,initcb=function(){}){this.oncominitlist[com]=initcb;},
 dooncominit:function(com,view,el){
     //console.log("dooncominit");
+    var me=this;
     if(this.oncominitlist.hasOwnProperty(com)){
         var cb=this.oncominitlist[com];
-        if($$.isfunction(cb)){cb(view,el);}
+        
+        if($$.isfunction(cb)){
+            cb.apply(view,[el]);
+            if(typeof me.aftercominitlist[com]=="undefined"){me.aftercominitlist[com]=[];}
+            me.aftercominitlist[com].forEach(function(acb){
+                acb.apply(view,[el]);
+            });
+        }
     }
     return this;
+},
+aftercominit:function(com,cb=function(){}){
+    if(typeof this.aftercominitlist[com]=="undefined"){this.aftercominitlist[com]=[];}
+    this.aftercominitlist[com].push(cb);
 },
 onloadinit:function(cb){this.onloadinitlist.push(cb);return this;},
 doonloadinit:function(){
@@ -1600,9 +1765,8 @@ God.coms("dialog").extendproto({//对话框
 show:function(content="",funcmap=function(){},title=""){
     code_bg='<div id="code_bg" style="position:absolute;left:0px;top:0px;background-color:#000;width:100%;filter:alpha(opacity=60);opacity:0.6;z-Index:100;"></div>'
     code_msg='<div id="code_msg" style="position:absolute;width:100%;height:30px;text-align:center;line-height: 30px;top:0px;left:0px;background-color:#ddd;filter:alpha(opacity=40);opacity:0.4;cursor:pointer;z-Index:101;">'+content+'</div>'
-    var nodes=sm.document.create(code_bg+code_msg);
-    var n=nodes.length;
-    for(var i=0;i<n;i++){document.prepend(nodes[i]);}
+    sm.document.create(code_bg+code_msg);
+    
     document.querySelector("#code_bg").style.height=document.clientHeight;
 
     return this;
@@ -1623,6 +1787,65 @@ close:function(filter){
         document.querySelector("#code_msg").remove();
     }catch(e){}
     return this;
+},
+
+});
+God.coms("upload").extend({
+    _setup:{
+        autostart:true,
+        onloadcb:function(){},
+        onfailcb:function(){},
+    },
+}).extendproto({//对话框
+selectfile:function(){
+    if(!document.body.querySelector("#uploadfile")){
+        sm.document.create('<input type="file" id="uploadfile" name="files" multiple="multiple" style="display:none"/>');
+        document.body.querySelector("#uploadfile").addEventListener("change",function(){
+            sm.upload.onqued(document.body.querySelector("#uploadfile").files);
+        });
+    }
+    document.body.querySelector("#uploadfile").click();
+    return sm.upload;
+},
+onqued:function(files){
+    if(this._setup.autostart){return this.do();}
+},
+autostart:function(auto=true){this.setup({autostart:auto});return this;},
+onload:function(cb){this.setup({onloadcb:cb});return this;},
+onfail:function(cb){this.setup({onfailcb:cb});return this;},
+url:function(newurl){this.setup({url:newurl});return this;},
+smurl:function(su,ex=""){return this.url(sm.server.url(su)+ex);},
+do:function(url="",fname="file"){
+    url=(url==""?this._setup.url:url);
+    var me=this;
+    var files = document.body.querySelector("#uploadfile").files;
+    var promise=new Promise(function(resolve,reject){
+        if(files.length<1){me._setup.onfailcb("没有要上传的问件!");return reject("没有要上传的问件!");}
+        var form = new FormData(); // FormData 对象
+        for (var i=0;i<files.length;i++){
+           form.append(fname+(i==0?"":i), files[i]); // 文件对象 
+        };
+        var xhr = new XMLHttpRequest();  // XMLHttpRequest 对象
+        xhr.open("post", url, true); //post方式，url为服务器请求地址，true 该参数规定请求是否异步处理。
+        //xhr.onload = uploadComplete; //请求完成
+        //xhr.onerror =  uploadFailed; //请求失败
+        //xhr.upload.onprogress = progressFunction;//【上传进度调用方法实现】
+        //xhr.upload.onloadstart = function(){//上传开始执行方法
+        //    ot = new Date().getTime();   //设置上传开始时间
+        //    oloaded = 0;//设置上传开始时，以上传的文件大小为0
+        //};
+        xhr.onload = function(oEvent) {
+            if (xhr.status == 200) {
+                me._setup.onloadcb(xhr.responseText);
+                return resolve(xhr.responseText);
+            } else {
+                me._setup.onfailcb(xhr.status);
+                return reject(xhr.status);
+            }
+          };
+        xhr.send(form); //开始上传，发送form数据
+    });
+    return promise;
 },
 
 });

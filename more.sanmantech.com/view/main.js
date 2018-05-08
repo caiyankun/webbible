@@ -1,10 +1,11 @@
 /**这个文件是项目自定义的文件，是对框架中默认方法，数据的重定义，会覆盖掉框架中默认的数据值，函数方法**/
 
-sm.coms.require(["jquery","bootstrap.v3","awesome","animate","hadmin","metismenu","slimscroll","pace"]).then(function(){
+sm.coms.require(["jquery","bootstrap.v3","awesome","animate","hadmin","metismenu","slimscroll","pace","modalform","webuploader"]).then(function(){
     
     //(1)项目中所有遇到的远程url建议都定义在这里，主机地址，方便后续更改：
     sm.server.extend({
-        host:"http://more.sanmantech.com/",
+        //host:"http://more.sanmantech.com/",
+        host:"http://local.more.com/",
         adjustdata:function(){
             //每次请求之前会自动执行一下这个函数：对数据进行矫正，这里自动添加token
             if(!this.hasOwnProperty("token")&&sm.user.info.token){
@@ -15,6 +16,9 @@ sm.coms.require(["jquery","bootstrap.v3","awesome","animate","hadmin","metismenu
             login:"user/login.func",
             showme:"user/showme.func",
             logout:"user/logout.func",
+            glob:"file/glob.func",
+            prodpicupload:"img/uploadimg.func/product/",
+            picupload:"img/uploadimg.func/",
         }
     });
     //(2)如果路由中需要用到用户权限验证的功能，就必须重写框架中用户登录相关的函数：

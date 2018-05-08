@@ -15,26 +15,14 @@ namespace model;
  */
 class img {
     public $logfile=ENTRY_PATH."img.log";
-    public function uploadimg($name,$folder,$cat="product"){
+    public function uploadimg($cat,$folder,$name=""){
         $log="enter uploading";
         $base=ENTRY_PATH."res/imgs/";
         $targetpath=$base.$cat."/";
         if($folder!==""){$targetpath=$targetpath.$folder."/";}
-        $time=time();
-        $i= rand(1, 10000);
-        $targetname=$name.date("y-m-d", $time)."_".$time."_".$i;
-        
         \File::mkdir($targetpath);
-        ob_start();
-        var_dump($_FILES);
-        $originfile=$this->saveuploadfileas($targetpath,$targetname);
-        if(!empty($originfile)){
-            $this->resize($originfile, 300,300,true);
-        }
-        $log=$log.ob_get_clean();    
-        file_put_contents($this->logfile,$log );
         
-        
+        $this->saveuploadfilesas($targetpath,$name);
         
     }
     public function testupload($name,$folder,$cat="product"){
@@ -45,36 +33,56 @@ class img {
         echo $targetpath;
     }
     public function test(){
-        echo file_get_contents($this->logfile);
+        //var_dump($_FILES);
+        echo json_encode($_FILES);
     }
-    public function saveuploadfileas($newloc,$newname=""){
+    public function saveuploadfilesas($targetpath,$namesuffix="") {
+        
+        foreach ($_FILES as $file => $fileinfo) {
+            $time=time();
+            $i= rand(1, 10000);
+            $targetname=$namesuffix.date("y-m-d", $time)."_".$time."_".$i;
+            //ob_start();
+            //echo $targetname;
+            //echo $name;
+            //var_dump($_FILES);
+            $originfile=$this->saveuploadfileas($file,$targetpath,$targetname);
+            if(!empty($originfile)){
+                $this->resize($originfile, 300,300,true);
+            }
+            //\Response::returntaskok([$file,$targetpath,$targetname]);
+            //$log=$log.ob_get_clean();    
+            //file_put_contents($this->logfile,$log );
+        }   
+    }
+    public function saveuploadfileas($file,$newloc,$newname=""){
         echo "enter saveas";
         // 允许上传的图片后缀
+        
         $allowedExts = array("gif", "jpeg", "jpg", "png");
-        $temp = explode(".", $_FILES["file"]["name"]);
+        $temp = explode(".", $_FILES[$file]["name"]);
         $extension = end($temp);     // 获取文件后缀名
-        if ((($_FILES["file"]["type"] == "image/gif")
-        || ($_FILES["file"]["type"] == "image/jpeg")
-        || ($_FILES["file"]["type"] == "image/jpg")
-        || ($_FILES["file"]["type"] == "image/pjpeg")
-        || ($_FILES["file"]["type"] == "image/x-png")
-        || ($_FILES["file"]["type"] == "image/png"))
-        && ($_FILES["file"]["size"] < 204800)   // 小于 200 kb
+        if ((($_FILES[$file]["type"] == "image/gif")
+        || ($_FILES[$file]["type"] == "image/jpeg")
+        || ($_FILES[$file]["type"] == "image/jpg")
+        || ($_FILES[$file]["type"] == "image/pjpeg")
+        || ($_FILES[$file]["type"] == "image/x-png")
+        || ($_FILES[$file]["type"] == "image/png"))
+        && ($_FILES[$file]["size"] < 204800)   // 小于 200 kb
         && in_array($extension, $allowedExts))
         {
-
-            if ($_FILES["file"]["error"] <1)
+            if ($_FILES[$file]["error"] <1)
             {
                 if(empty($newname)){
-                    $newname=$_FILES["file"]["name"];
+                    $newname=$_FILES[$file]["name"];
                 } else {
-                    $type=$_FILES["file"]["type"];
+                    $type=$_FILES[$file]["type"];
                     $type= array_pop(explode("/", $type)) ;
                     ($type=="pjpeg")&&($type="jpg");
                     ($type=="x-png")&&($type="png");
                     $newname=$newname.".".$type;
                 }
-                    if(move_uploaded_file($_FILES["file"]["tmp_name"], $newloc .$newname)){
+                    if(move_uploaded_file($_FILES[$file]["tmp_name"], $newloc .$newname)){
                         echo "文件存储在: " . $newloc .$newname;
                         return $newloc.$newname;
                     } else {
@@ -98,7 +106,7 @@ class img {
         //图片的类型
         $type = substr(strrchr($imgSrc, "."), 1);
         //初始化图象
-        if ($type == "jpg") {
+        if ($type == "jpg"||$type == "jpeg") {
             $im = imagecreatefromjpeg($imgSrc);
         }
         if ($type == "gif") {

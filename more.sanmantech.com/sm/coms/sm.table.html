@@ -1,13 +1,6 @@
 <div view-com-tpl="table">
     <div class="container-fluid table-responsive" >
-        <ul class="nav pagination " set:display="setup.toolbar.enable">
-            <li >
-            <div class="btn-group "  role="group" aria-label="...">
-                <button type="button" class="btn btn-default">1</button>
-                <button type="button" class="btn btn-default">2</button>
-            </div>
-            </li>
-        </ul>
+        <div view-com="toolbar"></div>
         <table smtable-id="0.1" class="table table-hover table-bordered">
             <thead >
             <tr>
@@ -30,7 +23,6 @@
     </div>
 </div>
 <script>
-console.log("加载了HTML代码");
 sm.view.oncominit("table",function(view,el){
     console.log("entered cominit");
     console.log(view);

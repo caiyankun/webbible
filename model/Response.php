@@ -25,7 +25,7 @@ class Response
         self::$_taskstat["info"]=self::$info;
 	self::$responseobj["data"]=self::$data;
         self::$responseobj["stat"]=self::$_taskstat;
-        echo json_encode(self::$responseobj,JSON_UNESCAPED_UNICODE);
+        echo json_encode(self::$responseobj,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
         exit(0);
     }
     public static function returntaskfail($data="",$code=1,$info=""){

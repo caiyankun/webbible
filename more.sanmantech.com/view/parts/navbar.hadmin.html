@@ -17,10 +17,16 @@
         <a class="J_menuItem" set:href="{{$_v.href}}">
             <i class="fa" set:addclass="{{$_v.icon}}"></i>
             <span class="nav-label">{{$_v.text}}</span>
+            <span class="fa arrow" set:exist="($_v.submenue)"></span>
         </a>
+        <ul class="nav nav-second-level collapse in" aria-expanded="false" style="" set:exist="($_v.submenue)">
+            <li for:="(_ii,_kk,_vv) in _v.submenue"><a class="J_menuItem" set:href="{{$_vv.href}}">{{$_vv.text}}</a>
+            </li>
+        </ul>
     </li>
     <li class="line dk"></li>
 </ul>
+
 
 
 
@@ -35,12 +41,19 @@ sm.view.onloadinit(function () {
            {text:"会员管理",icon:"fa-user",href:"#manage/member.html"},
            {text:"商品管理",icon:"fa-gift",href:"#manage/product.html"},
            {text:"订单管理",icon:"fa-reorder",href:"#manage/order.html"},
-           {text:"营销管理",icon:"fa-tv",href:"#manage/marketing.html"},
+           {text:"营销管理",icon:"fa-tv",href:"#manage/marketing.html",submenue:[
+                {text:"首页轮播",href:"#manage/mkt_lunbo.html"},
+                {text:"首页内容",href:"#manage/homelist.html"},
+            ]},
            {text:"图片管理",icon:"fa-file-image-o",href:"#manage/picture.html"},
            {text:"商城管理",icon:"fa-database",href:"#manage/shop.html"},
-           {text:"财务管理",icon:"fa-money",href:"#manage/finance.html"},
+           {text:"财务管理",icon:"fa-money",href:"#manage/finance.html",submenue:[
+                {text:"销售额统计",href:"#test.html"},
+                {text:"押金",href:"#test.html"},
+            ]},
            {text:"统计报表",icon:"fa-pie-chart",href:"#manage/report.html"},
        ], 
+    }).method({
     });
     //------------------------调用-------------------------------
     // MetsiMenu

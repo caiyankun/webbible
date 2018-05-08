@@ -1,0 +1,137 @@
+<div view-com-tpl="explore">
+<div view-com="toolbar"></div>
+<div view-com="thumb"></div>
+</div>
+
+
+<script>
+    sm.view.oncominit("explore",function(){
+        //this.toolbar.setitems("left",[["fa fa-user","用户"],["fa fa-plus","添加"]]);
+        //this.toolbar.putpath("图片目录");
+        this.toolbar.editbar.show=true;
+        //this.toolbar.setitems("right",[["fa fa-plus","添加图片"],["fa fa-trash","删除图片"]]);
+        this.data({
+            selectitems:",",
+            clipboard:",",
+            "setup.filefilter":"*",
+            "setup.folderfilter":"*",
+        }).method({
+            filter:function(items){
+                //console.log("enter filter items");
+                return items;
+            },
+            adjustpics:function(objarr){
+                var rs=[];
+                objarr.forEach(function(item){
+                    (item.type=="folder")&&(item.src="res/imgs/system/folder.png");
+                    rs.push(item);
+                });
+                return rs;
+            },
+            clearselect:function(){
+                this.thumb._el.querySelectorAll("a[style]").forEach(function(sel){
+                    sel.removeAttribute("style");
+                });
+                this.selectitems=",";
+                this.updateeditbar();
+            },
+            updateeditbar:function(){
+                this.toolbar.editbar.add=false;
+                this.toolbar.editbar.upload=true;
+                if(this.selectitems.length<=1){
+                    this.toolbar.editbar.cut=false;
+                    this.toolbar.editbar.copy=false;
+                    this.toolbar.editbar.delete=false;
+                    this.toolbar.editbar.download=false;
+                } else {
+                    this.toolbar.editbar.cut=true;
+                    this.toolbar.editbar.copy=true;
+                    this.toolbar.editbar.delete=true;
+                    this.toolbar.editbar.download=true;
+                }
+                if(this.clipboard.length<=1){
+                    this.toolbar.editbar.paste=false;
+                } else {
+                    this.toolbar.editbar.paste=true;
+                }
+            },
+            refreshremotepics:function(){
+                this.getremotepics(this.toolbar.getpath()+"/");
+            },
+            getremotepics:function(path){
+                var me=this;
+                me.toolbar.putpath(path.replace(/\/$/,""));
+                sm.ajax.smurl("glob").smpost({path:path,filefilter:this.setup.filefilter,folderfilter:this.setup.folderfilter}).then(function(d){
+                    var itemdef={type:"file",name:"",src:"",href:"javascript:"};
+                    //console.log($$.toobjarr(d,itemdef));
+                    me.thumb.pics=me.adjustpics($$.toobjarr(d,itemdef));
+                    me.clearselect();
+                },function(i){alert(0);alert(i);});
+            },
+            testclick:function(){
+                
+            },
+        }).watchdom({
+            "a.thumbnail@click":function(e,el,ds){
+                var ci=el.getAttribute("d-index");
+                if(this.selectitems.indexOf(","+ci+",")<0){
+                    if(!window.event.ctrlKey){
+                        this.clearselect();
+                    }
+                    this.selectitems=this.selectitems+ci+",";
+                    el.setAttribute("style","border:1px solid #00f;background-color:#999");
+                } else {
+                    if(window.event.ctrlKey){
+                        this.selectitems=this.selectitems.replace(","+ci+",",",");
+                        el.removeAttribute("style");
+                    } else {
+                        this.clearselect();
+                        this.selectitems=this.selectitems+ci+",";
+                        el.setAttribute("style","border:1px solid #00f;background-color:#999");
+                        if(this.thumb.pics[ci].type=="folder"){
+                            var curpath=this.toolbar.getpath();
+                            //console.log(curpath);
+                            curpath&&(curpath=curpath+"/");
+                            curpath=curpath+this.thumb.pics[ci].name;
+                            //console.log(curpath);
+                            this.getremotepics(curpath+"/");
+                        }
+                    }
+                }
+                this.updateeditbar();
+            },
+            ".path button":function(e,el,ds){
+                this.getremotepics(this.toolbar.getpath(el.getAttribute("d-index"))+"/");
+            },
+            ".editbar .copy":function(e,el,ds){
+                this.clipboard=this.selectitems;
+                //console.log(this.clipboard);
+                this.updateeditbar();
+            },
+            ".editbar .setup":function(e,el,ds){
+                var me=this;
+                sm.dialog.modalform(me.setup,function(){
+                    $$.merge.apply(me.setup,[$modalform.group().obj]);
+                    me.refreshremotepics();
+                });
+            },
+            ".editbar .clearclipboard":function(e,el,ds){
+                this.clipboard=",";
+                this.updateeditbar();
+            },
+            ".editbar .upload":function(e,el,ds){
+                var me=this;
+                var curpath=this.toolbar.getpath();
+                if(!/^res\/imgs\//.test(curpath)){
+                    alert("Not allowed for current path!");
+                    return ;
+                }
+                curparth=curpath.split("res/imgs/").pop();
+                sm.upload.smurl("picupload",curparth).selectfile().autostart().onload(function(){
+                    me.refreshremotepics();
+                });
+            },
+            
+        });
+    });
+</script>
