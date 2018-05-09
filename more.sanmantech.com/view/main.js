@@ -1,7 +1,7 @@
 /**这个文件是项目自定义的文件，是对框架中默认方法，数据的重定义，会覆盖掉框架中默认的数据值，函数方法**/
 
 sm.coms.require(["jquery","bootstrap.v3","awesome","animate","hadmin","metismenu","slimscroll","pace","modalform","webuploader"]).then(function(){
-    
+    console.log("组件已经加载完成？"+sm.coms.loadedlist);
     //(1)项目中所有遇到的远程url建议都定义在这里，主机地址，方便后续更改：
     sm.server.extend({
         //host:"http://more.sanmantech.com/",
@@ -62,8 +62,10 @@ sm.coms.require(["jquery","bootstrap.v3","awesome","animate","hadmin","metismenu
     
     //(4)启动路由文件
     sm.document.ready(function(){
+        console.log('document已经ready进行执行相关的路由操作？');
         sm.route.startup("view/route.js");
     });
 },function(i){
     alert("程序终止运行，由于程序运行必要的插件加载失败："+i);
 });
+console.log("main.js加载完成！");

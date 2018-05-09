@@ -1,8 +1,9 @@
 
-<div view-com="explore"></div>
+<div view-com="table"></div>
 
 <script>
-    sm.view.aftercominit("explore",function(){
-        $explore.getremotepics("res/imgs/post/");
+    sm.view.aftercominit("table",function(){
+        this.toolbar.show=false;
+        this.paging.show=false;
     });
 </script>

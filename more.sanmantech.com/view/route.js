@@ -27,3 +27,4 @@ sm.route.watch({
        document.body.innerText="404";
     },
 });
+console.log("router.js加载完成！");

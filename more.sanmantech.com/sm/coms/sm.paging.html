@@ -1,6 +1,6 @@
 <div view-com-tpl="paging">
 
-<nav aria-label="Page navigation">
+<nav aria-label="Page navigation" set:display='($show?"1":"")'>
   <ul class="pagination pull-right">
     <li set:display="($curpage==1?'':1)" class="prebtn">
       <a href="javascript:" aria-label="Previous" >
@@ -21,6 +21,7 @@
 <script>
     sm.view.oncominit("paging",function(){
         this.data({
+            show:true,
             curpage:1,
             totalpage:1,
             _totalitems:1,

@@ -736,10 +736,16 @@ method:{
                 //1,确保函数代理中心能响应该事件
                 if(typeof window.domevent_listener[dataspace][realevent]=='undefined'){
                     window.domevent_listener[dataspace][realevent]=true;
+                }
+                //2,如果根节点删除又重新建了，确保listen的是根节点是最新的，并且不能重复添加
+                var eventlist=rootnode.getAttribute('eventlist');
+                var tag=dataspace+"."+realevent+".watching";
+                if(!eventlist||eventlist.indexOf(tag)<0){
                     rootnode.addEventListener(realevent,function(e){
                         sm.view.eventhandeler.apply(me,[e,dataspace]);
                     });
-                }
+                    rootnode.setAttribute('eventlist',eventlist+','+tag);
+                } 
             });   
         });
         return this;
@@ -785,7 +791,7 @@ layout:{
         return curlayout;
     },
     load:function(views){
-        var curlayout=document.querySelector("[layout]");
+        var curlayout=document.body.querySelector("[layout]");
         if(!curlayout){
             var nonamel=document.createElement("div");
             nonamel.setAttribute("layout","noname");
@@ -798,8 +804,9 @@ layout:{
             container.setAttribute("container","*");
             curlayout.appendChild(container);
         }
+        if(views.length<1){return new Promise(function(resolve,reject){return resolve("blank");});}
+        var view=views.shift();
         const promise=new Promise(function(resolve,reject){
-            views.forEach(function(view){
                 var viewname=view.split("@")[0];
                 var filler=view.substr(viewname.length+1);
                 if(filler==""){filler="*"}
@@ -809,14 +816,24 @@ layout:{
                             curlayout.setAttribute("loaded",viewname);
                             sm.view.init().then(function(){
                                 sm.view.doonloadinit();
-                                return resolve();
+                                sm.view.layout.load(views).then(function(){
+                                    return resolve();
+                                },function(){
+                                    return reject();
+                                });
                             },function(){
                                 return reject("初始化失败！");
                             });
                         },function(i){
                             return reject(i);
                         });
-                    } 
+                    }  else {
+                        sm.view.layout.load(views).then(function(){
+                            return resolve();
+                        },function(){
+                            return reject();
+                        });
+                    }
                 } else {
                     var selector="[container='"+filler+"']";
                     var target=curlayout.querySelector(selector);
@@ -826,19 +843,28 @@ layout:{
                                 target.setAttribute("loaded",viewname);
                                 sm.view.init().then(function(){
                                     sm.view.doonloadinit();
-                                    return resolve();
+                                    sm.view.layout.load(views).then(function(){
+                                        return resolve();
+                                    },function(){
+                                        return reject();
+                                    });
                                 },function(){
                                     return reject("初始化失败！");
                                 });
                             },function(i){
                                 return reject(i);
                             });
+                        }  else {
+                            sm.view.layout.load(views).then(function(){
+                                return resolve();
+                            },function(){
+                                return reject();
+                            });
                         }
                     } else {
                         return reject.apply(sm.view,[viewname]);
                     }
                 }
-            });
         });
         return promise;
     },
@@ -860,7 +886,7 @@ makeui:function(lname="",views=[]){
     const promise=new Promise(function(resolve,reject){
        if(lname==""){lname="noname";}
         //先判断当前是否有layout，以及当前的layout是否是lname
-        var curlayout=document.querySelector("[layout]");
+        var curlayout=document.body.querySelector("[layout]");
         if(curlayout){curlayout=curlayout.getAttribute("layout");} 
         if(curlayout!==lname){
             sm.ajax.loadhtml("./view/layout/"+lname+".layout.html","body",true).then(function(){
@@ -1852,3 +1878,4 @@ do:function(url="",fname="file"){
 }
 //-----------------------基础组件定义:-----------------------------------------------
 
+console.log('sm.god.js已经加载完成！');

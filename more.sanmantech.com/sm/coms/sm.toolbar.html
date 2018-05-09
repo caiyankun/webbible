@@ -7,7 +7,7 @@
   <div class="btn-group path" role="group" aria-label="First group" set:display="($path,$path.length)">
         <button type="button" class="btn btn-default" for:="(_i,_k,_v) in path"  set:addattr="($notpathend($_i)?'!disabled':'disabled')" set:addclass="($notpathend($_i)?'btn-default!btn-primary':'btn-primary!btn-default')" set:d-index="{{_i}}">{{_v}}&nbsp<i class="fa fa-angle-double-right" set:display="($notpathend($_i))"></i></button>
   </div>
-  <div class="btn-group pull-right editbar" role="group" aria-label="First group" set:display="($editbar.show)">
+  <div class="btn-group pull-right editbar" role="group" aria-label="First group" set:display="($editbar.show?'1':'')">
         <button type="button" class="btn btn-default add" set:display="editbar.add"><i class="fa fa-plus" ></i></button>
         <button type="button" class="btn btn-default upload" set:display="editbar.upload"><i class="fa fa-cloud-upload" ></i></button>
         <button type="button" class="btn btn-default download" set:display="editbar.download"><i class="fa fa-cloud-download" ></i></button>

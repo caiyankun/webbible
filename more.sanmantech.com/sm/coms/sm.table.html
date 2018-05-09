@@ -1,7 +1,7 @@
 <div view-com-tpl="table">
     <div class="container-fluid table-responsive" >
         <div view-com="toolbar"></div>
-        <table smtable-id="0.1" class="table table-hover table-bordered">
+        <table class="table table-hover table-bordered">
             <thead >
             <tr>
             </tr>
@@ -9,30 +9,25 @@
           <tbody>
           </tbody>
         </table>
-        <ul class="nav  pagination pull-right" set:display="setup.pagination.enable">
-            <li >
-            <div class="btn-group "  role="group" aria-label="...">
-                <button type="button" class="btn btn-default">1</button>
-                <button type="button" class="btn btn-default">2</button>
-                <button type="button" class="btn btn-default">3</button>
-                <button type="button" class="btn btn-default">4</button>
-                <button type="button" class="btn btn-default">5</button>
-            </div>
-            </li>
-        </ul>
+        <div view-com="paging"></div>
     </div>
 </div>
 <script>
-sm.view.oncominit("table",function(view,el){
-    console.log("entered cominit");
-    console.log(view);
-    view.data({
-        "setup.toolbar.enable":true,
-         _el:el,
-         _tbel:el.querySelector("[smtable-id]")
+sm.view.oncominit("table",function(el){
+    var tbel=el.querySelector("table.table");
+    this.toolbar.editbar.show=false;
+    this.toolbar.setitems("right",[
+        ['fa fa-trash'],
+        ['fa fa-cut'],
+        ['fa fa-copy'],
+    ]);
+    
+    this.data({
+         _tbel:tbel,
     }).method({
         tbdata:{
-            tbel:function(){return view._tbel;},
+            _tbel:tbel,
+            tbel:function(){return this._tbel;},
             write:function(datas){
                 var tableel=this.tbel();
                 if(!tableel) return this;
@@ -69,7 +64,8 @@ sm.view.oncominit("table",function(view,el){
         },       
         
         tbtitle:{
-            tbel:function(){return view._tbel;},
+            _tbel:tbel,
+            tbel:function(){return this._tbel;},
             _setup:{
                 field:"col",
                 name:"col",
