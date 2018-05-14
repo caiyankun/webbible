@@ -1,6 +1,6 @@
 <div view-com-tpl="toolbar">
 
-<div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups" set:display="show">
+<div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups" set:display="($show?'1':'')">
   <div class="btn-group" role="group" aria-label="First group" set:display="($left,$left.length)">
     <button type="button" class="btn btn-default" for:="(_i,_k,_v) in left" ><i set:addclass="_v.class"></i>{{_v.text}}</button>
   </div>
@@ -25,7 +25,7 @@
         </ul>
   </div>
   <div class="btn-group pull-right" role="group" aria-label="Second group" set:display="($right,$right.length)">
-    <button type="button" class="btn btn-default" for:="(_i,_k,_v) in right" ><i set:addclass="_v.class"></i>{{_v.text}}</button>
+    <button type="button" class="btn btn-default" for:="(_i,_k,_v) in right" ><i set:class="_v.class"></i>{{_v.text}}</button>
   </div>
 </div>
 

@@ -1,227 +1,66 @@
-<style>
-    .ibox-tools a {
-        margin-right: 7px;
-    }
-
-    .ml10:nth-child(2) {
-        margin-left: 10px;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    table th, table td {
-        border: 1px solid #e6e6e6;
-        height: 30px;
-        line-height: 30px;
-        text-align: center;
-    }
-
-    #editTab td input {
-        width: 112px;
-        text-align: center;
-        border: none;
-    }
-</style>
-<div class="gray-bg">
-<div class="wrapper wrapper-content animated fadeInRight">
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="ibox float-e-margins">
-                <div class="ibox-title">
-                    <h5>财务统计</h5>
-                    <div class="ibox-tools">
-                        <a class="collapse-link" id="financeTabBtn">
-                            <i class="fa fa-chevron-up financeTabIcon"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="ibox-content" id="financeTabWrap">
-                    <table class="table table-bordered">
-                        <thead>
-                        <tr>
-                            <th>收入</th>
-                            <th>余额</th>
-                            <th>押金</th>
-                            <th>发票申请</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>50000</td>
-                            <td>200000</td>
-                            <td>25000</td>
-                            <td>300</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="ibox float-e-margins">
-                <div class="ibox-title">
-                    <h5>订单统计</h5>
-                    <div class="ibox-tools">
-                        <a class="collapse-link" id="orderTabBtn">
-                            <i class="fa fa-chevron-up orderTabIcon"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="ibox-content" id="orderTabWrap">
-                    <table class="table table-bordered">
-                        <thead>
-                        <tr>
-                            <th>所有订单</th>
-                            <th>待支付订单</th>
-                            <th>待发货订单</th>
-                            <th>待确认订单</th>
-                            <th>已完成订单</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>10000</td>
-                            <td>2000</td>
-                            <td>5000</td>
-                            <td>1000</td>
-                            <td>2000</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="ibox float-e-margins">
-                <div class="ibox-title">
-                    <h5>商品统计</h5>
-                    <div class="ibox-tools">
-                        <a class="collapse-link" id="sellTabBtn">
-                            <i class="fa fa-chevron-up sellTabIcon"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="ibox-content" id="sellTabWrap">
-                    <table class="table table-bordered">
-                        <thead>
-                        <tr>
-                            <th>入库</th>
-                            <th>在架</th>
-                            <th>出租中</th>
-                            <th>清洗中</th>
-                            <th>损坏</th>
-                            <th>出售</th>
-                            <th>丢失</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>3000</td>
-                            <td>2000</td>
-                            <td>1500</td>
-                            <td>300</td>
-                            <td>220</td>
-                            <td>8000</td>
-                            <td>150</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="ibox float-e-margins">
-                <div class="ibox-title">
-                    <h5>会员统计</h5>
-                    <div class="ibox-tools">
-                        <a class="collapse-link" id="memberTabBtn">
-                            <i class="fa fa-chevron-up memberTabIcon"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="ibox-content" id="memberTabWrap">
-                    <table class="table table-bordered">
-                        <thead>
-                        <tr>
-                            <th>管理员</th>
-                            <th>设计师</th>
-                            <th>普通用户</th>
-                            <th>铂金卡</th>
-                            <th>金卡</th>
-                            <th>银卡</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>8</td>
-                            <td>5</td>
-                            <td>399</td>
-                            <td>88</td>
-                            <td>20</td>
-                            <td>30</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="wrapper">
+<div class="row"><div class="col-sm-12">
+    <div view-com="pdtable" dataspace="caiwutongji"></div>
+    <div view-com="pdtable" dataspace="huiyuantongji"></div>
+    <div view-com="pdtable" dataspace="shangpintongji"></div>
+    <div view-com="pdtable" dataspace="dingdantongji"></div>
+</div></div>
 </div>
-</div>
+
+
+
 <script>
-    $(function () {
+    sm.view.aftercominit("pdtable>caiwutongji",function(){
+        this.title="财务统计：";
+        this.onrefresh=function(){
+        };
+        this.onsave=function(table){
 
-        //点击表格右上角的图标可以折叠表格
-        $('#financeTabBtn').click(function () {
-            //右上角小图标切换
-            if ($('#financeTabWrap').css('display') === 'block') {
-                $('.financeTabIcon').addClass('fa-chevron-down')
-            } else {
-                $('.financeTabIcon').removeClass('fa-chevron-down')
-            }
-            $('#financeTabWrap').slideToggle()
+        };
+        this.table.onclickcell=function(td){
+        };
 
-        })
+    });
+    sm.view.aftercominit("pdtable>huiyuantongji",function(){
+        this.title="会员统计：";
+        this.data({
+            
+        });
 
-        //点击表格右上角的图标可以折叠表格
-        $('#orderTabBtn').click(function () {
-            if ($('#orderTabWrap').css('display') === 'block') {
-                $('.orderTabIcon').addClass('fa-chevron-down')
-            } else {
-                $('.orderTabIcon').removeClass('fa-chevron-down')
-            }
-            $('#orderTabWrap').slideToggle()
-        })
+        this.onrefresh=function(newaso=false){
 
-        //点击表格右上角的图标可以折叠表格
-        $('#sellTabBtn').click(function () {
-            if ($('#sellTabWrap').css('display') === 'block') {
-                $('.sellTabIcon').addClass('fa-chevron-down')
-            } else {
-                $('.sellTabIcon').removeClass('fa-chevron-down')
-            }
-            $('#sellTabWrap').slideToggle()
-        })
+        };
+        this.onsave=function(table){
 
-        //点击表格右上角的图标可以折叠表格
-        $('#memberTabBtn').click(function () {
-            if ($('#memberTabWrap').css('display') === 'block') {
-                $('.memberTabIcon').addClass('fa-chevron-down')
-            } else {
-                $('.memberTabIcon').removeClass('fa-chevron-down')
-            }
-            $('#memberTabWrap').slideToggle()
-        })
+        };
 
+    });
+        sm.view.aftercominit("pdtable>shangpintongji",function(){
+        this.title="商品统计：";
+        this.data({
+            
+        });
 
-    })
+        this.onrefresh=function(newaso=false){
+
+        };
+        this.onsave=function(table){
+
+        };
+
+    });
+        sm.view.aftercominit("pdtable>dingdantongji",function(){
+        this.title="订单统计：";
+        this.data({
+            
+        });
+
+        this.onrefresh=function(newaso=false){
+
+        };
+        this.onsave=function(table){
+
+        };
+
+    });
 </script>

@@ -214,6 +214,33 @@ toobj:function(arr,objdef){
     }
     return rso;
 },
+formobj:function(karr,varr){
+    !$$.isarray(varr)&&(varr=[varr]);
+    if(varr.length<1) return {};
+    if($$.isarray(varr[0])){
+        var rs=[];
+        for (var i=0;i<varr.length;i++){
+            rs.push($$.formobj(karr,varr[i]));
+        }
+    } else {
+        var rs={};
+        for (var i=0;i<karr.length;i++){
+            rs[karr[i]]=i>(varr.length-1)?varr[0]:varr[i];
+        }
+    }
+    return rs;
+},
+objvalues:function(obj){
+    var rs=[];
+    for(var i in obj){
+        if($$.isarray(obj)){
+            rs.push($$.objvalues(obj[i]));
+        } else {
+            rs.push(obj[i]);
+        }
+    }
+    return rs;
+},
 toobjarr:function(arr,objdef){
     //如果传进来的是一个数组，那么遍历数组把每个元素转换成一个objdef
     //如果传进来的是一个对象，那么便利对象属性，把每个属性转换成一个objdef其中的name=key，value=value，text=key
@@ -245,6 +272,27 @@ foreach:function(obj,cb){
         });
     }
 },
+getElementLeft:function (element){
+    var actualLeft = element.offsetLeft;
+    var current = element.offsetParent;
+
+    while (current !== null){
+        actualLeft += current.offsetLeft;
+        current = current.offsetParent;
+    }
+    return actualLeft;
+},
+
+getElementTop:function (element){
+    var actualTop = element.offsetTop;
+    var current = element.offsetParent;
+    while (current !== null){
+        actualTop += current.offsetTop;
+        current = current.offsetParent;
+    }
+    return actualTop;
+    },
+
 });
 window.$$=God.$$=God.func;//方便对全局函数的引用，位置不能改
 God.coms("document").extendproto({//目的是定义页面跳转，页面信息，用户界面刷新等一系列操作
@@ -953,6 +1001,7 @@ init:function (com="body",deepinit=1,pdataspace=""){
     var dataspace=$el.getAttribute("dataspace");
     dataspace||(dataspace="common");
     (typeof dataspace!=="string")&&(dataspace="common");
+    var ods=dataspace;
     (pdataspace!=="")&&(dataspace=pdataspace+"."+dataspace);
     //console.log("root begin of Init:"+dataspace);
     //console.log(sm.view.data.common);
@@ -966,7 +1015,7 @@ init:function (com="body",deepinit=1,pdataspace=""){
             view._el=$el;
             //console.log("init el"+$el);
             //console.log($el);
-            if(comname&&needinit){sm.view.dooncominit(comname,view,$el);}
+            if(comname&&needinit){sm.view.dooncominit(comname,view,$el,ods,pdataspace);}
             $el.removeAttribute("oncominit");
             me.comset($el,dataspace,deepinit);
             me.comget($el,dataspace,deepinit);
@@ -1395,6 +1444,12 @@ setattrvalue:function (el,attr,value){
                 el.setAttribute("class",curclass);
             }
             break;
+        case 'class':
+            //console.log("why");
+            if(el&&value){
+                el.setAttribute("class",value);
+            }
+            break;
         case 'addattr':
             if(el&&value){
                 var acs=value.split("!")[0];
@@ -1476,7 +1531,7 @@ watchdata:function (dataspace="",varname=""){
     Object.keys(proxyobj).forEach(function(k){
         if(!proxyobj.hasOwnProperty(k)){
         } else if(Object.prototype.toString.call(proxyobj[k]) === '[object Object]'){
-            if(!proxyobj[k].hasOwnProperty("_com")){
+            if(!proxyobj[k].hasOwnProperty("_com")&&!/^(\$|\_)/.test(k)){
                 var realvarname=varname==""?k:varname+'.'+k;
                 me.watchdata(dataspace,varname==""?k:varname+'.'+k);
             }
@@ -1612,7 +1667,7 @@ aftercominitlist:[],
 onloadinitlist:[],
 onloadinitedlist:[],
 oncominit:function(com,initcb=function(){}){this.oncominitlist[com]=initcb;},
-dooncominit:function(com,view,el){
+dooncominit:function(com,view,el,ds,pds){
     //console.log("dooncominit");
     var me=this;
     if(this.oncominitlist.hasOwnProperty(com)){
@@ -1620,8 +1675,10 @@ dooncominit:function(com,view,el){
         
         if($$.isfunction(cb)){
             cb.apply(view,[el]);
-            if(typeof me.aftercominitlist[com]=="undefined"){me.aftercominitlist[com]=[];}
-            me.aftercominitlist[com].forEach(function(acb){
+            var fa=com+">"+ds+"@"+pds;
+            //console.log(fa);
+            if(typeof me.aftercominitlist[fa]=="undefined"){me.aftercominitlist[fa]=[];}
+            me.aftercominitlist[fa].forEach(function(acb){
                 acb.apply(view,[el]);
             });
         }
@@ -1629,8 +1686,14 @@ dooncominit:function(com,view,el){
     return this;
 },
 aftercominit:function(com,cb=function(){}){
-    if(typeof this.aftercominitlist[com]=="undefined"){this.aftercominitlist[com]=[];}
-    this.aftercominitlist[com].push(cb);
+    var cn=com.split(">")[0];
+    var ds=com.substr(cn.length+1);
+    (!ds)&&(ds=cn);
+    var pds=(/\@/.test(com)?com.split("@").pop():"");
+    (ds!=="common"&&pds=="")&&(pds="common");
+    var fa=cn+">"+ds+"@"+pds;
+    if(typeof this.aftercominitlist[fa]=="undefined"){this.aftercominitlist[fa]=[];}
+    this.aftercominitlist[fa].push(cb);
 },
 onloadinit:function(cb){this.onloadinitlist.push(cb);return this;},
 doonloadinit:function(){
@@ -1705,6 +1768,25 @@ history:function(){return window.history;},
 startup:function(routejs){return this.load(routejs).then(function(){sm.route.run();});},
 });
 God.coms("data").extendproto({
+    smdata:function(d){
+        this.setup({d:d});
+        return this;
+    },
+    tabledata:function(eq=0){
+        return this.setup().d[eq];
+    },
+    cubedata:function(){
+        return this.setup().d;
+    },
+    arraydata:function(eq=0){
+        return this.setup().d[eq][0];
+    },
+    vardata:function(eq=0){
+        return this.setup().d[eq][0][0];
+    },
+    def:function(eq=1){
+        return this.arraydata(eq);
+    },
 });
 God.coms("user").extend({
     info:{"uid":0,"uname":"请登录","nickname":"请登录","ulevel":0,"token":""},
@@ -1874,6 +1956,15 @@ do:function(url="",fname="file"){
     return promise;
 },
 
+});
+God.coms("event").extendproto({
+    once:function(en,el,cb){
+        var handler=function(e){
+            cb(e);
+            el.removeEventListener(en,handler);
+        };
+        el.addEventListener(en,handler);
+    },
 });
 }
 //-----------------------基础组件定义:-----------------------------------------------

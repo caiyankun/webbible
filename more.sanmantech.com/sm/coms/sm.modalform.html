@@ -20,22 +20,59 @@
     </div>
 </div>
 <script>
+    
+    //传进来一个对象{a:1,b:2}
+    //先转换为对象数组[
+    //{name:a,text:a,value:1}
+    //{name:b,text:b,value:2}
+    //]
+    
+    
     sm.view.oncominit("modalform",function(){
         this.data({
             formdata:[],
+            _origindata:false,
+            _finaldata:false,
         }).method({
             getgroupdata:function(){alert(JSON.stringify(this.formdata));},
+            filterdata:function(od){
+                var rs={};
+                for(var k in od){
+                    if(!$$.isarray(od[k])){
+                        rs[k]=od[k];
+                    }
+                }
+                return rs;
+            },
+            init:function(d){
+                if($$.isobj(d)){
+                    this._origindata=d
+                } else {
+                    this._origindata=$$.formobj(d,"");
+                }
+                
+                var t=this.filterdata(this._origindata);
+                var itemdef={name:"",value:"",text:""};
+                this.formdata=$$.toobjarr(t,itemdef);
+            },
+            getfinaldata:function(){
+                var t={};
+                $$.merge.apply(t,[this._origindata]);
+                $$.merge.apply(t,[this.group("obj")]);
+                this._finaldata=t;
+                return t;
+            },
         });
     });
     sm.dialog.modalform=function(d,cb=function(){}){
-        var itemdef={name:"",value:"",text:""};
         !document.body.querySelector("#modalform")&&sm.document.create('<div view-com="modalform" id="modalform"></div>');
         sm.view.init().then(function(){
-            $modalform.formdata=$$.toobjarr(d,itemdef);
+            console.log("0000");
+            $modalform.init(d);
             $("#modalform .modal").modal("show");
             $modalform.watchdom({
                 "button.ok":function(){
-                    cb.apply($modalform);
+                    cb.apply($modalform,[$modalform.getfinaldata()]);
                     sm.dialog.modalform.close();
                 },
             });
