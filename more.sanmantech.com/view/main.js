@@ -5,7 +5,8 @@ sm.coms.require(["jquery","bootstrap.v3","awesome","animate","hadmin","metismenu
     //(1)项目中所有遇到的远程url建议都定义在这里，主机地址，方便后续更改：
     sm.server.extend({
         //host:"http://more.sanmantech.com/",
-        host:"http://local.more.com/",
+        //host:"http://local.more.com/",
+        host:"/",
         adjustdata:function(){
             //每次请求之前会自动执行一下这个函数：对数据进行矫正，这里自动添加token
             if(!this.hasOwnProperty("token")&&sm.user.info.token){
