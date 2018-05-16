@@ -34,7 +34,15 @@ class shop {
             \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
-
+    public function attempjson($p) {
+        try { 
+            $rs=json_decode($p);
+            if(!is_null($rs)){$p=$rs;}
+        } catch(Exception $e) {
+            //...
+        }
+        return $p;
+    }
     /**
      * 读取商城信息
      */
@@ -42,7 +50,7 @@ class shop {
         if(!\Db::simplecall("more.shopreadinfo", array($key))){
             \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
         } else {
-            \Response::returntaskok(\Db::cubedatawithtitle());
+            \Response::returntaskok($this->attempjson(\Db::vardata()));
         }
     }
 }

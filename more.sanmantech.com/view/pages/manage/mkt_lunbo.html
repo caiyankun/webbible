@@ -11,9 +11,9 @@
             var me=this;
             sm.ajax.smurl("getlunbo").smpost().then(function(d){
                 console.log(d);//正常这里应该是一个JSON字符串
-                console.log(JSON.parse(sm.data.smdata(d).vardata()));
-                var td=JSON.parse(sm.data.smdata(d).vardata())
-                me.table.clear().write(td);
+                //console.log(JSON.parse(sm.data.smdata(d).vardata()));
+                //var td=JSON.parse(sm.data.smdata(d).vardata())
+                me.table.clear().write(d);
             });
         };
         this.onsave=function(table){
