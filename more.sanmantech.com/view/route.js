@@ -14,7 +14,7 @@ sm.route.watch({
             hash.replace(/^\#(.*\.html)$/,function(t,v){path=v;});
             sm.view.setvar("layout.curpath",path.split("/"),"common");
             path="view/pages/"+path;
-            sm.view.makeui("hadmin",["view/parts/navbar.hadmin.html@left","view/parts/toolbar.hadmin.html@toolbar",path+"@page"]);
+            sm.view.makeui("hadmin",["view/parts/sidebar.hadmin.html@left","view/parts/toolbar.hadmin.html@toolbar",path+"@page"]);
             
        }).error(function(){
            sm.route.to("#login.html");

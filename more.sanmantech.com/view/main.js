@@ -11,6 +11,7 @@ sm.coms.require(["jquery","bootstrap.v3","awesome","animate","hadmin","metismenu
             //每次请求之前会自动执行一下这个函数：对数据进行矫正，这里自动添加token
             if(!this.hasOwnProperty("token")&&sm.user.info.token){
                 this["token"]=sm.user.info.token;
+                console.log(this);
             }
         },
         urls:{

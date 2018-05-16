@@ -1,36 +1,21 @@
-<nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
-    <div class="navbar-header">
-        <a class="navbar-minimalize minimalize-styl-2 btn btn-info " href="#"><i class="fa fa-bars"></i></a>
-    </div>
-    <ul class="nav navbar-top-links navbar-right">
-        <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" role="button" href="#">
-                <i class="fa fa-user"></i><span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu">
-                <li><a href="#">用户信息</a></li>
-                <li><a href="#">修改密码</a></li>
-                <li role="separator" class="divider"></li>
-                <li><a href="#">退出登录</a></li>
-            </ul>
-        </li>
-        <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" role="button" href="#">
-                <i class="fa fa-language"></i></span>
-            </a>
-            <ul class="dropdown-menu">
-                <li><a href="#">中文</a></li>
-                <li><a href="#">English</a></li>
-            </ul>
-        </li>
-        <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" role="button" href="#">
-                <i class="fa fa-bars"></i></span>
-            </a>
-            <ul class="dropdown-menu">
-                <li><a href="#">帮助</a></li>
-                <li><a href="#">关于</a></li>
-            </ul>
-        </li>
-    </ul>
-</nav>
+<div view-com="navbar"></div>
+
+<script>
+    sm.view.aftercominit("navbar",function(){
+        this.setitems([
+            {text:"",icon:"fa-user",href:"javascript:",submenue:[
+                {text:"用户信息",href:"javascript:"},
+                {text:"修改密码",href:"javascript:"},
+                {text:"退出登录",href:"javascript:"},
+            ]},
+            {text:"",icon:"fa-language",href:"javascript:",submenue:[
+                {text:"中文",href:"javascript:"},
+                {text:"English",href:"javascript:"},
+            ]},
+            {text:"",icon:"fa-question-circle",href:"javascript:",submenue:[
+                {text:"帮助",href:"javascript:"},
+                {text:"关于",href:"javascript:"},
+            ]},
+        ]);
+    });   
+</script>

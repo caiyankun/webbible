@@ -48,7 +48,7 @@ class img {
             //var_dump($_FILES);
             $originfile=$this->saveuploadfileas($file,$targetpath,$targetname);
             if(!empty($originfile)){
-                $this->resize($originfile, 300,300,true);
+                $this->resize($originfile, 450,750,true);
             }
             //\Response::returntaskok([$file,$targetpath,$targetname]);
             //$log=$log.ob_get_clean();    

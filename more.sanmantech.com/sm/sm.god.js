@@ -292,7 +292,44 @@ getElementTop:function (element){
     }
     return actualTop;
     },
+setOpacity:function(ele, opacity) {
+    if (ele.style.opacity != undefined) {
+        ///兼容FF和GG和新版本IE
+        ele.style.opacity = opacity / 100;
 
+    } else {
+        ///兼容老版本ie
+        ele.style.filter = "alpha(opacity=" + opacity + ")";
+    }
+},
+fadein:function(ele,interval=30) {
+    if (ele) {
+        ele.style.display="block";
+        var v = 0;
+        timer = setInterval(function() {
+            if (v <= 100) {
+                v += 10;
+                $$.setOpacity(ele, v);
+            } else {
+                clearInterval(timer);
+            }
+        }, interval);
+    }
+},
+fadeout:function(ele,interval=30) {
+    if (ele) {
+        ele.style.display="block";
+        var v = 100;
+        timer = setInterval(function() {
+            if (v >=0) {
+                v -= 10;
+                $$.setOpacity(ele, v);
+            } else {
+                clearInterval(timer);
+            }
+        }, interval);
+    }
+},
 });
 window.$$=God.$$=God.func;//方便对全局函数的引用，位置不能改
 God.coms("document").extendproto({//目的是定义页面跳转，页面信息，用户界面刷新等一系列操作
@@ -832,6 +869,93 @@ method:{
         if(which=="") {return this._group;}
         else {return this._group[which];}
     },
+    addclass:function(classes,target=false){
+        !target&&(target=this._el);
+        if(target){
+            var oc=target.getAttribute("class");
+            if(oc){
+                oc=" "+oc+" ";
+                classes=classes.split(" ");
+                classes.forEach(function(cla){
+                    if(cla){
+                        if(oc.indexOf(" "+cla+" ")<0){
+                            oc=oc+cla+" ";
+                        }
+                    }
+                });
+                oc=oc.substr(1,oc.length-2);
+                target.setAttribute("class",oc);
+            } else {
+                target.setAttribute("class",classes);
+            }
+        }
+        return this;
+    },
+    removeclass:function(classes,target=false){
+        !target&&(target=this._el);
+        if(target){
+            var oc=target.getAttribute("class");
+            if(oc){
+                oc=" "+oc+" ";
+                classes=classes.split(" ");
+                classes.forEach(function(cla){
+                    if(cla){
+                        if(oc.indexOf(" "+cla+" ")>=0){
+                            oc=oc.replace(" "+cla+" "," ");
+                        }
+                    }
+                });
+                oc=oc.substr(1,oc.length-2);
+                target.setAttribute("class",oc);
+            }
+        }
+        return this;
+    },
+    toggleclass:function(classes,target=false){
+        !target&&(target=this._el);
+        if(target){
+            var oc=target.getAttribute("class");
+            if(oc){
+                oc=" "+oc+" ";
+                classes=classes.split(" ");
+                classes.forEach(function(cla){
+                    if(cla){
+                        if(oc.indexOf(" "+cla+" ")>=0){
+                            oc=oc.replace(" "+cla+" "," ");
+                        } else {
+                            oc=oc+cla+" ";
+                        }
+                    }
+                });
+                oc=oc.substr(1,oc.length-2);
+                target.setAttribute("class",oc);
+            } else {
+                target.setAttribute("class",classes);
+            }
+        }
+        return this;
+    },
+    hasclass:function(classes,target=false){
+        !target&&(target=this._el);
+        var rs=false;
+        if(target){
+            var oc=target.getAttribute("class");
+            if(oc){
+                oc=" "+oc+" ";
+                classes=classes.split(" ");
+                classes.forEach(function(cla){
+                    if(cla){
+                        if(oc.indexOf(" "+cla+" ")>=0){
+                            rs=true;
+                        } else {
+                            rs=false;
+                        }
+                    }
+                });
+            }
+        }
+        return rs;
+    },
 },//这里的函数都需要有this指针，会把当前实例需要的函数再次封装在这里
 layout:{
     get:function(){
@@ -1236,19 +1360,18 @@ forelset:function(el,deep,autoupdate=1,dataspace="",deepinit=0){
         nodenum=nodes.length,itemnum=items.length;
     }
     var index=0;
-    if(typeof dataspace!=="string"){alert("forelset2");}
     if(itemnum<1){ //如果数据是空的时候，
         me.setvar(v,"",dataspace);
         me.setvar(i,0,dataspace);
         me.setvar(k,0,dataspace);
-        me.elset(el,deep=1,autoupdate=true,dataspace,deepinit,[i,k,v,data],false);
+        me.elset(el,1,autoupdate=true,dataspace,deepinit,[i,k,v,data],false);
     }
     for(let item in items){
         me.setvar(v,items[item],dataspace);
         me.setvar(i,index++,dataspace);
         me.setvar(k,item,dataspace);
         nodes[index-1].setAttribute("view-locked","");
-        me.elset(nodes[index-1],deep=1,autoupdate=nodes[index-1]==el?true:false,dataspace,deepinit,[i,k,v,data],false);
+        me.elset(nodes[index-1],1,autoupdate=nodes[index-1]==el?true:false,dataspace,true,[i,k,v,data],false);//当发现set一个for的时候，就进行forsel
         nodes[index-1]!==el&&(nodes[index-1].setAttribute("view-locked",1));
     }
 },
@@ -1260,7 +1383,7 @@ elset:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0,noupdatelist=[],b
     if(el.nodeType == 1){
         if(bcheckfor&&me.checkisfor(el)){
             //console.log("找到了一个for元素:"+el);
-            me.forelset(el,deep,autoupdate,dataspace,deepinit);
+            me.forelset(el,1,autoupdate,dataspace,deepinit);
         } else {
             //解析属性并将其指定的值赋值到变量
             var nodeAttrs = el.attributes;
@@ -1279,17 +1402,17 @@ elset:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0,noupdatelist=[],b
                         });
                         //console.log(realattr+"-elset:"+varname+"-dataspace:"+dataspace+"-value:"+me.getvar(varname,dataspace));
                         //判断是否要给当前变量增加跟随变量更新后的自动更新
-                        autoupdate&&(noupdatelist.indexOf(varname)<0)&&(me.varfunsadd(varname,el,dataspace));
+                        autoupdate&&(me.varfunsadd(varname,el,dataspace));
                     } //如果是要set一个简单变量的话
                     else {
                         if(/^\(.*\)$/.test(varname)){varname="{{"+varname+"}}";}//给显式表达式加括号，统一格式
                         varname=varname.replace(/\{\{\s*([_\.a-zA-Z0-9]*|[_\.a-zA-Z0-9]+\(.*\))\s*\}\}/g,function(t,v){return "{{$"+v+"}}";});//给单变量/函数加$统一格式，标准要求是函数一定加@
                         var varvalue=varname.replace(/\{\{\s*(.*?)\s*\}\}/g,function(t,exp){
                             autoupdate&&exp.replace(/(^|[^\\])\s*\$([_a-zA-Z][_\.a-zA-Z0-9]*)/g,function(t,v0,v){
-                                if(noupdatelist.indexOf(v)<0){
+                                //if(noupdatelist.indexOf(v)<0){
                                    me.varfunsadd(v,el,dataspace); 
                                    me.getvar(v,dataspace);
-                                }
+                                //}
                             });//给变量添加粉丝
                             return me.getexp(exp,dataspace);//完成表达式计算并完成替换
                         });//给所有表达式中的变量添加粉丝
@@ -1348,10 +1471,10 @@ elset:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0,noupdatelist=[],b
         textstr=textstr.replace(/\{\{\s*([_\.a-zA-Z0-9]*|[_\.a-zA-Z0-9]+\(.*\))\s*\}\}/g,function(t,v){return "{{$"+v+"}}";});//校准格式给单变量/函数加$统一格式，标准要求是函数一定加@
         textstr=textstr.replace(/\{\{\s*(.*?)\s*\}\}/g,function(t,exp){
             autoupdate&&exp.replace(/(^|[^\\])\s*\$([_a-zA-Z][_\.a-zA-Z0-9]*)/g,function(t,v0,v){
-                if(noupdatelist.indexOf(v)<0){
+                //if(noupdatelist.indexOf(v)<0&&!/^\_/.test(v)){
                    me.varfunsadd(v,el,dataspace); 
                    me.getvar(v,dataspace);
-                }
+                //}
             });//将表达式中的变量添加粉丝
             return me.getexp(exp,dataspace);//计算表达式的值并替换原字符串
         });//（1）给所有表达式中的变量添加粉丝（2）计算表达式值及完成替换
@@ -1375,7 +1498,8 @@ elset:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0,noupdatelist=[],b
                 
             } else {
                 el.before(t.firstElementChild);
-                el&&el.parentNode&&el.parentNode.removeChild(el);
+                el&&el.parentNode&&el.parentNode.removeChild(el);//问题在于这里创建的新节点并没有执行elset，要执行一下
+                me.elset(tt,1,1,dataspace);
             }
         }
     }
@@ -1653,6 +1777,7 @@ varfunshave:function (varname,el,dataspace=""){
     }
 },//检测变量是否有该粉丝
 varfunsadd:function (varname,el,dataspace=""){
+    if(/^\_/.test(varname)){return ;}
     (dataspace=="")&&(dataspace="common");
     //(arguments.length>2)&&(dataspace!=="")&&(varname=dataspace+"."+varname);
     //console.log("添加粉丝："+dataspace+":"+varname);

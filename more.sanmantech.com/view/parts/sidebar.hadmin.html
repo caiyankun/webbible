@@ -1,0 +1,23 @@
+
+<div view-com="sidebar"></div>
+
+
+
+<script>
+    sm.view.aftercominit("sidebar",function(){
+        this.setitems([
+           {text:"主页",icon:"fa-home",href:"#manage/home.html"},
+           {text:"会员管理",icon:"fa-user",href:"#manage/member.html"},
+           {text:"商品管理",icon:"fa-gift",href:"#manage/product.html"},
+           {text:"订单管理",icon:"fa-reorder",href:"#manage/order.html"},
+           {text:"营销管理",icon:"fa-tv",href:"javascript:",submenue:[
+                {text:"首页轮播",href:"#manage/mkt_lunbo.html"},
+                {text:"首页内容",href:"#manage/mkt_home.html"},
+            ]},
+           {text:"图片管理",icon:"fa-file-image-o",href:"#manage/picture.html"},
+           {text:"商城管理",icon:"fa-database",href:"#manage/shop.html"},
+           {text:"财务管理",icon:"fa-money",href:"#manage/finance.html"},
+           {text:"统计报表",icon:"fa-pie-chart",href:"#manage/report.html"},
+       ]);
+    });
+</script>
