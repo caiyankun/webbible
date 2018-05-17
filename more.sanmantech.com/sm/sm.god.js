@@ -41,6 +41,7 @@ God.coms.require=function(plugins=[]){
             me.loadedlist.push(fullpath);
         }
     });
+    newplugins.length&&(sm.loading.init(newplugins.length));
     return sm.ajax.loadhtml(newplugins,"head");
 };
 God.coms.warehouse=function(com="",remote=false){
@@ -483,12 +484,14 @@ loadhtml:function(htmlfiles,target="body",cleartarget=false,remote=true){
     var me=this;
     if(!$$.isarray(htmlfiles)){htmlfiles=[htmlfiles];}
     if(htmlfiles.length==0){
+        sm.loading.finish();
         return new Promise(function(resolve,reject){return resolve("blank");});
     } else if(htmlfiles.length==1){
         const htmlfile=htmlfiles[0];
         if(remote){
             const promise = new Promise(function(resolve, reject) {
                 me.load(htmlfile).then(function(d){
+                    sm.loading.finish();
                     me.loadhtml(me.adjusturl(d,htmlfile),target,cleartarget,false).then(function(){
                     //me.loadhtml(d,target,cleartarget,false).then(function(){
                         return resolve(d);
@@ -560,6 +563,7 @@ loadhtml:function(htmlfiles,target="body",cleartarget=false,remote=true){
         const htmlfile=htmlfiles.shift();
         const promise = new Promise(function(resolve, reject) {
             me.loadhtml(htmlfile,target,cleartarget,remote).then(function(){
+                sm.loading.next(htmlfile);
                 me.loadhtml(htmlfiles,target,false,remote).then(function(d){
                     return resolve(d);
                 },function(i){
@@ -2089,6 +2093,47 @@ God.coms("event").extendproto({
             el.removeEventListener(en,handler);
         };
         el.addEventListener(en,handler);
+    },
+});
+God.coms("loading").extend({
+    total:0,
+    curent:0,
+}).extendproto({
+    logo:function(url=false){
+        var logo=document.body.querySelector(".startup.wrapper>div.logo");
+        url&&logo&&(logo.style.backgroundImage="url("+url+")");
+        logo&&(logo.style.display="block");
+        return this;
+    },
+    progress:function(v){
+        var pv=document.body.querySelector(".startup.wrapper>div.progress>.value");
+        var p=document.body.querySelector(".startup.wrapper>div.progress");
+        p&&(p.style.display="block");
+        pv&&(pv.style.width=v%101+"%");
+        return this;
+    },
+    text:function(p){
+        var t=document.body.querySelector(".startup.wrapper>a.loading");
+        t&&(t.textContent=p);
+        return this;
+    },
+    init:function(t,ft){
+        this.total=t;
+        this.current=0;
+        this.text(ft);
+        return this;
+    },
+    next:function(t){
+        this.current&&this.current++;
+        this.total&&(this.progress(this.current*100/this.total));
+        this.text(t);
+        return this;
+    },
+    finish:function(t=false){
+        this.progress(100);
+        !t&&(t="Finish!");
+        this.text(t);
+        return this;
     },
 });
 }

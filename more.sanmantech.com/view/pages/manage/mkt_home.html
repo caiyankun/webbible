@@ -22,12 +22,14 @@
                 //var td=JSON.parse(sm.data.smdata(d).vardata());
                 me.table.clear("data").write(d);
                 sm.dialog.loading(false);
+                sm.dialog.msg("刷新成功！");
             });
         };
         this.onsave=function(table){
             sm.dialog.loading();
             sm.ajax.smurl("writehomelist").smpost({value:this.table.datas(false,true)}).then(function(d){
                 sm.dialog.loading(false);
+                sm.dialog.msg("保存成功！");
             });
         };
         this.table.onclickcell=function(td){
