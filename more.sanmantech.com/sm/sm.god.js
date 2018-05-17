@@ -484,14 +484,12 @@ loadhtml:function(htmlfiles,target="body",cleartarget=false,remote=true){
     var me=this;
     if(!$$.isarray(htmlfiles)){htmlfiles=[htmlfiles];}
     if(htmlfiles.length==0){
-        sm.loading.finish();
         return new Promise(function(resolve,reject){return resolve("blank");});
     } else if(htmlfiles.length==1){
         const htmlfile=htmlfiles[0];
         if(remote){
             const promise = new Promise(function(resolve, reject) {
                 me.load(htmlfile).then(function(d){
-                    sm.loading.finish();
                     me.loadhtml(me.adjusturl(d,htmlfile),target,cleartarget,false).then(function(){
                     //me.loadhtml(d,target,cleartarget,false).then(function(){
                         return resolve(d);
@@ -565,6 +563,7 @@ loadhtml:function(htmlfiles,target="body",cleartarget=false,remote=true){
             me.loadhtml(htmlfile,target,cleartarget,remote).then(function(){
                 sm.loading.next(htmlfile);
                 me.loadhtml(htmlfiles,target,false,remote).then(function(d){
+                    sm.loading.finish();
                     return resolve(d);
                 },function(i){
                     return reject(i);
