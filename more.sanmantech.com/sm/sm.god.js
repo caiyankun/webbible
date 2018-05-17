@@ -2096,7 +2096,7 @@ God.coms("event").extendproto({
 });
 God.coms("loading").extend({
     total:0,
-    curent:0,
+    current:0,
 }).extendproto({
     logo:function(url=false){
         var logo=document.body.querySelector(".startup.wrapper>div.logo");
@@ -2123,7 +2123,8 @@ God.coms("loading").extend({
         return this;
     },
     next:function(t){
-        this.current&&this.current++;
+        this.current++;
+        this.total&&(this.current>this.total)&&(this.current=this.total);
         this.total&&(this.progress(this.current*100/this.total));
         this.text(t);
         return this;
