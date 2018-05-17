@@ -2099,20 +2099,20 @@ God.coms("loading").extend({
     current:0,
 }).extendproto({
     logo:function(url=false){
-        var logo=document.body.querySelector(".startup.wrapper>div.logo");
+        var logo=document.body.querySelector(".startup>div.logo");
         url&&logo&&(logo.style.backgroundImage="url("+url+")");
         logo&&(logo.style.display="block");
         return this;
     },
     progress:function(v){
-        var pv=document.body.querySelector(".startup.wrapper>div.progress>.value");
-        var p=document.body.querySelector(".startup.wrapper>div.progress");
+        var pv=document.body.querySelector(".startup>div.progress>.value");
+        var p=document.body.querySelector(".startup>div.progress");
         p&&(p.style.display="block");
         pv&&(pv.style.width=v%101+"%");
         return this;
     },
     text:function(p){
-        var t=document.body.querySelector(".startup.wrapper>a.loading");
+        var t=document.body.querySelector(".startup>a.loading");
         t&&(t.textContent=p);
         return this;
     },
@@ -2133,6 +2133,7 @@ God.coms("loading").extend({
         this.progress(100);
         !t&&(t="Finish!");
         this.text(t);
+        this.total=0;
         return this;
     },
 });
