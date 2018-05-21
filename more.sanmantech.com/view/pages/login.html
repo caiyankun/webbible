@@ -1,9 +1,9 @@
 <div class="middle-box text-center loginscreen  animated fadeInDown">
     <div>
         <div>
-            <h1 class="logo-name">M</h1>
+            
+            <img src='/res/imgs/index/logo.jpg' style="border-radius: 5px;"/>
         </div>
-        <h3>摩尔衣橱 More Closet</h3>
         <div class="m-t" role="form" >
             <div class="form-group">
                 <input type="email" class="form-control" get:value="login.input.uname"  placeholder="用户名" required="">
@@ -12,8 +12,6 @@
                 <input type="password" class="form-control" get:value="login.input.upass" placeholder="密码" required="">
             </div>
             <button class="btn btn-primary block full-width m-b" >管理员登录</button>
-            <p class="text-muted text-center"> <a href="login.html#"><small>忘记密码了？</small></a> | <a href="register.html">注册一个新账号</a>
-            </p>
         </div>
     </div>
 </div>
@@ -25,11 +23,9 @@ sm.view.onloadinit(function(){
     console.log($common);
     $common.watchdom({
         "text:管理员登录":function(){
-            console.log("事件");
-            console.log(this);
             sm.user.login(this.login.input.uname,this.login.input.upass,"0000",true,function(d){
-                alert("登录成功:"+JSON.stringify(d));
-                sm.route.to("#home.html");
+                //alert("登录成功:"+JSON.stringify(d));
+                sm.route.to("#manage/home.html");
             },function(i){
                 alert("登录失败："+i);
             });

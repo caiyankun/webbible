@@ -30,8 +30,10 @@
 </div>
 </div>
 <div class="row"><div class="col-sm-12">
-    <div view-com="pdtable" dataspace="xiaoshoue"></div>
-    <div view-com="pdtable" dataspace="xinzenghuiyuan"></div>
+    <div view-com="pdtable" dataspace="caiwutongji"></div>
+    <div view-com="pdtable" dataspace="huiyuantongji"></div>
+    <div view-com="pdtable" dataspace="shangpintongji"></div>
+    <div view-com="pdtable" dataspace="dingdantongji"></div>
 </div></div>
 </div>
 </div>
@@ -41,8 +43,8 @@
 
 
 <script>
-    sm.view.aftercominit("pdtable>xiaoshoue",function(){
-        this.title="今日销售额统计：";
+    sm.view.aftercominit("pdtable>caiwutongji",function(){
+        this.title="财务统计：";
         this.onrefresh=function(){
         };
         this.onsave=function(table){
@@ -52,8 +54,36 @@
         };
 
     });
-    sm.view.aftercominit("pdtable>xinzenghuiyuan",function(){
-        this.title="今日新增会员统计：";
+    sm.view.aftercominit("pdtable>huiyuantongji",function(){
+        this.title="会员统计：";
+        this.data({
+            
+        });
+
+        this.onrefresh=function(newaso=false){
+
+        };
+        this.onsave=function(table){
+
+        };
+
+    });
+        sm.view.aftercominit("pdtable>shangpintongji",function(){
+        this.title="商品统计：";
+        this.data({
+            
+        });
+
+        this.onrefresh=function(newaso=false){
+
+        };
+        this.onsave=function(table){
+
+        };
+
+    });
+        sm.view.aftercominit("pdtable>dingdantongji",function(){
+        this.title="订单统计：";
         this.data({
             
         });

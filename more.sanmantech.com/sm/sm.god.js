@@ -362,6 +362,17 @@ create:function(str){
     for(var i=0;i<n;i++){document.body.prepend(rs[i]);}
     return rs;
 },
+body:function(){
+    var t=document.querySelector("body>div.body");
+    if(t){
+        return t;
+    } else {
+        var tt=document.createElement("div");
+        tt.setAttribute("class","body");
+        document.body.appendChild(tt);
+        return sm.document.body();
+    }
+},
 });
 God.coms("ajax").extend({
     _setup:{
@@ -575,7 +586,7 @@ loadhtml:function(htmlfiles,target="body",cleartarget=false,remote=true){
         return promise;
     }
 },
-loadjs:function(jsfiles,target="body"){
+loadjs:function(jsfiles,target="head"){
     var me=this;
     if(target.nodeType!==1){
         target=document.querySelector(target);
@@ -1064,7 +1075,7 @@ makeui:function(lname="",views=[]){
         var curlayout=document.body.querySelector("[layout]");
         if(curlayout){curlayout=curlayout.getAttribute("layout");} 
         if(curlayout!==lname){
-            sm.ajax.loadhtml("./view/layout/"+lname+".layout.html","body",true).then(function(){
+            sm.ajax.loadhtml("./view/layout/"+lname+".layout.html",sm.document.body(),true).then(function(){
                 sm.view.init().then(function(){
                     sm.view.doonloadinit();
                     sm.view.layout.load(views).then(function(d){return resolve(d);},function(i){return reject(i);});
@@ -1853,6 +1864,7 @@ watch:function(wathcingtree={}){
     var me=this;
     if(!me.watched){
         window.onhashchange=function(){
+            console.log("11111111111111111");
             me.newhash=location.hash;
             me.hashhandler(me.oldhash,me.newhash);
             me.oldhash=me.newhash;
@@ -1863,6 +1875,7 @@ watch:function(wathcingtree={}){
     return this;
 },
 hashhandler:function(oldhash,newhash){
+    console.log("Enter Hash Handeller!");
     var me=this;
     var watchingtree=me.watchingtree;
     for(var route in watchingtree){
@@ -1995,6 +2008,12 @@ check:function(datas){
     }
     return checkpass;
 },
+define:function(defs){
+    for(var x in defs){
+        this[x]=defs[x];
+    }
+    return this;
+},
 });
 God.coms("dialog").extendproto({//对话框
 
@@ -2124,14 +2143,14 @@ God.coms("loading").extend({
     },
     next:function(t){
         this.current++;
-        this.total&&(this.current>this.total)&&(this.current=this.total);
+        this.total&&(this.current>this.total)&&(this.finish(t));
         this.total&&(this.progress(this.current*100/this.total));
         this.text(t);
         return this;
     },
     finish:function(t=false){
         this.progress(100);
-        !t&&(t="Finish!");
+        !t&&(t="Finishing...");
         this.text(t);
         this.total=0;
         return this;
