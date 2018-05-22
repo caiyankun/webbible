@@ -1,6 +1,5 @@
 <div class="wrapper">
 <div class="row"><div class="col-sm-12">
-    <div view-com="pdtable" dataspace="huiyuantongji"></div>
     <div view-com="pdtable" dataspace="huiyuanliebiao"></div>
     <div view-com="pdtable" dataspace="huiyuanxiangqing"></div>
 </div></div>
@@ -9,17 +8,6 @@
 
 
 <script>
-    sm.view.aftercominit("pdtable>huiyuantongji",function(){
-        this.title="会员统计：";
-        this.onrefresh=function(){
-        };
-        this.onsave=function(table){
-
-        };
-        this.table.onclickcell=function(td){
-        };
-
-    });
     sm.view.aftercominit("pdtable>huiyuanliebiao",function(){
         this.title="会员列表：";
         this.data({

@@ -42,6 +42,7 @@ sm.view.oncominit("table",function(el){
          _bodyel:tbel.querySelector("tbody"),
          _data:[],
          _fields:[],
+         _enablemenu:true,
          _nrm:false,
          _defined:false,
          hfloatitems:[
@@ -155,6 +156,9 @@ sm.view.oncominit("table",function(el){
                 }
                 !this._defined&&(def.length)&&(this.define(def));
             }
+        },
+        enablemenu:function(t=true){
+            this._enablemenu=t;
         },
         setup:function(){return sm.setup.apply(this,arguments);},
         define:function(defobjarr){
@@ -423,12 +427,12 @@ sm.view.oncominit("table",function(el){
         "td@mousedown":function(e,el){
             if(e.button ==2){
                 this.doclickcell(el);
-                this.floatmenu.show(e,this.floatitems);
+                this._enablemenu&&this.floatmenu.show(e,this.floatitems);
             }
         },
         "th@mousedown":function(e,el){
             if(e.button ==2){
-                this.floatmenu.show(e,this.hfloatitems);
+                this._enablemenu&&this.floatmenu.show(e,this.hfloatitems);
             }
         },
     });

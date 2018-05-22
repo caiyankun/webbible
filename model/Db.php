@@ -98,23 +98,23 @@ class Db {
             return true;
         }
     }
-    public static function vardata($valueiffail=""){
-        if(is_array(self::$data)&&is_array(self::$data[0])&&is_array(self::$data[0][0])&&!empty(self::$data[0][0])){
-            return reset(self::$data[0][0]);
+    public static function vardata($valueiffail="",$offset=0){
+        if(is_array(self::$data)&&is_array(self::$data[$offset])&&is_array(self::$data[$offset][0])&&!empty(self::$data[$offset][0])){
+            return reset(self::$data[$offset][0]);
         } else {
             return $valueiffail;
         }   
     }
-    public static function arraydata($valueiffail=[]){
-        if(is_array(self::$data)&&is_array(self::$data[0])&&is_array(self::$data[0][0])){
-            return self::$data[0][0];
+    public static function arraydata($valueiffail=[],$offset=0){
+        if(is_array(self::$data)&&is_array(self::$data[$offset])&&is_array(self::$data[$offset][0])){
+            return self::$data[$offset][0];
         } else {
             return $valueiffail;
         }   
     }
-    public static function tabledata($valueiffail=[[]]){
-        if(is_array(self::$data)&&is_array(self::$data[0])&&is_array(self::$data[0][0])){
-            return self::$data[0];
+    public static function tabledata($valueiffail=[[]],$offset=0){
+        if(is_array(self::$data)&&is_array(self::$data[$offset])&&is_array(self::$data[$offset][0])){
+            return self::$data[$offset];
         } else {
             return $valueiffail;
         }        

@@ -1,6 +1,5 @@
 <div class="wrapper">
 <div class="row"><div class="col-sm-12">
-    <div view-com="pdtable" dataspace="dingdantongji"></div>
     <div view-com="pdtable" dataspace="dingdanguanli"></div>
 </div></div>
 </div>
@@ -8,17 +7,6 @@
 
 
 <script>
-    sm.view.aftercominit("pdtable>dingdantongji",function(){
-        this.title="订单统计：";
-        this.onrefresh=function(){
-        };
-        this.onsave=function(table){
-
-        };
-        this.table.onclickcell=function(td){
-        };
-
-    });
     sm.view.aftercominit("pdtable>dingdanguanli",function(){
         this.title="订单管理：";
         this.data({

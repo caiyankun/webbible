@@ -1,6 +1,5 @@
 <div class="wrapper">
 <div class="row"><div class="col-sm-12">
-    <div view-com="pdtable" dataspace="shangpintongji"></div>
     <div view-com="pdtable" dataspace="shangpinguanli"></div>
 </div></div>
 </div>
@@ -8,24 +7,6 @@
 
 
 <script>
-    sm.view.aftercominit("pdtable>shangpintongji",function(){
-        this.title="商品统计：";
-        this.table.toolbar.show=false;
-        this.onrefresh=function(){
-            var me=this;
-            sm.ajax.smurl("productstat").smpost().then(function(d){
-                var t=sm.data.smdata(d);
-                //me.table.define(t.def());
-                me.table.clear("data").write(t.tabledata());
-            });
-        };
-        this.onsave=function(table){
-
-        };
-        this.table.onclickcell=function(td){
-        };
-        this.onrefresh();
-    });
     sm.view.aftercominit("pdtable>shangpinguanli",function(){
         this.title="商品管理：";
         this.data({

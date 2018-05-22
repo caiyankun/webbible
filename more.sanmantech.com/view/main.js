@@ -27,6 +27,7 @@ sm.coms.require(["jquery","bootstrap.v3","awesome","animate","hadmin","metismenu
             gethomelist:"shop/readinfo.func/home.list",
             productstat:"product/stat.func",
             productquery:"product/query.func",
+            homestat:"shop/homestat.func"
         }
     });
     //(2)如果路由中需要用到用户权限验证的功能，就必须重写框架中用户登录相关的函数：

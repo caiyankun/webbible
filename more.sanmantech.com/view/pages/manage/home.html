@@ -10,7 +10,7 @@
             </div>
             <div class="col-xs-8 text-right btn btn-primary"  role="button" data-toggle="collapse" href="#saldetail" aria-expanded="false" aria-controls="saldetail">
                 <span> 今日销售额 </span>
-                <h2 class="font-bold">1112</h2>
+                <h2 class="font-bold">{{jinri.xiaoshou}}</h2>
             </div>
         </div>
     </div>
@@ -23,7 +23,7 @@
             </div>
             <div class="col-xs-8 text-right btn btn-primary"  role="button" data-toggle="collapse" href="#newuserdetail" aria-expanded="false" aria-controls="newuserdetail">
                 <span> 今日新增会员 </span>
-                <h2 class="font-bold">1112</h2>
+                <h2 class="font-bold">{{jinri.huiyuan}}</h2>
             </div>
         </div>
     </div>
@@ -43,8 +43,13 @@
 
 
 <script>
+    
+    
+    
     sm.view.aftercominit("pdtable>caiwutongji",function(){
         this.title="财务统计：";
+        this.table.toolbar.show=false;
+        this.table.enablemenu(false);
         this.onrefresh=function(){
         };
         this.onsave=function(table){
@@ -56,6 +61,8 @@
     });
     sm.view.aftercominit("pdtable>huiyuantongji",function(){
         this.title="会员统计：";
+        this.table.toolbar.show=false;
+        this.table.enablemenu(false);
         this.data({
             
         });
@@ -68,8 +75,10 @@
         };
 
     });
-        sm.view.aftercominit("pdtable>shangpintongji",function(){
+    sm.view.aftercominit("pdtable>shangpintongji",function(){
         this.title="商品统计：";
+        this.table.toolbar.show=false;
+        this.table.enablemenu(false);
         this.data({
             
         });
@@ -82,8 +91,10 @@
         };
 
     });
-        sm.view.aftercominit("pdtable>dingdantongji",function(){
+    sm.view.aftercominit("pdtable>dingdantongji",function(){
         this.title="订单统计：";
+        this.table.toolbar.show=false;
+        this.table.enablemenu(false);
         this.data({
             
         });
@@ -94,6 +105,16 @@
         this.onsave=function(table){
 
         };
+
+
+        sm.ajax.smurl("homestat").smpost().then(function(d){
+            $common.jinri.xiaoshou=d.jinri[1];
+            $common.jinri.huiyuan=d.jinri[0];
+            $caiwutongji.table.clear().write(d.finstat);
+            $huiyuantongji.table.clear().write(d.memstat);
+            $shangpintongji.table.clear().write(d.goodstat);
+            $dingdantongji.table.clear().write(d.orderstat);
+        });
 
     });
 </script>

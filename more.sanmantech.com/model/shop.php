@@ -22,7 +22,21 @@ class shop {
             \Response::returntaskok(\Db::cubedatawithtitle());
         }
     }
-
+    public function homestat() {
+        \User::checkright(800)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
+        if(!\Db::simplecall("more.managehome", array())){
+            \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
+        } else {
+            $rs=[];
+            $rs["jinri"]= \Db::arraydata();
+            $rs["finstat"]= \Db::tabledata([[]],1);
+            $rs["memstat"]= \Db::tabledata([[]],2);
+            $rs["goodstat"]= \Db::tabledata([[]],3);
+            $rs["orderstat"]= \Db::tabledata([[]],4);
+            
+            \Response::returntaskok($rs);
+        }
+    }
     /**
      * 删除商城信息
      */
