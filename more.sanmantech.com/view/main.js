@@ -21,10 +21,10 @@ sm.coms.require(["jquery","bootstrap.v3","awesome","animate","hadmin","metismenu
             glob:"file/glob.func",
             prodpicupload:"img/uploadimg.func/product/",
             picupload:"img/uploadimg.func/",
-            getlunbo:"shop/readinfo.func/home.post",
-            writelunbo:"shop/writeinfo.func/home.post",
-            writehomelist:"shop/writeinfo.func/home.list",
-            gethomelist:"shop/readinfo.func/home.list",
+            getlunbo:"db/proc.func/more.shop_get?key=home.post",
+            writelunbo:"db/proc.func/more.shop_set?key=home.post",//获取首页精选的轮播图
+            writehomelist:"db/proc.func/more.shop_set?key=home.list",
+            gethomelist:"db/proc.func/more.shop_get?key=home.list",//获取首页精选的图文列表
             productstat:"product/stat.func",
             productquery:"product/query.func",
             homestat:"shop/homestat.func"

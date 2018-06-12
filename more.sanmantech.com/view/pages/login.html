@@ -1,4 +1,4 @@
-<div class="middle-box text-center loginscreen  animated fadeInDown">
+<div class="middle-box text-center loginscreen  animated fadeInDown" com:="login" dataspace='login' oncominit="true">
     <div>
         <div>
             
@@ -6,30 +6,54 @@
         </div>
         <div class="m-t" role="form" >
             <div class="form-group">
-                <input type="email" class="form-control" get:value="login.input.uname"  placeholder="用户名" required="">
+                <input type="email" class="form-control" get:value="uname"  placeholder="User Name" required="">
             </div>
             <div class="form-group">
-                <input type="password" class="form-control" get:value="login.input.upass" placeholder="密码" required="">
+                <input type="password" class="form-control" get:value="upass" placeholder="Password" required="">
             </div>
-            <button class="btn btn-primary block full-width m-b" >管理员登录</button>
+            <p class="bg-danger" set:display="($error==''?'':'1')">{{error}}</p>
+            <button class="btn btn-primary block full-width m-b submmit" >管理员登录</button>
         </div>
     </div>
 </div>
 
 <script>
-    console.log("loaded");
-sm.view.onloadinit(function(){
-    console.log("enter onloadinit");
-    console.log($common);
-    $common.watchdom({
-        "text:管理员登录":function(){
-            sm.user.login(this.login.input.uname,this.login.input.upass,"0000",true,function(d){
-                //alert("登录成功:"+JSON.stringify(d));
-                sm.route.to("#manage/home.html");
-            },function(i){
-                alert("登录失败："+i);
+
+sm.view.oncominit("login",function(el){
+    
+    sm.datavalidation.define({
+        uname:/@/,
+        upass:/\w{6,}/,
+    });
+    
+    
+    this.data({
+        error:"",
+        uname:"",
+        upass:"",
+    }).method({
+        onlogin:function(uname,upass){
+            var me=this;
+            me.error="";
+            sm.datavalidation.check({uname:uname,upass:upass}).success(function(){
+                var mee=this;
+                sm.user.login(uname,upass,"0000",true,function(d){
+                    sm.route.to("#manage/home.html");
+                },function(i){
+                    me.error="Login fail:"+i;
+                });
+            }).error(function(){
+                me.error="Data format incorrect："+this.stat().info;
             });
+
+            
+        },
+    }).watchdom({
+        "button.submmit":function(){
+            this.onlogin(this.uname,this.upass);
         },
     });
 });
+
+
 </script>

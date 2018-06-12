@@ -215,6 +215,15 @@ toobj:function(arr,objdef){
     }
     return rso;
 },
+transpose:function(arr){
+
+    return arr[0].map(function(v,i){
+        return arr.map(function(vv){
+            return vv[i];
+        });
+    });
+
+},
 formobj:function(karr,varr){
     !$$.isarray(varr)&&(varr=[varr]);
     if(varr.length<1) return {};
@@ -283,7 +292,32 @@ getElementLeft:function (element){
     }
     return actualLeft;
 },
-
+dbaddstr:function(row){
+    var rs="";
+    for(var k in row){
+        if(row[k]!=""){
+            if(rs==""){
+                rs=k+"=\""+row[k]+"\"";
+            } else {
+                rs=rs+","+k+"=\""+row[k]+"\"";
+            }
+        }
+    }
+    return rs;
+},
+dbupdstr:function(ori,newo){
+    var rs="";
+    for(var k in ori){
+        if(ori[k]!==newo[k]){
+            if(rs==""){
+                rs=k+"=\""+newo[k]+"\"";
+            } else {
+                rs=rs+","+k+"=\""+newo[k]+"\"";
+            }
+        }
+    }
+    return rs;
+},
 getElementTop:function (element){
     var actualTop = element.offsetTop;
     var current = element.offsetParent;
@@ -439,9 +473,9 @@ doxhr:function(paraobj,smfcheck=false){
         xhr.open(me.setup().type,me.setup().url,me.setup().async);    //建立连接，参数一：发送方式，二：请求地址，三：是否异步，true为异步
         xhr.setRequestHeader('Content-type','application/x-www-form-urlencoded');    //可有可无
         //post参数要转换格式啊-_-!!!
-        //console.log(me.formatdata(data));
+        console.log(me.formatdata(data));
         //console.log(me.setup());
-        
+      
         xhr.send(me.formatdata(data)); 
         me.setup().data={};
     });
@@ -454,7 +488,7 @@ formatdata:function(obj){
     var rs="";
     for(var k in obj){
         if(rs!==""){rs=rs+"&";}
-        rs=rs+k+"="+obj[k];
+        rs=rs+k+"="+encodeURIComponent(obj[k]);
     }
     if(rs==""){
         return null;
@@ -1974,6 +2008,57 @@ God.coms("server").extend({
         }
     },
 });
+God.coms("db").extend({
+    _setup:{
+        url:"db/proc.func/",
+        db:"more",
+        tb:"user",
+    },
+}).extendproto({
+    url:function(u){this.setup({url:u});return this;},
+    db:function(d){this.setup({db:d});return this;},
+    tb:function(t){this.setup({tb:t});return this;},
+    list:function(paras={}){
+        var furl=this.setup().url+this.setup().db+"."+this.setup().tb+"_list";
+        console.log(furl);
+        return sm.ajax.url(furl).smpost(paras);
+    },
+    add:function(paras={}){
+        var furl=this.setup().url+this.setup().db+"."+this.setup().tb+"_add";
+        console.log(furl);
+        return sm.ajax.url(furl).smpost(paras);
+    },
+    update:function(paras={}){
+        var furl=this.setup().url+this.setup().db+"."+this.setup().tb+"_update";
+        console.log(furl);
+        return sm.ajax.url(furl).smpost(paras);
+    },
+    detail:function(paras={}){
+        var furl=this.setup().url+this.setup().db+"."+this.setup().tb+"_detail";
+        console.log(furl);
+        return sm.ajax.url(furl).smpost(paras);
+    },
+    stat:function(paras={}){
+        var furl=this.setup().url+this.setup().db+"."+this.setup().tb+"_stat";
+        console.log(furl);
+        return sm.ajax.url(furl).smpost(paras);
+    },
+    delete:function(paras={}){
+        var furl=this.setup().url+this.setup().db+"."+this.setup().tb+"_delete";
+        console.log(furl);
+        return sm.ajax.url(furl).smpost(paras);
+    },
+    set:function(key,value){
+        var furl=this.setup().url+this.setup().db+"."+this.setup().tb+"_set";
+        console.log(furl);
+        return sm.ajax.url(furl).smpost({key:key,value:value});
+    },
+    get:function(key){
+        var furl=this.setup().url+this.setup().db+"."+this.setup().tb+"_get";
+        console.log(furl);
+        return sm.ajax.url(furl).smpost({key:key});
+    },
+});
 God.coms("datavalidation").extendproto({//目的是定义数据验证相关的函数相关的函数
 check:function(datas){
     var checkpass=true;
@@ -2006,7 +2091,7 @@ check:function(datas){
             }
         }
     }
-    return checkpass;
+    return this;
 },
 define:function(defs){
     for(var x in defs){
@@ -2160,3 +2245,5 @@ God.coms("loading").extend({
 //-----------------------基础组件定义:-----------------------------------------------
 
 console.log('sm.god.js已经加载完成！');
+
+

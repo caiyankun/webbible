@@ -26,14 +26,14 @@ class test {
             echo \Token::$errorinfo;
         }
     }
-    public function test(){
-        var_dump($_REQUEST);
-        var_dump($_GET);
-        var_dump($_POST);
-        \Request::picoutdata("token");
-        var_dump($_REQUEST);
-        var_dump($_GET);
-        var_dump($_POST);
+    public function test($str=""){
+        //$str="sale.cat,sale.hotbrand,sale.hotlist,sale.post";
+        $rs=explode(",",$str);
+        foreach ($rs as $k) {
+            $keynames=explode("=>",$k);
+            if(sizeof($keynames)>1){$keyname=$keynames[1];}else{$keyname=$keynames[0];}
+            echo $keyname;
+        }
         
     }
 }
