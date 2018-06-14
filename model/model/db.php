@@ -12,13 +12,13 @@ class db {
         }
         return $p;
     }
-    public function proc($procname,$paras=[],$id=0,$contents="",$witch="",$filterinfo="",$orderinfo="",$page=1,$length=100,$smproc=true,$key='',$value='',$option=''){
+    public function proc($procname,$paras=[],$id=0,$contents="",$witch="",$filterinfo="",$orderinfo="",$page=1,$length=100,$smproc=true,$key='',$value='',$option='',$multiset=""){
         //校验权限，后续扩展为权限表形式
-        \User::checkright(800)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
+        //\User::checkright(800)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
         
         //分类执行
         if($smproc&&preg_match('/_list$/', $procname)){
-            $this->querylist($procname,$filterinfo,$orderinfo,$page,$length,$option);
+            $this->querylist($procname,$filterinfo,$orderinfo,$page,$length,$option,$multiset);
         } elseif ($smproc&&preg_match('/_detail$/', $procname)){
             $this->detail($procname,$id,$witch,$option);
         } elseif ($smproc&&preg_match('/_add$/', $procname)){
@@ -70,7 +70,7 @@ class db {
             \Response::returntaskfail(\Db::$info);
         }
     }
-    public function querylist($procname,$filterinfo="",$orderinfo="",$page=1,$length=0,$option=""){
+    public function querylist($procname,$filterinfo="",$orderinfo="",$page=1,$length=0,$option="",$multiset=""){
         //var_dump([$filterinfo,$orderinfo,$page,$length]);
         if(\Db::simplecall($procname, [$filterinfo,$orderinfo,$page,$length,\User::uid(),$option])){
         //if(\Db::simplecall("more.user_list", ["","",1,100])){

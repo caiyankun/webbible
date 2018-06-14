@@ -246,7 +246,9 @@ class Db {
             	}
                 
                 
-                $pdostate=$conn->query($sqlstr_proc,PDO::FETCH_NUM);
+                //$pdostate=$conn->query($sqlstr_proc,PDO::FETCH_NUM);
+                
+                $pdostate=$conn->query($sqlstr_proc,PDO::FETCH_ASSOC);
                 if(!$pdostate){self::$error=1;self::$info="调用query失败！";return false;}
                 $maxcolumns=$pdostate->columnCount();
                 
