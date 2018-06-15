@@ -74,10 +74,23 @@ class db {
         //var_dump([$filterinfo,$orderinfo,$page,$length]);
         if(\Db::simplecall($procname, [$filterinfo,$orderinfo,$page,$length,\User::uid(),$option])){
         //if(\Db::simplecall("more.user_list", ["","",1,100])){
+        //echo json_encode(\Db::cubedata());
+        //exit(0);
             $rs=[];
             $rs["data"]= \Db::tabledata();
             $rs["title"]= \Db::$datatitle;
             $rs["paging"]=\Db::arraydata([0,0,0],1);
+            if($multiset!=""){
+                $rssets= split(",", $multiset);
+                foreach ($rssets as $key => $value) {  
+                    if($key==0){
+                        $rs[$value]=\Db::tabledata();
+                        unset($rs["data"]);
+                    } else {
+                        $rs[$value]=\Db::tabledata([[]],$key+1);
+                    }
+                }
+            }
             \Response::returntaskok($rs);
         } else {
             \Response::returntaskfail(\Db::$info);
