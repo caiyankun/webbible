@@ -1,47 +1,8 @@
-﻿<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<title>摩尔衣橱</title>
-<style>
-    .test{
-        width: 100px;
-        height: 100px;
-        border-radius: 5px;
-        margin-left:2px;
-        float:left;
-    }
-    .test.logo{
-        background-image: url(res/imgs/index/logo.jpg);
-    }
-    .test.android{
-        background-image: url(res/imgs/index/android_100.png);
-    }
-    .test.ios{
-        background-image: url(res/imgs/index/ios_100.png);
-    }
+<div view-com="smtable">
     
-</style>
-</head>
-<body >
-
-    <div class="test logo">
-
-    </div>
-    <div class="test android">
-
-    </div>
-    <div class="test ios">
-
-    </div>
-    
-</body>
-
-<!-- (1)必须的框架核心 -->
-<script src="sm/sm.god.js"></script>
-<!-- (2)必须的自定义js，入口文件在这里！ -->
+</div>
 <script>
-
-
+sm.view.aftercominit("smtable",function(){
+    this.onrefresh();
+});
 </script>
-</html>

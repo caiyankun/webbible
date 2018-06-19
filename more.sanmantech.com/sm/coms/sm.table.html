@@ -289,7 +289,7 @@ sm.view.oncominit("table",function(el){
             var mor=$$.formobj(this.fields(),"");
             $$.safemerge.apply(mor,[or]);
             sm.dialog.modalform(mor,function(rowdata){
-                me.doaddrow($$.merge.apply(or,[rowdata]));
+                me.doaddrow($$.merge.apply({},[rowdata]));
             });
         },
         onclickcell:function(td){},
@@ -304,6 +304,7 @@ sm.view.oncominit("table",function(el){
             });
         },
         doaddrow:function(rowdata){
+            console.log(rowdata);
             this.write(rowdata);
         },
         dodelrow:function(td){
@@ -453,6 +454,7 @@ sm.view.oncominit("table",function(el){
             default:
         }
     };
+
 });
 
 </script>

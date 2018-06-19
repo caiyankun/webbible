@@ -62,8 +62,8 @@ class db {
             $rs=[];
             $rs["title"]=["key","value"];
             $rs["data"]=[];
-            for($i=0;$i< sizeof($value);$i++){
-                array_push($rs["data"], [$key[$i],$value[$i]]);
+            for($i=0;$i< sizeof($key);$i++){
+                array_push($rs["data"], [$key[$i],$value[$key[$i]]]);
             }
             \Response::returntaskok($rs);
         } else {

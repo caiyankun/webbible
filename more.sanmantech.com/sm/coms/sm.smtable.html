@@ -1,0 +1,155 @@
+<div view-com-tpl="smtable">
+    <div view-com="table" dataspace="main"></div>
+    <div view-com="table" dataspace="detail"></div>
+</div>
+
+<script>
+    sm.view.oncominit("smtable",function(){
+        var me=this;
+        this.main.toolbar.setitems("right",[
+            ["fa fa-plus"],
+            ["fa fa-refresh"],
+            ["fa fa-save"],
+        ]);
+        this.main.toolbar.setitems("left",[
+            ["fa fa-gear main"],
+        ]);
+        this.main.toolbar.show=true;
+        this.main.paging.show=true;
+        this.detail.toolbar.show=false;
+        this.detail.paging.show=false;
+        this.data({
+            showdetail:true,
+            _setup:{
+                db:"",
+                tb:"",
+            }
+        }).method({
+            setup:function(value=false){
+                if(value){
+                    $$.merge.apply(this._setup,[value]);
+                } 
+                return this._setup;
+            },
+            onsetup:function(){
+                sm.dialog.modalform(this.setup(),function(newsetup){
+                    me.setup(newsetup);
+                    me.onrefresh();
+                });
+            },
+            ondetail:function(td){
+                var k=me.main.getkey(td);
+                if(me.showdetail){
+                    me.db().detail({id:k.value}).then(function(d){
+                        console.log(d);
+                        me.detail.clear().write(d.data);
+                        me.detail.define(d.title);
+                    },function(i){
+                        console.log("error:"+i);
+                    });
+                }
+            },
+            onlist:function(){
+                me.db().list().then(function(d){
+                    me.main.clear().write(d.data);
+                    me.main.define(d.title);
+                    me.main.paging.setup(d.paging[1]*d.paging[2],d.paging[0],d.paging[2]);
+                    me.main.setkey(0);
+                },function(i){sm.dialog.msg(i);});
+            },
+            onadd:function(td=""){
+                var mee=me.main;
+                var nr=mee.nrm();
+                if(td!==""){
+                    nr=mee.rowobj(td);
+                }
+                sm.dialog.modalform(nr,function(rowdata){
+                    var contents=$$.dbaddstr(rowdata);
+                    me.db().add({contents:contents}).then(function(d){
+                        me.onrefresh();
+                    },function(i){
+                        console.log("error:"+i);
+                    });
+                });
+            },
+            onupdate:function(td){
+                var mee=me.main;
+                var k=mee.getkey(td);
+                var or=mee.rowobj(td);
+                sm.dialog.modalform(or,function(rowdata){
+                    var t=$$.dbupdstr(or,rowdata);
+                    console.log("------"+t);
+                    me.db().update({contents:t,id:k.value}).then(function(d){
+                        mee.doupdrow(td,rowdata);
+                    },function(i){
+                        console.log("error:"+i);
+                    });
+                });
+            },
+            ondelete:function(td){
+                var k=me.main.getkey(td);
+                var mee=me.main;
+                me.db().delete({id:k.value}).then(function(d){
+                    mee.dodelrow(td);
+                },function(i){
+                    console.log("error:"+i);
+                });
+            },
+            onsave:function(){
+                
+            },
+            onrefresh:function(){//list
+                me.onlist();
+                me.detail.clear();
+            },
+            onset:function(){
+                
+            },
+            onget:function(){
+                
+            },
+            db:function(){
+                return sm.db.db(this.setup().db).tb(this.setup().tb);
+            }
+        }).watchdom({
+            ".toolbar i.fa-gear.main":function(e,el){
+               this.onsetup();
+           },
+        });
+        me.main.onclickcell=function(td){//detail
+            me.ondetail(td);
+            me.curtd=td;
+        };
+        me.main.floatmenu.onclickmenu=function(el,cla,text){//add，update，delete
+            switch(cla){
+                case "del":
+                    me.ondelete(el);
+                    break;
+                case "edit":
+                    me.onupdate(el);
+                    break;
+                case "add":
+                    me.onadd();
+                    break;
+                case "duplicate":
+                    me.onadd(el);
+                    break;
+                default:
+            }
+        };
+        me.detail.floatitems=[
+             {class:"edit",text:"编辑"},
+        ];
+        me.detail.hfloatitems=[
+             {class:"edit",text:"编辑"},
+        ];
+        me.detail.floatmenu.onclickmenu=function(el,cla,text){//add，update，delete
+            switch(cla){
+                case "edit":
+                    me.onupdate(me.curtd);
+                    break;
+                default:
+            }
+        };
+    });
+</script>
