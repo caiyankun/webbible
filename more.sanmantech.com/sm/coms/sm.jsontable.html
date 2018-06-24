@@ -25,7 +25,7 @@
             _setup:{
                 db:"",
                 tb:"",
-                key:""
+                key:"",
             }
         }).method({
             onsave:function(){
@@ -53,6 +53,10 @@
                         var v=kv.substr(k.length+1);
                         if(v=="[]"){
                             of[k]=[];
+                        } else if(v=="{}") {
+                            of[k]={};
+                        } else if(v=="[{}]") {
+                            of[k]=[{}];
                         } else {
                             of[k]=v;
                         }
@@ -63,15 +67,16 @@
                         var olditem=olddata[ok];
                         var item={};
                         $$.merge.apply(item,[of]);
-                        //console.log(item);
+                        console.log("catch me here");
                         //console.log(olditem);
                         for(var k in item){
-                            if(!$$.isarray(item[k])){
+                            if(!$$.isarray(item[k])&&!$$.isobj(item[k])){
                                 olditem.hasOwnProperty(k)&&(item[k]=olditem[k]);
                             }
                         }
                         newdata.push(item);
                     }
+                    console.log("hahahahah");
                     me.main.clear().write(newdata);
                     me.onsave();
                 });
@@ -105,15 +110,21 @@
                     console.log("main data:");
                     console.log(maindata);
                     for(var k in maindata){
-                        for (var kk in maindata[k][me.curk]){
-                            var item={};
-                            $$.merge.apply(item,[of]);
+                        if($$.isobj(maindata[k][me.curk])){
+                            //强制主表中的所有的该字段都与此item保持一致
+                            var item=$$.merge.apply({},[of]);
                             for (kkk in item){
-                                maindata[k][me.curk][kk].hasOwnProperty(kkk)&&(item[kkk]=maindata[k][me.curk][kk][kkk]);
+                                maindata[k][me.curk].hasOwnProperty(kkk)&&(item[kkk]=maindata[k][me.curk][kkk]);
                             }
-                            maindata[k][me.curk][kk]=item;
-                            console.log("item:"+k);
-                            console.log(item);
+                            maindata[k][me.curk]=item;
+                        } else {
+                            for (var kk in maindata[k][me.curk]){
+                                var item=$$.merge.apply({},[of]);
+                                for (kkk in item){
+                                    maindata[k][me.curk][kk].hasOwnProperty(kkk)&&(item[kkk]=maindata[k][me.curk][kk][kkk]);
+                                }
+                                maindata[k][me.curk][kk]=item;
+                            }
                         }
                     }
                     me.onsaveitems();
@@ -121,7 +132,33 @@
             },
             onsaveitems:function(){
                 if(me.curtd==""||me.curk=="") return;
-                me.main.rowobj(me.curtd)[me.curk]=me.detail.datas(false);
+                var otarget=me.main.rowobj(me.curtd)[me.curk];
+                console.log(111116666);
+                if($$.isobj(otarget)){
+                    me.main.rowobj(me.curtd)[me.curk]=me.detail.datas(false)[0];
+                    //强制主表中的所有的该字段都与此item保持一致
+                    var maindata=me.main.datas(false,false);
+                    console.log("main data:");
+                    console.log(maindata);
+                    for(var k in maindata){
+                        var item=$$.merge.apply({},[me.detail.datas(false)[0]]);
+                        for (kkk in item){
+                            maindata[k][me.curk].hasOwnProperty(kkk)&&(item[kkk]=maindata[k][me.curk][kkk]);
+                        }
+                        maindata[k][me.curk]=item;
+                        console.log("item:"+k);
+                        console.log(item);
+                    }
+                } else if(otarget.length<1 || !$$.isobj(otarget[0])){
+                    var v=[];
+                    try{
+                        v=JSON.parse(me.detail.datas(false)[0]["JSON"]);
+                    } catch(e){}
+                    me.main.rowobj(me.curtd)[me.curk]=v;
+                } else {
+                    me.main.rowobj(me.curtd)[me.curk]=me.detail.datas(false);
+                }
+                this.onsave();
             },
             onrefreshitems:function(which=false,curtd=false){
                 if(curtd){this.curtd=curtd;}
@@ -131,7 +168,7 @@
                 var robj=me.main.rowobj(curtd);
                 for(var k in robj){
                     var v=robj[k];
-                    if($$.isarray(v)){
+                    if($$.isarray(v)||$$.isobj(v)){
                         whichs.push(["refresh detail",k]);
                     }
                 }
@@ -144,8 +181,25 @@
                     !which&&(which=whichs[0][1]);
                     this.curk=which;
                     me.detail.toolbar.setitems("right",whichs);
-                    if(robj[which].length==0){robj[which]=[{blank:"blank"}];}
-                    me.detail.write(robj[which]);
+                    if($$.isobj(robj[which])){
+                        var otarget=$$.merge.apply({},[robj[which]]);
+                    } else {
+                        var otarget=robj[which];
+                    }
+                    
+                    
+                    console.log("iiiiiiii:"+otarget);
+                    if($$.isarray(otarget)&&otarget.length>0&&$$.isobj(otarget[0])){
+                        if(JSON.stringify(otarget[0])=="{}"){
+                            otarget=[{blank:"blank"}];
+                        }
+                    } else if($$.isarray(otarget)){
+                        otarget=[{JSON:JSON.stringify(otarget)}];
+                    } else if($$.isobj(otarget)){
+                        (JSON.stringify(otarget)=="{}")&&(otarget={blank:"blank"});
+                        otarget=[otarget];
+                    }
+                    me.detail.write(otarget);
                 }
             },
             onsetup:function(){
@@ -163,6 +217,7 @@
             onget:function(){
                 if(this.setup().db=="") return;
                 me.db().get(this.setup().key).then(function(d){
+                    if($$.isobj(d)){d=[d];}
                     if(d=="" ||d.length<1){d=[{blank:"blank"}];}
                     me.main.clear().write(d);
                 },function(i){sm.dialog.msg(i);});

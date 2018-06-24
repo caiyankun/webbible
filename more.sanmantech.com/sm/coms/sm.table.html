@@ -124,6 +124,17 @@ sm.view.oncominit("table",function(el){
         nrm:function(c=false){
             c&&(this._nrm=c);
             !this._nrm&&(this._nrm=$$.formobj(this.fields(),""));
+            var firstrow=this.rowobj(0);
+            for (var k in firstrow){
+                var v=firstrow[k];
+                if($$.isarray(v)&&v.length>0&&$$.isobj(v[0])){
+                    this._nrm[k]=[{}];
+                } else if($$.isobj(v)) {
+                    this._nrm[k]={};
+                } else if($$.isarray(v)) {
+                    this._nrm[k]=[];
+                }
+            }
             return this._nrm;
         },
         write:function(datas){
@@ -148,11 +159,16 @@ sm.view.oncominit("table",function(el){
                     var tddata=rowdata[col];
                     objarr&&(!defed)&&(def.push(col));
                     if($$.isarray(tddata)){
-                        tdel.innerHTML="[...]";
+                        if(tddata.length>0 && $$.isobj(tddata[0])){
+                            tdel.innerHTML="[{...}]";
+                        } else {
+                            tdel.innerHTML="[...]";
+                        }
+                    } else if($$.isobj(tddata)){
+                        tdel.innerHTML="{...}";
                     } else {
                         tdel.innerHTML=tddata;
                     }
-                    
                 }
                 !this._defined&&(def.length)&&(this.define(def));
             }
@@ -300,6 +316,7 @@ sm.view.oncominit("table",function(el){
             var me=this;
             var or=this.rowobj(td);
             sm.dialog.modalform(or,function(rowdata){
+                console.log(rowdata);
                 me.doupdrow(td,rowdata);
             });
         },
@@ -312,7 +329,7 @@ sm.view.oncominit("table",function(el){
             this.rowel(td).remove();
         },
         doupdrow:function(td,newdata){
-            
+            console.log(11111111111);
             var rel=this.rowel(td);
             var ri=this.rowindex(td);
             if($$.isobj(this._data[0])){
@@ -323,11 +340,18 @@ sm.view.oncominit("table",function(el){
             var i=0;
             var tdels=rel.querySelectorAll("td");
             for(var col in newdata){
+                var tdel=tdels[i];
                 var tddata=newdata[col];
                 if($$.isarray(tddata)){
-                    tdels[i].innerHTML="[...]";
+                    if(tddata.length>0 && $$.isobj(tddata[0])){
+                        tdel.innerHTML="[{...}]";
+                    } else {
+                        tdel.innerHTML="[...]";
+                    }
+                } else if($$.isobj(tddata)){
+                    tdel.innerHTML="{...}";
                 } else {
-                    tdels[i].innerHTML=tddata;
+                    tdel.innerHTML=tddata;
                 }
                 i++;
             }

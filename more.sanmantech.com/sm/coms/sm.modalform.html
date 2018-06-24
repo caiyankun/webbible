@@ -38,7 +38,7 @@
             filterdata:function(od){
                 var rs={};
                 for(var k in od){
-                    if(!$$.isarray(od[k])){
+                    if(!$$.isarray(od[k])&&!$$.isobj(od[k])){
                         rs[k]=od[k];
                     }
                 }

@@ -27,6 +27,12 @@ sm.route.watch({
     "#test.html":function(){
          sm.view.makeui("noname",["test.html"]);
     },
+    "#db.html":function(){
+         sm.view.makeui("noname",["db.html"]);
+    },
+    "#json.html":function(){
+         sm.view.makeui("noname",["json.html"]);
+    },
     "(.*)":function(hash){
        document.body.innerText="404";
     },

@@ -12,7 +12,7 @@ class db {
         }
         return $p;
     }
-    public function proc($procname,$paras=[],$id=0,$contents="",$witch="",$filterinfo="",$orderinfo="",$page=1,$length=100,$smproc=true,$key='',$value='',$option='',$multiset=""){
+    public function proc($procname,$paras=[],$id=0,$contents="",$witch="",$filterinfo="",$orderinfo="",$page=1,$length=100,$smproc=true,$key='',$value='',$option='',$multiset="",$type="jsonarray"){
         //校验权限，后续扩展为权限表形式
         //\User::checkright(800)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
         
@@ -28,7 +28,7 @@ class db {
         } elseif ($smproc&&preg_match('/_delete$/', $procname)){
             $this->delete($procname,$id,$option);
         } elseif ($smproc&&preg_match('/_get$/', $procname)){
-            $this->get($procname,$key,$option);
+            $this->get($procname,$key,$option,$type);
         } elseif ($smproc&&preg_match('/_set$/', $procname)){
             $this->set($procname,$key,$value,$option);
         } elseif ($smproc&&preg_match('/_stat$/', $procname)){
@@ -131,11 +131,21 @@ class db {
             \Response::returntaskfail(\Db::$info);
         }
     }
-    public function get($procname,$key,$option=""){
+    public function get($procname,$key,$option="",$type="jsonarray"){
         $keys=explode(",",$key);
         if(sizeof($keys)<2){
             if(\Db::simplecall($procname, [$key,\User::uid(),$option])){
-                \Response::returntaskok($this->attempjson(\Db::vardata()));
+                $rs=$this->attempjson(\Db::vardata());
+                if($type=="json"){
+                    if(is_array($rs)){
+                        if(sizeof($rs)>0){
+                            $rs=$rs[0];
+                        } else {
+                            $rs= json_decode("{}");
+                        }
+                    }
+                }
+                \Response::returntaskok($rs);
             } else {
                 \Response::returntaskfail(\Db::$info);
             }
@@ -146,7 +156,17 @@ class db {
             $curkey=$keynames[0];
             if(sizeof($keynames)>1){$keyname=$keynames[1];}else{$keyname=$keynames[0];}
             if(\Db::simplecall($procname, [$curkey,\User::uid(),$option])){
-                $rs[$keyname]=$this->attempjson(\Db::vardata());
+                $trs=$this->attempjson(\Db::vardata());
+                if($type=="json"){
+                    if(is_array($trs)){
+                        if(sizeof($rs)>0){
+                            $trs=$trs[0];
+                        } else {
+                            $trs= json_decode("{}");
+                        }
+                    }
+                }
+                $rs[$keyname]=$rs;
             } else {
                 \Response::returntaskfail(\Db::$info);
             }
