@@ -2,7 +2,7 @@
 
 
 /*常量声明
- *  */
+ */
 define('WEBROOT_PATH',$_SERVER['DOCUMENT_ROOT']);//整个站点的根目录,假定是后面不带\的
 define('ENTRY_PATH',dirname($_SERVER['SCRIPT_FILENAME']).'/');//入口文件 Path,有的时候没入口文件呢?
 define('PATH_INFO',$_SERVER['PATH_INFO']);//截取Pathinfo信息
@@ -108,9 +108,10 @@ function sm(){return new God();}
 function startup(){
     DEBUG_ENABLE && Debug::log("Start Up ok(index.php[entry file]->God.php[auto load]->startup())! ");
     DEBUG_ENABLE && Debug::log('pathinfo'.PATH_INFO);
-    return Router::distribute(PATH_INFO);
+    return \Router::distribute(PATH_INFO);
 }
 
 /*执行语句*/
 spl_autoload_register(__NAMESPACE__ .'\Loader::autoload'); // 注册自动加载函数
+//echo __NAMESPACE__;
 //echo "end load God!";

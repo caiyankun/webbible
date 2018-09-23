@@ -1,0 +1,484 @@
+<style>
+    table.smtable tr.selected{
+        background-color:#eef;
+    }
+    table.smtable td.focus{
+        background-color:#ddf;
+    }
+</style>
+
+<div view-com-tpl="table">
+    <div class="container-fluid table-responsive" >
+        <div view-com="toolbar" class="toolbar"></div>
+        <table class="table table-hover table-bordered smtable">
+          <thead >
+            <tr>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+        <div view-com="paging"></div>
+    </div>
+    <div view-com="floatmenu"></div>
+</div>
+<script>
+sm.view.oncominit("table",function(el){
+    var tbel=el.querySelector("table.table");
+    tbel.oncontextmenu=function(){return false;}
+    this.toolbar.editbar.show=false;
+    this.toolbar.show=false;
+    this.toolbar.setitems("right",[
+        //['fa fa-trash'],
+        //['fa fa-cut'],
+        //['fa fa-copy'],
+        ['fa fa-plus'],
+    ]);
+    this.paging.show=false;
+    var me=this;
+    this.data({
+         _tbel:tbel,
+         _headel:tbel.querySelector("thead>tr"),
+         _bodyel:tbel.querySelector("tbody"),
+         _data:[],
+         _fields:[],
+         _enablemenu:true,
+         _nrm:false,
+         _defined:false,
+         hfloatitems:[
+             {class:"add",text:"添加新行"},
+         ],
+         floatitems:[
+             {class:"add",text:"添加新行"},
+             {class:"duplicate",text:"复制行"},
+             {class:"del",text:"删除"},
+             {class:"edit",text:"编辑"},
+         ],
+         _key:0,
+         _setup:{
+            field:"col",
+            name:"col",
+            type:"data",
+            key:false,
+            visable:true,
+            editable:false,
+            options:"",
+        },
+        _defaultdef:{
+            field:"noname",
+            name:"noname",
+            type:"data",
+            key:false,
+            visable:true,
+            editable:false,
+            options:"",
+        },
+    }).method({
+        tbel:function(){return this._tbel;},
+        headel:function(){return this._headel;},
+        bodyel:function(){return this._bodyel;},
+        colel:function(eq){
+            this.istd(eq)&&(eq=this.colindex(eq));
+            eq=eq+1;
+            var tableel=this.tbel();
+            if(tableel){
+                return tableel.querySelector("thead>tr>th:nth-child("+eq+")");
+            } else {
+                return null;
+            }
+        },
+        istd:function(td){
+            return (Object.prototype.toString.call(td)=="[object HTMLTableCellElement]")&&(td.matches("td"));
+        },
+        rowel:function(td){
+            if(!(Object.prototype.toString.call(td)=="[object HTMLTableCellElement]")){
+                //td=td+1;
+                return this.tbel().querySelector("tbody>tr:nth-child("+td+")");
+            }
+            return this.istd(td)?td.parentElement:td;
+        },
+        colindex:function(td){
+            i=0;
+            let b=td;
+            while(b.previousSibling){
+                b=b.previousSibling;
+                i++;
+            }
+            return b;
+        },
+        rowindex:function(td){
+            if(!(Object.prototype.toString.call(td)=="[object HTMLTableCellElement]")){return td;}
+            i=0;
+            let b=this.rowel(td);
+            while(b.previousSibling){
+                b=b.previousSibling;
+                if(b.nodeType==1){i++;}
+            }
+            return i;
+        },
+        clear:function(which=""){
+            (!which||which=="define")&&(this.headel().innerHTML="",this._defined=false);
+            (!which||which=="data")&&(this.bodyel().innerHTML="",this._data=[]);
+            return this;
+        },
+        nrm:function(c=false){
+            c&&(this._nrm=c);
+            !this._nrm&&(this._nrm=$$.formobj(this.fields(),""));
+            var firstrow=this.rowobj(0);
+            for (var k in firstrow){
+                var v=firstrow[k];
+                if($$.isarray(v)&&v.length>0&&$$.isobj(v[0])){
+                    this._nrm[k]=[{}];
+                } else if($$.isobj(v)) {
+                    this._nrm[k]={};
+                } else if($$.isarray(v)) {
+                    this._nrm[k]=[];
+                }
+            }
+            return this._nrm;
+        },
+        write:function(datas){
+            var tableel=this.tbel();
+            this._data=this._data.concat(datas);
+            if(!tableel) return this;
+            var datael=tableel.querySelector("tbody");
+            if(!datael ) return this;
+            if(!$$.isarray(datas)){datas=[datas];}
+            var objarr=$$.isobj(datas[0]);
+            var def=[];
+            var defed=this._defined;
+            for (var row in datas){
+                var rowdata=datas[row];
+                var rowel=document.createElement("tr");
+                datael.appendChild(rowel);
+                console.log("catchme here");
+                if(!$$.isarray(rowdata)&&!$$.isobj(rowdata)){rowdata=[rowdata];}//如果是数组，直接写，如果是对象，要分两种情况，如果是已经定义了的，就合并再写
+                for(var col in rowdata){
+                    var tdel=document.createElement("td");
+                    rowel.appendChild(tdel);
+                    var tddata=rowdata[col];
+                    objarr&&(!defed)&&(def.push(col));
+                    if($$.isarray(tddata)){
+                        if(tddata.length>0 && $$.isobj(tddata[0])){
+                            tdel.innerHTML="[{...}]";
+                        } else {
+                            tdel.innerHTML="[...]";
+                        }
+                    } else if($$.isobj(tddata)){
+                        tdel.innerHTML="{...}";
+                    } else {
+                        tdel.innerHTML=tddata;
+                    }
+                }
+                !this._defined&&(def.length)&&(this.define(def));
+            }
+        },
+        enablemenu:function(t=true){
+            this._enablemenu=t;
+        },
+        setup:function(){return sm.setup.apply(this,arguments);},
+        define:function(defobjarr){
+            var me=this;
+            !$$.isarray(defobjarr)&&(defobjarr=[defobjarr]);
+            var i=0;
+            this._fields=[];
+            defobjarr.forEach(function(def){
+                var fieldel=me.colel(i);
+                if(fieldel){
+                    if(!$$.isobj(def)){
+                        if($$.isarray(def)){
+                            var t=me.setup();
+                            var ii=0;
+                            var tidy={};
+                            for(var k in t){
+                                if(ii<def.length) {
+                                    tidy[k]=def[ii];
+                                } else {
+                                    tidy[k]=t[k];
+                                }
+                                ii++;
+                            }
+                            def=tidy;
+                        } else {
+                            var t=$$.merge.apply({},[me._defaultdef]);
+                            def=$$.merge.apply(t,[{field:def,name:def}]);
+                        }
+                    }
+                    for (var k in def){
+                        var v=def[k];
+                        fieldel.setAttribute(k+"-t",v);
+                        if(k=="name"){
+                            fieldel.innerHTML=v;
+                        }
+                    }
+                    me._fields.push(def);
+                } else {
+                    me.add(def);
+                }
+                
+                i++;
+            });
+            this._defined=true;
+        },//field,name,type,visable,editable,options,如果只指定一个参数，那么将只会初始化name=field=value
+        fielddef:function(eq){
+            console.log("catch me here!");
+            this.istd(eq)&&(eq=this.colindex(eq));
+            var fieldel=this.colel(eq);
+            if(!fieldel){return this._defaultdef;}
+            var attrs=fieldel.attributes;
+            var rsdef={};
+            for (var i=0;i<attrs.length;i++) {
+                var attr=attrs[i].name;
+                rsdef[attr.split("-t")[0]]=fieldel.getAttribute(attr);
+            };
+            return rsdef;
+        },
+        fielddefs:function(){
+            return this.fields(false);
+        },
+        field:function(td){return this.fielddef(td).field;},
+        fields:function(which="field"){
+            if(which){
+                var a=this._fields;
+                var rs=[];
+                for(var i in a){
+                    rs.push(a[i][which]);
+                }
+                return rs;
+            } else {
+                return this._fields;
+            }
+        },
+        add:function(coldef){
+            var me=this;
+            var tableel=this.tbel();
+            if(!tableel) return this;
+            var titleel=this.headel();
+            if(!titleel ) return this;
+            if(!$$.isobj(coldef)){
+                if($$.isarray(coldef)){
+                    var t=this.setup();
+                    var i=0;
+                    var tidy={};
+                    for(var k in t){
+                        if(i<coldef.length) {
+                            tidy[k]=coldef[i];
+                        } else {
+                            tidy[k]=t[k];
+                        }
+                        i++;
+                    }
+                    coldef=tidy;
+                } else {
+                    var t=$$.merge.apply({},[me._defaultdef]);
+                    coldef=$$.merge.apply(t,[{field:coldef,name:coldef}]);
+                }
+            } else {
+                var t=$$.merge.apply({},[me._defaultdef]);
+                coldef=$$.merge.apply(t,[coldef]);
+            }
+            var fieldel=document.createElement("th");
+            for (var k in coldef){
+                var v=coldef[k];
+                fieldel.setAttribute(k+"-t",v);
+                if(k=="name"){
+                    fieldel.innerHTML=v;
+                }
+            }
+            me._fields.push(coldef);
+            titleel.appendChild(fieldel);
+            return this;
+        },
+        onaddrow:function(){
+            var me=this;
+            var nr=this.nrm();
+            sm.dialog.modalform(nr,function(rowdata){
+                me.write(rowdata);
+            });
+        },
+        blankrowobj:function(){
+            return $$.formobj(this.fields(),"");
+        },
+        onduprow:function(td){
+            var me=this;
+            var or=this.rowobj(td);
+            var mor=$$.formobj(this.fields(),"");
+            $$.safemerge.apply(mor,[or]);
+            sm.dialog.modalform(mor,function(rowdata){
+                me.doaddrow($$.merge.apply({},[rowdata]));
+            });
+        },
+        onclickcell:function(td){},
+        ondelrow:function(td){
+            this.dodelrow(td);
+        },
+        oneditrow:function(td){
+            var me=this;
+            var or=this.rowobj(td);
+            sm.dialog.modalform(or,function(rowdata){
+                console.log(rowdata);
+                me.doupdrow(td,rowdata);
+            });
+        },
+        doaddrow:function(rowdata){
+            console.log(rowdata);
+            this.write(rowdata);
+        },
+        dodelrow:function(td){
+            this._data.splice(this.rowindex(td),1);
+            this.rowel(td).remove();
+        },
+        doupdrow:function(td,newdata){
+            console.log(11111111111);
+            var rel=this.rowel(td);
+            var ri=this.rowindex(td);
+            if($$.isobj(this._data[0])){
+                this._data.splice(ri,1,newdata);
+            } else {
+                this._data.splice(ri,1,$$.objvalues(newdata));
+            }
+            var i=0;
+            var tdels=rel.querySelectorAll("td");
+            for(var col in newdata){
+                var tdel=tdels[i];
+                var tddata=newdata[col];
+                if($$.isarray(tddata)){
+                    if(tddata.length>0 && $$.isobj(tddata[0])){
+                        tdel.innerHTML="[{...}]";
+                    } else {
+                        tdel.innerHTML="[...]";
+                    }
+                } else if($$.isobj(tddata)){
+                    tdel.innerHTML="{...}";
+                } else {
+                    tdel.innerHTML=tddata;
+                }
+                i++;
+            }
+        },
+        dofocuscell:function(td){
+            //清除所有的选中状态的td样式
+            var o=this.bodyel().querySelectorAll("td.focus");
+            o&&o.forEach(function(otd){
+                otd.removeAttribute("class");
+            });
+            td.setAttribute("class","focus");
+        },
+        doselectrow:function(td){
+            var ntr=this.rowel(td);
+            if(!window.event.ctrlKey){
+                var o=this.bodyel().querySelectorAll("tr.selected");
+                o&&o.forEach(function(otr){
+                    otr.removeAttribute("class");
+                });
+            }
+            ntr.setAttribute("class","selected");//多选时不能取消选择
+        },
+        doclickcell:function(td){
+            //清除全部的
+            this.dofocuscell(td);
+            this.doselectrow(td);
+        },
+        focustd:function(){
+            return this.bodyel().querySelector("td.focus");
+        },
+        rowdata:function(td){
+            var rs=this._data[this.rowindex(td)];
+            if($$.isobj(rs)){return $$.objvalues(rs);}
+            return rs;
+        },
+        rowobj:function(td){
+            var rs=this._data[this.rowindex(td)];
+            if($$.isobj(rs)){return rs;}
+            return $$.formobj(this.fields(),rs);
+        },
+        setkey:function(keyindex){
+            this._key=keyindex;
+            var fd=this.fields();
+            for(var i=0;i<fd.length;i++){
+                fd[i].key=false;
+            }
+            fd[keyindex].key=true;
+            this.define(fd);
+        },
+        getkey:function(td=false){
+            return {key:this.fielddef(this._key).field,value:this.rowdata(td)[this._key]};
+        },
+        selecteddata:function(td=false){
+            !td&&(td=this.focustd());
+            return this.rowdata(td);
+        },
+        selectedlist:function(){
+            var t=this.bodyel().querySelector("tr.selected");
+            var rs="";
+            me=this;
+            t.forEach(function(tr){
+                rs=rs+","+me.rowindex(tr);
+            });
+            rs=rs+",";
+            return rs;
+        },
+        selecteddatas:function(){
+            var t=this.bodyel().querySelector("tr.selected");
+            var rs=[];
+            me=this;
+            t.forEach(function(tr){
+                rs.push(me.rowdata(tr));
+            });
+            return rs;
+        },
+        datas:function(arr=true,json=false){
+            var rs=[];
+            if(!this._data.length){return json?"[]":[];}
+            if(arr){
+                if($$.isarray(this._data[0])){
+                    return json?JSON.stringify(this._data):this._data;
+                } else {
+                    return json?JSON.stringify($$.objvalues(this._data)):$$.objvalues(this._data);
+                }
+            } else {
+                if($$.isarray(this._data[0])){
+                    return json?JSON.stringify($$.formobj(this.fields(),this._data)):$$.formobj(this.fields(),this._data);
+                } else {
+                    return json?JSON.stringify(this._data):this._data;
+                }
+            }
+        },
+    }).watchdom({
+        "table@click":function(){console.log("you clicked table");},
+        "th@click":function(){console.log("you clicked field")},
+        "tr@click":function(){console.log("you clicked tr")},
+        "td@click":function(e,el){this.doclickcell(el);this.onclickcell(el);},
+        "td@mousedown":function(e,el){
+            if(e.button ==2){
+                this.doclickcell(el);
+                this._enablemenu&&this.floatmenu.show(e,this.floatitems);
+            }
+        },
+        "th@mousedown":function(e,el){
+            if(e.button ==2){
+                this._enablemenu&&this.floatmenu.show(e,this.hfloatitems);
+            }
+        },
+    });
+    this.floatmenu.onclickmenu=function(el,cla,text){
+        switch(cla){
+            case "del":
+                me.ondelrow(el);
+                break;
+            case "edit":
+                me.oneditrow(el);
+                break;
+            case "add":
+                me.onaddrow();
+                break;
+            case "duplicate":
+                me.onduprow(el);
+                break;
+            default:
+        }
+    };
+
+});
+
+</script>

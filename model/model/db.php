@@ -104,8 +104,10 @@ class db {
         }
     }
     public function update($procname,$id,$contents,$witch="",$option=""){
+        //\Response::returntaskok([$procname,$id,$contents,$witch,\User::uid(),$option]);
         if(\Db::simplecall($procname, [$id,$contents,$witch,\User::uid(),$option])){
             \Response::returntaskok(\Db::cubedatawithtitle());
+            
         } else {
             \Response::returntaskfail(\Db::$info);
         }

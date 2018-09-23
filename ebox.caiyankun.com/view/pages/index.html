@@ -1,0 +1,67 @@
+<div class="wrapper" style="height: 100%">
+<div class="row">
+    <div class="col-sm-4">
+    <input type="text" placeholder="请输入关键词.." id="keyword" >
+    <button class="btn btn-default"  onclick="readlist();">查询</button>
+    <button class="btn btn-default"  onclick="savecontent();">保存</button>
+    <button class="btn btn-default"  onclick="deleteitem();">删除</button>
+    <div view-com="table"></div>
+    </div>
+    <div class="col-sm-8">
+    <textarea class="form-control" rows="40" id="contentediter"></textarea>
+    </div>
+</div>
+</div>
+
+<style>
+</style>
+<script>
+    function readlist(){
+        var keyword=document.getElementById("keyword").value;
+        sm.db.db("caiyankun").tb("ebox").list({filterinfo:keyword}).then(function(d){
+            console.log(d);
+            $table.clear().write(d.data);
+            //document.getElementById("diaryediter").value=d.data[4][1];
+        });
+    }
+    function deleteitem(){
+        
+        sm.db.db("caiyankun").tb("ebox").delete({id:$table.getkey($table.focustd()).value}).then(function(d){
+            console.log(d);
+            readlist();
+            //document.getElementById("diaryediter").value=d.data[4][1];
+        });
+    }
+    function savecontent(){
+        var contents=document.getElementById("contentediter").value;
+        var contentarr=contents.split("\n|=====|\n");
+        if(contentarr.length!==2){
+            var realcontent=contents;
+            var fields=["0","未命名","未命名"];
+        } else {
+            var fields=contentarr[0].split("-");
+            if(fields.length==1) {fields=[0,'未命名'].concat(fields);}
+            if(fields.length==2) {fields=[0].concat(fields);}
+            var realcontent=contentarr[1];
+        }
+        sm.db.db("caiyankun").tb("ebox").update({id:fields[0],contents:'domain="'+fields[1]+'",title="'+fields[2]+'",content="'+realcontent+'"'}).then(function(d){
+            sm.dialog.msg("已保存！");
+            console.log(d);
+        });
+        console.log(contents.split("\n|=====|\n")[0]);
+        //console.log(contents.split("\r\n|=====|\r\n")[1]);
+        
+
+    }
+     sm.view.aftercominit("table",function(){
+        this.onclickcell=function(td){
+            console.log(this.getkey(td).value);
+            sm.db.db("caiyankun").tb("ebox").detail({id:this.getkey(td).value}).then(function(d){
+                console.log(d);
+                document.getElementById("contentediter").value=d.data[0][1]+"-"+d.data[4][1]+"-"+d.data[6][1]+"\n|=====|\n"+d.data[7][1];
+            });
+         }
+     });
+    
+    
+</script>

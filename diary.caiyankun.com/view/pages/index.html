@@ -1,0 +1,30 @@
+<div class="wrapper" style="height: 100%">
+<div class="row"><div class="col-sm-12">
+    <input type="text" value="2018-9-20" id="datetimepicker" >
+    <button class="btn btn-default"  onclick="readdiary();">查看/编辑</button>
+    <button class="btn btn-default" onclick="writediary();">保存</button>
+    <button class="btn btn-default" >附件</button>
+    <textarea class="form-control" rows="30" id="diaryediter"></textarea>
+</div>
+</div>
+</div>
+
+<style>
+</style>
+<script>
+    function readdiary(){
+        var vdate=document.getElementById("datetimepicker").value;
+        sm.ajax.url("/db/proc.func/diary_detail").smpost({witch:vdate}).then(function(d){
+            console.log(d);
+            document.getElementById("diaryediter").value=d.data[4][1];
+        });
+    }
+    function writediary(){
+        var vdate=document.getElementById("datetimepicker").value;
+        var content=document.getElementById("diaryediter").value;
+        sm.ajax.url("/db/proc.func/diary_update").smpost({witch:vdate,contents:content}).then(function(d){
+            sm.dialog.msg("写日记成功！");
+            readdiary();
+        });
+    }
+</script>

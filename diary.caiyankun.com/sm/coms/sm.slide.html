@@ -1,0 +1,170 @@
+
+<style>
+    body>div.body,.screenwindow{
+        height:100%;
+        width:100%;
+        overflow: hidden;
+        position:fixed;
+        top:0;
+        left:0;
+    }
+.screenwindow .slide {
+    transition: all 1s;
+    width: 100%;
+    height:100%;
+    min-height: 400px;
+    min-width: 600px;
+    background-image: url(res/imgs/1.jpg);
+    background-size:cover;
+}
+.screenwindow .fullpage {
+    transition:all 1s;
+    position: relative;
+    width: 100%;
+    height:100%;
+    overflow:visible;
+    top:0;
+}
+</style>
+<div view-com-tpl="slide">
+    <div class="screenwindow">
+        <div class="fullpage">
+            <div class="slide" for:="(_i,_k,_v) in items" set:style="background-image: url({{_v.img}})">
+                <h1>{{_v.h1}}</h1>
+                <div class="header"></div>
+                <div class="footer"></div>
+                <p>{{_v.p}}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    sm.view.oncominit("slide",function(el){
+        var me=this;
+        this.data({
+            items:[
+            ],
+            _curindex:0,
+            _wheelwatched:false,
+            _handeling:false,
+            _fullpage:this._el.querySelector(".fullpage"),
+        }).method({
+            curslide:function(){
+                var a=this._fullpage.style.top;
+                (a=="")&&(a=0);
+                a=parseInt(a);
+                !a&&(a=0);
+                a=Math.abs(a/100);
+                return a;
+            },
+            preslide:function(){
+                return this.goslide(this.curslide()-1);
+            },
+            nexslide:function(){
+                return this.goslide(this.curslide()+1);
+            },
+            slideel:function(n){
+                var items=[];
+                this._fullpage&&(items=this._fullpage.querySelectorAll(".slide"));
+                return items?items[n]:false;
+            },
+            onleaveslide:function(n){
+                console.log("leave slide of "+n);
+            },
+            onenterslide:function(n){
+                console.log("enter slide of "+n);
+            },
+            goslide:function(n=0){
+                var me=this;
+                var oldn=this.curslide();
+                
+                if(this._fullpage){
+                    var sitems=this._fullpage.querySelectorAll(".slide");
+                    (n>=sitems.length)&&(n=sitems.length-1);
+                    (n<0)&&(n=0);
+                    if(sitems.length==0||n==oldn){
+                        me._handeling=false;
+                        return this;
+                    }
+                    this._fullpage.style.top="-"+n*100+"%";
+                    console.log("-"+n*100+"%");
+                    this.onleaveslide(oldn);
+                    setTimeout(function(){
+                        me.onenterslide(n);
+                    },1000);
+                }
+                return this;
+            },
+            count:function(){
+                if(this._fullpage){
+                    var sitems=this._fullpage.querySelectorAll(".slide");
+                    return sitems.length;
+                }
+                return 0;
+            },
+            add:function(imgs){
+                this.items=imgs;
+            },
+            clear:function(){
+                this.items=[];
+            },
+            onwheelup:function(){
+                console.log("enter onwheelup");
+                this.preslide();
+            },
+            onwheeldown:function(){
+                console.log("enter onwhelldown");
+                this.nexslide();
+            },
+            onwheel:function(e){
+                e=e || window.event;
+                if(this._handeling) {return this;}
+                this._handeling=true;
+                var me=this;
+                console.log("enter wheelfunction");
+                console.log(this);
+                if(e.wheelDelta){//IE/Opera/Chrome   
+                    if(e.wheelDelta>0)  
+                    {  
+                        //向上滚动事件  
+                        this.onwheelup();
+
+                    }else  
+                    {   
+                        //向下滚动事件  
+                        this.onwheeldown();
+
+                    }   
+                }else if(e.detail){  
+                    //Firefox   
+                    if(e.detail==-3) {   
+                       //向上滚动事件  
+                        this.onwheelup(); 
+
+                    }else {   
+                        //向下滚动事件  
+                        this.onwheeldown();
+
+                    }   
+                }  
+                setTimeout(function(){
+                    me._handeling=false;
+                },1000);
+                
+            },
+        }).watchdom({
+
+        });
+        
+        
+    if(document.addEventListener&&!me._wheelwatched){   
+        //adding the event listerner for Mozilla  
+         document.addEventListener("DOMMouseScroll" ,function(e){me.onwheel(e);}, false);  
+         me._wheelwatched=true;
+     }  
+     //IE/Opera/Chrome   
+     window.onmousewheel=document.onmousewheel=function(e){me.onwheel(e);};  
+        
+    });
+</script>

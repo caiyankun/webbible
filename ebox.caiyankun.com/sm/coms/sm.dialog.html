@@ -1,0 +1,15 @@
+<script src="layui/layer/layer.js"></script>
+<script>
+    sm.dialog.msg=function(c){
+        layer.msg(c);
+        return this;
+    }
+    sm.dialog.loading=function(a="show"){
+        if(a=="show"){
+            layer.load();
+        } else {
+            layer.closeAll();
+        }
+        return this;
+    }
+</script>

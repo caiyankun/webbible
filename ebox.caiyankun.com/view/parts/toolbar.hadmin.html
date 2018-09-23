@@ -1,0 +1,21 @@
+<div view-com="navbar"></div>
+
+<script>
+    sm.view.aftercominit("navbar",function(){
+        this.setitems([
+            {text:"",icon:"fa-user",href:"javascript:",submenue:[
+                {text:"用户信息",href:"javascript:"},
+                {text:"修改密码",href:"javascript:"},
+                {text:"退出登录",href:"javascript:"},
+            ]},
+            {text:"",icon:"fa-language",href:"javascript:",submenue:[
+                {text:"中文",href:"javascript:"},
+                {text:"English",href:"javascript:"},
+            ]},
+            {text:"",icon:"fa-question-circle",href:"javascript:",submenue:[
+                {text:"帮助",href:"javascript:"},
+                {text:"关于",href:"javascript:"},
+            ]},
+        ]);
+    });   
+</script>

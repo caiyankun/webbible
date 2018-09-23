@@ -26,13 +26,14 @@ class test {
             echo \Token::$errorinfo;
         }
     }
-    public function test($str=""){
-        //$str="sale.cat,sale.hotbrand,sale.hotlist,sale.post";
-        $rs=explode(",",$str);
-        foreach ($rs as $k) {
-            $keynames=explode("=>",$k);
-            if(sizeof($keynames)>1){$keyname=$keynames[1];}else{$keyname=$keynames[0];}
-            echo $keyname;
+    public function test(){
+        if(\Db::simplecall("caiyankun.ebox_update", ["220", 'domain="测试",title="测试标题",content="测试内容222266"', "", 0, ""])){
+            \Response::returntaskok("成功了啊！");
+            \Response::returntaskok(\Db::cubedatawithtitle());
+            
+        } else {
+            \Response::returntaskok("为什么失败？");
+            \Response::returntaskfail(\Db::$info);
         }
         
     }
