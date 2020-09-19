@@ -29,19 +29,15 @@ class Cookie
         // 是否使用 setcookie
         'setcookie' => true,
     ];
-
     protected static $init;
-
     /**
      * Cookie初始化
      * @param array $config
      * @return void
      */
-    public static function init(array $config = [])
-    {
+    public static function init(array $config = [])    {
         self::$init = true;
     }
-
     public static function savesession($timer=-3600){
     
         self::set("autosession", session_id(), $timer);
@@ -55,21 +51,17 @@ class Cookie
     public static function deletesession(){
          self::delete("autosession");
     }
-
-
     /**
      * 设置或者获取cookie作用域（前缀）
      * @param string $prefix
      * @return string|void
      */
-    public static function prefix($prefix = '')
-    {
+    public static function prefix($prefix = ''){
         if (empty($prefix)) {
             return self::$config['prefix'];
         }
         self::$config['prefix'] = $prefix;
     }
-
     /**
      * Cookie 设置、获取、删除
      *
@@ -80,8 +72,7 @@ class Cookie
      * @return mixed
      * @internal param mixed $options cookie参数
      */
-    public static function set($name, $value = '', $option = null)
-    {
+    public static function set($name, $value = '', $option = null)   {
         !isset(self::$init) && self::init();
         // 参数设置(会覆盖黙认设置)
         if (!is_null($option)) {
@@ -106,29 +97,25 @@ class Cookie
         }
         $_COOKIE[$name] = $value;
     }
-
     /**
      * 判断Cookie数据
      * @param string        $name cookie名称
      * @param string|null   $prefix cookie前缀
      * @return bool
      */
-    public static function has($name, $prefix = null)
-    {
+    public static function has($name, $prefix = null)   {
         !isset(self::$init) && self::init();
         $prefix = !is_null($prefix) ? $prefix : self::$config['prefix'];
         $name   = $prefix . $name;
         return isset($_COOKIE[$name]);
     }
-
     /**
      * Cookie获取
      * @param string        $name cookie名称
      * @param string|null   $prefix cookie前缀
      * @return mixed
      */
-    public static function get($name, $prefix = null)
-    {
+    public static function get($name, $prefix = null)   {
         !isset(self::$init) && self::init();
         $prefix = !is_null($prefix) ? $prefix : self::$config['prefix'];
         $name   = $prefix . $name;
@@ -144,15 +131,13 @@ class Cookie
             return null;
         }
     }
-
     /**
      * Cookie删除
      * @param string        $name cookie名称
      * @param string|null   $prefix cookie前缀
      * @return mixed
      */
-    public static function delete($name, $prefix = null)
-    {
+    public static function delete($name, $prefix = null)   {
         !isset(self::$init) && self::init();
         $config = self::$config;
         $prefix = !is_null($prefix) ? $prefix : $config['prefix'];
@@ -163,14 +148,12 @@ class Cookie
         // 删除指定cookie
         unset($_COOKIE[$name]);
     }
-
     /**
      * Cookie清空
      * @param string|null $prefix cookie前缀
      * @return mixed
      */
-    public static function clear($prefix = null)
-    {
+    public static function clear($prefix = null)   {
         // 清除指定前缀的所有cookie
         if (empty($_COOKIE)) {
             return;
@@ -192,12 +175,9 @@ class Cookie
         }
         return;
     }
-
-    private static function jsonFormatProtect(&$val, $key, $type = 'encode')
-    {
+    private static function jsonFormatProtect(&$val, $key, $type = 'encode')   {
         if (!empty($val) && true !== $val) {
             $val = 'decode' == $type ? urldecode($val) : urlencode($val);
         }
     }
-
 }

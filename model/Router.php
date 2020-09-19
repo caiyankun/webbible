@@ -87,10 +87,13 @@ class Router
     }
 
     public static function distribute($pathinfo) {
-    	    //echo "go inside distribute";
-    	    //echo $_SERVER['PATH_INFO'];
-    	    //echo $pathinfo;
-            //exit(0);
+    	    /*
+            echo "go inside distribute";
+    	    echo $_SERVER['PATH_INFO'];
+    	    echo $pathinfo;
+            echo "--------\r\n";
+            echo ENTRY_PATH ."myindex.php";
+            exit(0);//*/
             if(empty($pathinfo)){
 		empty(include ENTRY_PATH ."myindex.php")&&empty(include ENTRY_PATH ."index.html");
 		return "";
@@ -98,8 +101,11 @@ class Router
             $pathinfo=preg_replace("/^\//","",$pathinfo);
             self::$pathinfo=$pathinfo;
             
+            
+            
+            
             (self::checkrouteright($pathinfo)||self::norouteright($pathinfo))&&
-            self::beforedistribute()&&
+            self::beforedistribute($pathinfo)&&
             self::distriutetoview()||
             self::distriutetomodel()||
             self::faildistribute();
@@ -123,6 +129,5 @@ class Router
        NOROUTERIGHTEXIT&&exit(0);
        return NOROUTERIGHTRETURN;
     }
-    
 }
 //echo "end load Router!";

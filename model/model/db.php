@@ -50,9 +50,9 @@ class db {
         if(empty($paras)){
             $rs=[];
         } else{
-            $rs= is_array($paras)?$paras:split(",", $paras);
+            $rs= is_array($paras)?$paras:explode(",", $paras);
         }
-        $arr= split(",", $paras);
+        $arr= explode(",", $paras);
         var_dump($arr);
     }
     public function detail($procname,$id,$witch="",$option=""){

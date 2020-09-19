@@ -1,0 +1,8 @@
+<script src="layui/layer/layer.js"></script>
+<script>
+    sm.dialog.layerform=function(){
+        var e = document.createEvent("MouseEvents");
+        e.initEvent("click", true, true);
+        document.getElementById("clickme").dispatchEvent(e);
+    }
+</script>

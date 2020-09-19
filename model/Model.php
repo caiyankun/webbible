@@ -23,7 +23,6 @@ class Model
 	User::checkright($this->accesslevel)||$this->noright();
    }
 
-
    public function noright(){
        if(empty(include ENTRY_PATH.NOMODELRIGHT_PAGE)) {Response::returntaskfail('',1,'您没有权限执行此Model!');}
        NOMODELRIGHTSTOP&&exit(0);
@@ -179,6 +178,4 @@ class Model
         }
         return $asoc?$paraarr:array_values($paraarr);
     }
-   
-   
 }

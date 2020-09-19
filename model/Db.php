@@ -11,6 +11,7 @@ class Db {
         "upass"=>"",//对应的密码
         "dbtype"=>"mysql",//数据库类型
     ];
+     
     public static $data=null;
     public static $datatitle=[];
     public static $outvars=null;
@@ -18,16 +19,16 @@ class Db {
     public static $info="";
     public static $setupcfg=[];
     private static $inited=false;
+  
+     
     /* 
      * 把构造函数声明成私有为了不让使用实例化的方式进行连接 
      */ 
     private function __construct() {} 
-    
     /* 
      * 防止别人通过clone的方式拷贝连接实例
      */ 
     private function __clone() {} 
-    
     private static function init(){
     	if(!self::$inited){
             self::$config=array_merge(self::$config,Config::get("defaultdb","db",[]));
@@ -130,7 +131,7 @@ class Db {
         
         return array_merge(self::cubedata($valueiffail), [[self::$datatitle]]);
     }
-/* 
+    /* 
      * 获取连接实例，如果没有初始化的话进行初始化
      * @param 
      * @return $objInstance; 
@@ -188,7 +189,6 @@ class Db {
 			echo "<br>info:<br>";
 			var_dump(\Db::$info);
     }
-    
     /*
      *    在调用CallProc的时候，参数格式必须是一个关联数组，如果某个参数是输出参数，那么这个参数必须以_开头
      *     
@@ -276,14 +276,13 @@ class Db {
             return true;
         }    	
     }
-    
     /* 
      * 只有当执行到不可访问的静态函数（私有的或者不存在的静态函数）时先自动执行这个 暂时不需要这个！
      * @param $chrMethod, $arrArguments 
      * @return $mix 
-     */ 
+     
     //final public static function __callStatic( $chrMethod, $arrArguments ) { 
     //    $objInstance = self::getInstance(); 
     //    return call_user_func_array(array($objInstance, $chrMethod), $arrArguments); //不会有问题吗？   
-    //} 
+    //} */
 }

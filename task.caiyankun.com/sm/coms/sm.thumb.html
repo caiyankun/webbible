@@ -1,0 +1,34 @@
+<div view-com-tpl="thumb" class="pre-scrollable ">
+    <div for:="(_i,_k,_v) in pics " class="col-xs-12 col-sm-6 col-md-3" set:display="($pics,$pics.length&&$show)">
+    <a set:href="{{_v.href}}" class="thumbnail" set:d-index="{{_i}}">
+      <img set:src="{{_v.src}}" alt="100%x180" style="height: 130px;width: 78px">
+      <span>{{_v.name}}</span>
+    </a>
+  </div>
+  <div class="clearfix"></div>
+</div>
+
+
+<script>
+    sm.view.oncominit("thumb",function(el){
+        this.data({
+            show:true,
+            pics:[],
+            baseurl:"/",
+            path:"",
+            filter:"",
+        }).method({
+            clearpics:function(direction,arr=[]){
+                this.pics=[];
+            },
+            putpics:function(picsarr){
+                var itemdef={src:"",href:"javascript:"};
+                this.pics=$$.toobjarr(picsarr,itemdef);
+            },
+            djson:function(obj){
+                return JSON.stringify(obj);
+            },
+            
+        });
+    });
+</script>
