@@ -1,7 +1,6 @@
 !window.onerror&&(window.onerror=function(m,u,l){alert ('神码加载出错:\r\n【文件】:'+u+"\r\n【行】:"+l+"\r\n【信息】:"+m);});
 
 //---------------God.js Core 开始：sm及原型定义，链式操作--------------------
-
 if (true){
 //原型定义-开始:--sm及God原型定义，链式操作
 if(true){
@@ -28,6 +27,7 @@ God.coms=function(comname){//简化组件的定义原型连链：sm.xx->God.xx->
     sm[comname]={__proto__:God[comname],whoami:'sm.'+comname};
    return sm[comname];
 };
+//已经加载过的组件不会重复加载，已经加载了哪些组件是存放在sm.coms.loadedlist数组中！
 God.coms.loadedlist=[];
 God.coms.require=function(plugins=[]){
     var me=this;
@@ -43,7 +43,9 @@ God.coms.require=function(plugins=[]){
     });
     newplugins.length&&(sm.loading.init(newplugins.length));
     return sm.ajax.loadhtml(newplugins,"head");
-};
+};//动态加载一系列组件
+//warehouse有两个作用，如果remote是false，就是简单的判断下给定的com是否已在warehouse中。
+//如果remoe为true则使用异步回调的方式进行后续动作
 God.coms.warehouse=function(com="",remote=false){
     var me= this;
     var wel=document.head.querySelector("#coms-warehouse");
@@ -85,7 +87,7 @@ God.coms.deliver=function(com){
         });
     });
     return promise;
-};
+};//实际执行将一个com组件从远程运到warehouse，执行他之前
 God.define=function(func){func.apply(this);return this;};//简化组件成员添加 - 函数方式
 God.extend=function(o){for (x in o) {this[x]=o[x];} return this;};//简化组件成员添加-对象方式
 God.extendproto=function(o){for (x in o) {this.__proto__[x]=o[x];} return this;};//简化组件成员添加-对象方式
@@ -115,7 +117,7 @@ God.error=function(e,i){
         this._stat.error=e;this._stat.info=i;
     }
     return this;
-};
+};//当前
 God.stat=function(){return this._stat;}
 God.taskfail=function(cb){return this.error.apply(this,arguments);}
 God.success=function(cb){
@@ -139,12 +141,8 @@ God.safemerge=function(o){for (x in o) {this.hasOwnProperty(x)&&(this[x]=o[x]);}
 //组件的公共方法：设置，显示自己，程序执行错误状态，回调
 
 }
-
 //----------------God.js Core 结束：sm及原型定义，链式操作--------------------
-
-
 if (true){
-
 
 (function () {
     var ie = !!(window.attachEvent && !window.opera);
@@ -179,23 +177,21 @@ if (true){
 })();//增加document.ready功能
 
 }
-
 //-----------------------基础组件定义:-----------------------------------------------
-
 if(true){
 window.varfuns=[];//{varstr:[{node:node,attr:attr,updatecb:updatecb},{node:node,attr:attr,updatecb:updatecb}]}
 window.domevent_cb=[];//这里存储所有的whatch DOM相关的回调函数
 window.domevent_listener=[];//这里存储所有的whatch DOM相关的回调函数
 
 God.coms("func").extendproto({
-isempty:function(varname){return !varname;},
-isnull:function(varname){return  (!varname&& typeof(varname)!="undefined" && varname!=0);},
-isobj:function(varname){return Object.prototype.toString.call(varname) === '[object Object]'; },
-isarray:function(varname){return Object.prototype.toString.call(varname) === '[object Array]'; },
-isna:function(varname){return isNaN(varname);},
-isundefined:function(varname){return typeof(varname) == "undefined";},
-isdefined:function(varname){return !(typeof(varname) == "undefined");},
-isfunction:function(varname){return (typeof(varname) == "function");},
+isempty:function(varname){return !varname;},//判断参数是否为空
+isnull:function(varname){return  (!varname&& typeof(varname)!="undefined" && varname!=0);},//判断参数是否为null
+isobj:function(varname){return Object.prototype.toString.call(varname) === '[object Object]'; },//判断参数是否为对象
+isarray:function(varname){return Object.prototype.toString.call(varname) === '[object Array]'; },//判断参数是否为数组
+isna:function(varname){return isNaN(varname);},//判断参数是否为NA
+isundefined:function(varname){return typeof(varname) == "undefined";},//判断参数是否为 undefined
+isdefined:function(varname){return !(typeof(varname) == "undefined");},//判断参数是否为defined
+isfunction:function(varname){return (typeof(varname) == "function");},// 判断参数是否为函数
 toobj:function(arr,objdef){
     //如果传进来的是一个数组，那么遍历数组把每个元素按照顺序赋值到objdef
     //如果传进来的是一个对象，那么便利对象属性，那么把这个对象属性合并到objdef
@@ -214,7 +210,7 @@ toobj:function(arr,objdef){
         i++;
     }
     return rso;
-},
+},//数组：遍历数组把每个元素按照顺序赋值到objdef；对象：遍历对象属性，那么把这个对象属性合并到objdef
 transpose:function(arr){
 
     return arr[0].map(function(v,i){
@@ -223,7 +219,7 @@ transpose:function(arr){
         });
     });
 
-},
+},//把一个二维数组转置
 formobj:function(karr,varr){
     !$$.isarray(varr)&&(varr=[varr]);
     if(varr.length<1) return {};
@@ -239,7 +235,7 @@ formobj:function(karr,varr){
         }
     }
     return rs;
-},
+},//把两个数组组合成一个obj
 objvalues:function(obj){
     var rs=[];
     for(var i in obj){
@@ -250,7 +246,7 @@ objvalues:function(obj){
         }
     }
     return rs;
-},
+},//把对象中的属性值组合成一个数组
 toobjarr:function(arr,objdef){
     //如果传进来的是一个数组，那么遍历数组把每个元素转换成一个objdef
     //如果传进来的是一个对象，那么便利对象属性，把每个属性转换成一个objdef其中的name=key，value=value，text=key
@@ -266,10 +262,10 @@ toobjarr:function(arr,objdef){
         rso.push($$.toobj(item,objdef));
     });
     return rso;
-},
+},//没看懂！！
 merge:function(o){for (x in o) {this[x]=o[x];} return this;},//把给定的对象的全部属性融合到自身中
 safemerge:function(o){for (x in o) {this.hasOwnProperty(x)&&(this[x]=o[x]);} return this;},//把给定的对象中与自身相交的属性值更新到自身中
-rndid:function(prix){prix=arguments[0]?(arguments[0]+"_"):"";return prix+parseInt(1000000*Math.random());},
+rndid:function(prix){prix=arguments[0]?(arguments[0]+"_"):"";return prix+parseInt(1000000*Math.random());},//产生一个随机数，其前缀时prix
 foreach:function(obj,cb){
     if($$.isobj(obj)){
         Object.keys(obj).forEach(function(k){
@@ -281,7 +277,7 @@ foreach:function(obj,cb){
             cb(k,obj[k])
         });
     }
-},
+},//遍历一个对象，数组，cb的两个参数分别时key，value，或者index，value
 getElementLeft:function (element){
     var actualLeft = element.offsetLeft;
     var current = element.offsetParent;
@@ -291,7 +287,16 @@ getElementLeft:function (element){
         current = current.offsetParent;
     }
     return actualLeft;
-},
+},//获取一个元素的左边定位
+getElementTop:function (element){
+    var actualTop = element.offsetTop;
+    var current = element.offsetParent;
+    while (current !== null){
+        actualTop += current.offsetTop;
+        current = current.offsetParent;
+    }
+    return actualTop;
+    },//获取一个元素的上部定位
 dbaddstr:function(row){
     var rs="";
     for(var k in row){
@@ -304,7 +309,7 @@ dbaddstr:function(row){
         }
     }
     return rs;
-},
+},//把一个对象组装成一个字符串，用于mysql添加：key1=value1，key2=value2
 dbupdstr:function(ori,newo){
     var rs="";
     for(var k in ori){
@@ -317,16 +322,7 @@ dbupdstr:function(ori,newo){
         }
     }
     return rs;
-},
-getElementTop:function (element){
-    var actualTop = element.offsetTop;
-    var current = element.offsetParent;
-    while (current !== null){
-        actualTop += current.offsetTop;
-        current = current.offsetParent;
-    }
-    return actualTop;
-    },
+},//对比两个对象，只把值不相同的部分组装成一个字符串，用于mysql更新：key1=value1，key2=value2
 setOpacity:function(ele, opacity) {
     if (ele.style.opacity != undefined) {
         ///兼容FF和GG和新版本IE
@@ -336,7 +332,7 @@ setOpacity:function(ele, opacity) {
         ///兼容老版本ie
         ele.style.filter = "alpha(opacity=" + opacity + ")";
     }
-},
+},//设置某个元素的透明度
 fadein:function(ele,interval=30) {
     if (ele) {
         ele.style.display="block";
@@ -350,7 +346,7 @@ fadein:function(ele,interval=30) {
             }
         }, interval);
     }
-},
+},//设置某个元素动态显示
 fadeout:function(ele,interval=30) {
     if (ele) {
         ele.style.display="block";
@@ -364,50 +360,10 @@ fadeout:function(ele,interval=30) {
             }
         }, interval);
     }
-},
+},//设置某个元素动态隐藏
 });
 window.$$=God.$$=God.func;//方便对全局函数的引用，位置不能改
-God.coms("document").extendproto({//目的是定义页面跳转，页面信息，用户界面刷新等一系列操作
-ready:function(){document.ready.apply(this,arguments);return this;},//请注意This指针无法传递到函数内部
-reload:function(newurl){
-    if(arguments[0]) {
-        window.location.href=newurl;
-    } else {
-    	location.reload();
-    }
-    return this;
-},
-open:function(newurl){
-    window.open(newurl);
-    return this;
-},
-href:function(){
-    return window.location.href;
-},
-title:function(newtitle=""){document.title=newtitle==""?document.title:newtitle;return this;},
-create:function(str){
-    var t=document.createElement("div");
-    t.innerHTML=str;
-    var rs=[];
-    var nodes=t.childNodes;
-    var n=nodes.length;
-    for (var i=0;i<n;i++){rs.push(nodes[i]);}
-    var n=rs.length;
-    for(var i=0;i<n;i++){document.body.prepend(rs[i]);}
-    return rs;
-},
-body:function(){
-    var t=document.querySelector("body>div.body");
-    if(t){
-        return t;
-    } else {
-        var tt=document.createElement("div");
-        tt.setAttribute("class","body");
-        document.body.appendChild(tt);
-        return sm.document.body();
-    }
-},
-});
+
 God.coms("ajax").extend({
     _setup:{
         data:{},
@@ -416,23 +372,23 @@ God.coms("ajax").extend({
         url:"#",
     },   
 }).extendproto({
-type:function(newtype){this.setup({type:newtype});return this;},
-data:function(newdata){this.setup({data:newdata});return this;},
-url:function(newurl){this.setup({url:newurl});return this;},
-smurl:function(su,ex=""){return this.url(sm.server.url(su)+ex);},
-async:function(b){this.setup({async:b});return this;},
+type:function(newtype){this.setup({type:newtype});return this;},//设置POST的Type：POST，GET
+data:function(newdata){this.setup({data:newdata});return this;},//设置POST的数据
+url:function(newurl){this.setup({url:newurl});return this;},//设置POST的网址
+smurl:function(su,ex=""){return this.url(sm.server.url(su)+ex);},//输入名字，设置为sm.server.url中存储的url
+async:function(b){this.setup({async:b});return this;},//设置是否为异步
 post:function(data,url,async){
     arguments.length>2&&(this.async(async));
     arguments.length>1&&(this.url(url));
     arguments.length>0&&(this.data(data));
     return this.type("POST").clearstat().doxhr();
-},
+},//这个POST的返回值是原原本本的返回值
 smpost:function(data,url,async){
     arguments.length>2&&(this.async(async));
     arguments.length>1&&(this.url(url));
     arguments.length>0&&(this.data(data));
     return this.type("POST").clearstat().doxhr({},true);
-},
+},//这个POST的返回值是对返回的值按照交互的规则进行解析，直接解析出有用的数据！
 doxhr:function(paraobj,smfcheck=false){
     var me=this;
     const promise = new Promise(function(resolve, reject) {
@@ -480,7 +436,7 @@ doxhr:function(paraobj,smfcheck=false){
         me.setup().data={};
     });
     return promise;
-},
+},//实际的交互函数
 formatdata:function(obj){
     sm.server.adjustdata.apply(obj);
     if(!obj) {return null;}
@@ -494,7 +450,7 @@ formatdata:function(obj){
         return null;
     }
     return rs;
-},
+},//将一个给定的对象，组装成一个GET字符串 key1=value1&key2=value2
 adjusturl:function(d,htmlpath){
     var nd=document.createElement("div");
     nd.innerHTML=d;
@@ -520,7 +476,7 @@ adjusturl:function(d,htmlpath){
         }
     }
     return nd.innerHTML;
-},
+},//把给定的一段HTML代码中所有含有src，进行遍历，把相对路径的src前面添加一段HTMLpath
 loadhtml:function(htmlfiles,target="body",cleartarget=false,remote=true){
     if(target.nodeType!==1){
         target=document.querySelector(target);
@@ -529,8 +485,8 @@ loadhtml:function(htmlfiles,target="body",cleartarget=false,remote=true){
     var me=this;
     if(!$$.isarray(htmlfiles)){htmlfiles=[htmlfiles];}
     if(htmlfiles.length==0){
-        return new Promise(function(resolve,reject){return resolve("blank");});
-    } else if(htmlfiles.length==1){
+        return new Promise(function(resolve,reject){return resolve("blank");}); //一层套一层，这是最后一轮的时候直接回复
+    } else if(htmlfiles.length==1){//最后一个加载的文件
         const htmlfile=htmlfiles[0];
         if(remote){
             const promise = new Promise(function(resolve, reject) {
@@ -566,14 +522,14 @@ loadhtml:function(htmlfiles,target="body",cleartarget=false,remote=true){
                 var cnodes=htmldiv.childNodes;
                 var nodenum=cnodes.length;
                 for(var i=0;i<nodenum;i++){
-                    if(target==document.head){
+                    if(target==document.head){ //对元素一个一个的遍历，如果目标是Head的话，就只挑选Com模板，其他的都删掉忽略
                         if(["STYLE","LINK","META"].indexOf(cnodes[0].nodeName)>-1){
                             target.appendChild(cnodes[0]);
                         }else{
                             if(cnodes[0].nodeType==1 && cnodes[0].matches("[view-com-tpl]")){
                                 let tcom=cnodes[0].getAttribute("view-com-tpl");
-                                if(!sm.coms.warehouse(tcom)){
-                                    sm.coms.warehouse().appendChild(cnodes[0]);
+                                if(!sm.coms.warehouse(tcom)){ //如果仓库里面没有，就加在仓库里面，但是好像
+                                    sm.coms.warehouse().appendChild(cnodes[0]);//append以后会把节点从原来的地方删掉
                                 } else {
                                     cnodes[0].remove();
                                 }
@@ -582,10 +538,10 @@ loadhtml:function(htmlfiles,target="body",cleartarget=false,remote=true){
                             }
                         }
                     }else{
-                        target.appendChild(cnodes[0]);
+                        target.appendChild(cnodes[0]);//对元素一个一个的遍历，如果目标不是Head的话，就都当成普通的代码全部导入
                     }
                 }
-                if(sl>0){
+                if(sl>0){ //上面是把非JS的内容玻璃出来了，但是JS部分由于是异步的，需要一个一个来，递归，把JS一个一个的累加到后面的。
                     var script=newscripts[0];
                     bash.getElementsByTagName('script').item(0).remove();
                     if(script.src){
@@ -619,7 +575,7 @@ loadhtml:function(htmlfiles,target="body",cleartarget=false,remote=true){
         });
         return promise;
     }
-},
+},//动态加载一个HTML文件
 loadjs:function(jsfiles,target="head"){
     var me=this;
     if(target.nodeType!==1){
@@ -669,7 +625,7 @@ loadjs:function(jsfiles,target="head"){
         });
         return promise;
     }  
-},
+},//动态加载一个JS文件
 loadcss:function(cssfiles){
     var me=this;
     !$$.isarray(cssfiles)&&(cssfiles=[cssfiles]);
@@ -707,8 +663,8 @@ loadcss:function(cssfiles){
         });
         return promise;
     }
-},
-load:function(file,async=true){return sm.ajax.async(async).url(file).post();},
+},//动态加载一个css文件
+load:function(file,async=true){return sm.ajax.async(async).url(file).post();},//执行一个POST请求，把返回的内容作为参数传递给回调函数
 smfcheck:function(d){
     var me=this;
     me.clearstat();
@@ -727,14 +683,14 @@ smfcheck:function(d){
         return false;
     }
     return true;
-},
+},//检查一段返回值是否为sm format，返回值为布尔值
 });
 God.coms("view").extendproto({//对话框
 find:function(dataspace){
     //console.log("find");
     if(typeof dataspace!=="string"){alert("1");}
     return this.new(dataspace);
-},
+},//new的别名，增强可读性
 new:function(dataspace){
     //console.log("new:"+dataspace);
     var val=sm.view.data;
@@ -759,7 +715,7 @@ new:function(dataspace){
     }
     
     return val[exp[i]];
-},//创建一个新的view实例
+},//创建一个新的view实例，或者返回既有的view实例
 fillcomto:function(comname,target,dataspace,independent=false){
     var promise=new Promise(function(resolve,reject){
         sm.coms.warehouse(comname,true).then(function(com){
@@ -781,46 +737,14 @@ fillcomto:function(comname,target,dataspace,independent=false){
         },function(i){return reject(i);});
     });
     return promise;
-},
-eventhandeler:function(e,dataspace){
-    var maxi=e.path.indexOf(e.currentTarget)
-    var me=this;
-    var dwtree=me.domwatchingtree;
-    var defaultevent="click";
-    for (var k in dwtree){
-        var cb=dwtree[k];
-        var selector=k.split("@")[0];
-        selector=selector.replace(/^id\:(.*)$/,function(t,v){return "[dom-id='"+v+"']";});
-        var match=false;
-        selector.replace(/^text\:(.*)$/,function(t,v){e.target.textContent==v && (match=true);});
-        try{
-            var i=0;
-            var matchedel=e.target;
-            while(i<=maxi){
-                e.path[i].matches(selector)&&(match=true,matchedel=e.path[i]);
-                i++;
-            }
-        } catch(e){
-            
-        }
-        
-        var curevent=k.substr(selector.length+1);
-        if(curevent==""){curevent=defaultevent} else {defaultevent=curevent;}
-        if(match&&("@"+curevent+"@").indexOf("@"+e.type+"@")>-1){
-            //console.log(e.target.textContent+e.type+dataspace);
-            cb.apply(sm.view.find(dataspace),[e,matchedel,dataspace]);
-        }
-    }
-    
-    return this;    
-},
-method:{
+},//把某一个组件动态加载到一个目标节点中
+method:{//下面是界面组件的通用方法
     find:function(subdataspace){
         var me=this;
         var ms=me._dataspace;
         var fs=ms+"."+subdataspace;
         return sm.view.find(fs);
-    },
+    },//在当前变量空间下查找子空间变量
     data:function(mapobj){
         var me=this;
         var dataspace=me._dataspace;
@@ -829,14 +753,14 @@ method:{
             sm.view.setvar(k,v,dataspace);
         });
         return me;
-    },
+    },//给当前的组件添加新的成员变量
     method:function(mapobj){
         var me=this;
         $$.foreach(mapobj,function(k,v){
             me[k]=v;
         });
         return this;
-    },
+    },//给当前的组件添加新的方法
     alias:function(newalias){
         //console.log("进入组件自己的Alias");
         var ns=newalias.split(".");
@@ -848,7 +772,7 @@ method:{
         }
         k[ns[i]]=this;
         return this;
-    },
+    },//给当前的组件创建一个新的别名
     watchdom:function(mapobj,stopbuble=false){
         var me=this;
         //获取顶层节点
@@ -882,7 +806,7 @@ method:{
             });   
         });
         return this;
-    },
+    },//在com的顶层节点创建事件监听，并记录在DOM中
     watchdata:function(mapobj){
         var me=this;
         var dataspace=me._dataspace;
@@ -892,7 +816,7 @@ method:{
         });
         sm.view.watchdata(dataspace);
         return this;
-    },
+    },//这个不需要用户使用
     group:function(which=""){
         this._group=[];
         var me=this;
@@ -916,7 +840,7 @@ method:{
         });
         if(which=="") {return this._group;}
         else {return this._group[which];}
-    },
+    },//这是干啥的？
     addclass:function(classes,target=false){
         !target&&(target=this._el);
         if(target){
@@ -938,7 +862,7 @@ method:{
             }
         }
         return this;
-    },
+    },//确保某个DOM节点有某个类
     removeclass:function(classes,target=false){
         !target&&(target=this._el);
         if(target){
@@ -958,7 +882,7 @@ method:{
             }
         }
         return this;
-    },
+    },//确保某个DOM节点没有某个类
     toggleclass:function(classes,target=false){
         !target&&(target=this._el);
         if(target){
@@ -982,7 +906,7 @@ method:{
             }
         }
         return this;
-    },
+    },//切换某个DOM节点的某个类
     hasclass:function(classes,target=false){
         !target&&(target=this._el);
         var rs=false;
@@ -1003,13 +927,13 @@ method:{
             }
         }
         return rs;
-    },
+    },//检测某个DOM节点是否有某个类
 },//这里的函数都需要有this指针，会把当前实例需要的函数再次封装在这里
 layout:{
     get:function(){
         var curlayout=document.querySelector("[layout]");
         return curlayout;
-    },
+    },//返回当前的Layout元素
     load:function(views){
         var curlayout=document.body.querySelector("[layout]");
         if(!curlayout){
@@ -1087,7 +1011,7 @@ layout:{
                 }
         });
         return promise;
-    },
+    },//把一系列parts加载到当前的布局中，格式如下["toolbar@header","footbar@footer",page@page]
     clear:function(witch=""){
         var me=this;
         var curlayout=me.get();
@@ -1100,7 +1024,7 @@ layout:{
            }
         }
         return this;
-    },
+    },//清空layout中的所有容器中的内容
 },
 makeui:function(lname="",views=[]){
     const promise=new Promise(function(resolve,reject){
@@ -1122,7 +1046,44 @@ makeui:function(lname="",views=[]){
         } 
     });
     return promise;
-},
+},//将给定的部件按照布局组装起来
+init:function (com="body",deepinit=1,pdataspace=""){
+    var me=this;
+    //首先检查当前元素是不是组件，不是的话就拒绝初始化
+    var $el = com.nodeType == 1 ? com : document.querySelector(com);
+    if(!this.checkiscom($el)){return this;}
+    //如果是组件的话，先确定当前组件的数据空间在哪里
+    var dataspace=$el.getAttribute("dataspace");
+    dataspace||(dataspace="common");
+    (typeof dataspace!=="string")&&(dataspace="common");
+    var ods=dataspace;
+    (pdataspace!=="")&&(dataspace=pdataspace+"."+dataspace);
+    //console.log("root begin of Init:"+dataspace);
+    //console.log(sm.view.data.common);
+    var comname=$el.getAttribute("com:");
+    var needinit=$el.getAttribute("oncominit");
+    //首先确保该组件下没有尚未实例化的组件引用，没有的话开始进行初始化
+    var promise=new Promise(function(resolve,reject){
+        me.comrefinit($el,dataspace).then(function(d){
+            //console.log("开始初始化一个组件："+dataspace);
+            var view=sm.view.new(dataspace);
+            view._el=$el;
+            //console.log("init el"+$el);
+            //console.log($el);
+            if(comname&&needinit){sm.view.dooncominit(comname,view,$el,ods,pdataspace);}
+            $el.removeAttribute("oncominit");
+            me.comset($el,dataspace,deepinit);
+            me.comget($el,dataspace,deepinit);
+            me.watchdata(dataspace);
+            return resolve("初始化成功！");
+        },function(i){
+            return reject("初始化失败："+i);
+        });
+    });
+    return promise;
+},//View组件初始化，逐一进行一遍Get，Set然后对变量进行watch
+
+//下面函数虽是View类，但不是给用户用的，因此不可见
 comget:function (com,dataspace="",deepinit=0){
     (dataspace=="")&&(dataspace="common");
     var $el = com.nodeType == 1 ? com : document.querySelector(com);
@@ -1163,43 +1124,39 @@ comrefinit:function(el=document.body,pds=""){
         });
     });
     return promise;
-},
-init:function (com="body",deepinit=1,pdataspace=""){
+},//把某个组件HTML代码进行初始化，当有View-com：时就表明没初始化
+eventhandeler:function(e,dataspace){
+    var maxi=e.path.indexOf(e.currentTarget)
     var me=this;
-    //首先检查当前元素是不是组件，不是的话就拒绝初始化
-    var $el = com.nodeType == 1 ? com : document.querySelector(com);
-    if(!this.checkiscom($el)){return this;}
-    //如果是组件的话，先确定当前组件的数据空间在哪里
-    var dataspace=$el.getAttribute("dataspace");
-    dataspace||(dataspace="common");
-    (typeof dataspace!=="string")&&(dataspace="common");
-    var ods=dataspace;
-    (pdataspace!=="")&&(dataspace=pdataspace+"."+dataspace);
-    //console.log("root begin of Init:"+dataspace);
-    //console.log(sm.view.data.common);
-    var comname=$el.getAttribute("com:");
-    var needinit=$el.getAttribute("oncominit");
-    //首先确保该组件下没有尚未实例化的组件引用，没有的话开始进行初始化
-    var promise=new Promise(function(resolve,reject){
-        me.comrefinit($el,dataspace).then(function(d){
-            //console.log("开始初始化一个组件："+dataspace);
-            var view=sm.view.new(dataspace);
-            view._el=$el;
-            //console.log("init el"+$el);
-            //console.log($el);
-            if(comname&&needinit){sm.view.dooncominit(comname,view,$el,ods,pdataspace);}
-            $el.removeAttribute("oncominit");
-            me.comset($el,dataspace,deepinit);
-            me.comget($el,dataspace,deepinit);
-            me.watchdata(dataspace);
-            return resolve("初始化成功！");
-        },function(i){
-            return reject("初始化失败："+i);
-        });
-    });
-    return promise;
-},//View组件初始化，搜索全部的View组件并逐一进行一遍Get，Set然后对变量进行watch
-//下面函数虽是View类，但不是给用户用的，因此不可见
+    var dwtree=me.domwatchingtree;
+    var defaultevent="click";
+    for (var k in dwtree){
+        var cb=dwtree[k];
+        var selector=k.split("@")[0];
+        selector=selector.replace(/^id\:(.*)$/,function(t,v){return "[dom-id='"+v+"']";});
+        var match=false;
+        selector.replace(/^text\:(.*)$/,function(t,v){e.target.textContent==v && (match=true);});
+        try{
+            var i=0;
+            var matchedel=e.target;
+            while(i<=maxi){
+                e.path[i].matches(selector)&&(match=true,matchedel=e.path[i]);
+                i++;
+            }
+        } catch(e){
+            
+        }
+        
+        var curevent=k.substr(selector.length+1);
+        if(curevent==""){curevent=defaultevent} else {defaultevent=curevent;}
+        if(match&&("@"+curevent+"@").indexOf("@"+e.type+"@")>-1){
+            //console.log(e.target.textContent+e.type+dataspace);
+            cb.apply(sm.view.find(dataspace),[e,matchedel,dataspace]);
+        }
+    }
+    
+    return this;    
+},
 groupelget:function(el,autoupdate,dataspace="",gselector="",gby="value",gas="",gon="input",gdeep=1){
     me=this;
     //获取数组的格式：getgroup:xxxx=变量,附加选项：group-selector,group-id,group-by,group-as,group-deepwatch,group-on
@@ -1231,9 +1188,9 @@ groupelget:function(el,autoupdate,dataspace="",gselector="",gby="value",gas="",g
             gselector="[group-id='"+gname+"']";
         }
         el.setAttribute("group-selector",gselector);
-    }//组装selector
+    }//如果没有selector，就组装一个selector，通过type，name等
     el.getAttribute("group-by")&&(gby=el.getAttribute("group-by"));
-    el.getAttribute("group-on")&&(gon=el.getAttribute("group-by"));
+    el.getAttribute("group-on")&&(gon=el.getAttribute("group-on"));
     el.getAttribute("group-deepwatch")&&(gdeep=el.getAttribute("group-deepwatch"));
     el.getAttribute("group-as")&&(gas=el.getAttribute("group-as"));
     //console.log(gselector+gby+gon+gdeep+gas);
@@ -1248,20 +1205,20 @@ groupelget:function(el,autoupdate,dataspace="",gselector="",gby="value",gas="",g
         var mgon=gon;
         var mgdeep=gdeep;
         node.getAttribute("group-by")&&(mgby=node.getAttribute("group-by"));
-        node.getAttribute("group-on")&&(mgon=node.getAttribute("group-by"));
+        node.getAttribute("group-on")&&(mgon=node.getAttribute("group-on"));
         node.getAttribute("group-deepwatch")&&(mgdeep=node.getAttribute("group-deepwatch"));
         node.getAttribute("group-as")&&(mgas=node.getAttribute("group-as"));
         var item=me.getattrvalue(node,mgby);
         if(mgas==""){
             rsvalue.push(item);
         } else {
-            revalue[mgas]=item;
+            rsvalue[mgas]=item;
         }
         //console.log("找到一个数据源："+gselector+mgby+mgon+mgdeep+mgas);
         autoupdate&&(node!==el)&&(mgdeep)&&me.watchdom(node,dataspace,mgon,el);
     });
     return rsvalue;
-},//通过给定的参数，获取一组元素的值，并组装成array或者obj
+},//通过给定的参数，获取一组元素的值，并组装成array或者obj；
 checkiscom:function(com){
     var $el = com.nodeType == 1 ? com : document.querySelector(com);
     if ($el==document.querySelector("body")){return true;}
@@ -1284,7 +1241,7 @@ checkisfor:function(com){
     return nodeAttrs.length&&(i>-1);
 },
 checkislocked:function(com){
-    //console.log("检查是否锁定");
+    //console.log("检查是否锁定");锁定是什么意思
     return (com.nodeType==1)&&com.getAttribute("view-locked");
 },
 checkiscomref:function(el){
@@ -1364,7 +1321,7 @@ elget:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0){
                     me.init(node,deepinit,dataspace);//如果需要对子组件进行递归初始化就进行递归初始化
                 }
             } else {
-                me.elget(node,deep,autoupdate,dataspace,deepinit);
+                me.elget(node,deep,autoupdate,dataspace,deepinit);//遍历所有的元素
             }
             
         });
@@ -1433,13 +1390,13 @@ elset:function (el,deep=0,autoupdate=1,dataspace="",deepinit=0,noupdatelist=[],b
             //console.log("找到了一个for元素:"+el);
             me.forelset(el,1,autoupdate,dataspace,deepinit);
         } else {
-            //解析属性并将其指定的值赋值到变量
+            //解析属性并将其指定的值赋值到属性
             var nodeAttrs = el.attributes;
             [].slice.call(nodeAttrs).forEach(function(attr) {
                 var attrName = attr.name;
                 var regisset = /(^|\:)set\:/;
                 if (regisset.test(attrName)) {
-                    var varname = attr.value;//1，简单变量；2，字符串模版；3，表达式
+                    var varname = attr.value;//1，简单变量，变量列表；2，字符串模版；3，表达式
                     attrName=attrName.replace(/^(get\:)|(set\:)/,"").replace(/^(get\:)|(set\:)/,"");
                     var realattr=attrName.split("=")[0].split("@")[0];//attr可能有多个，由-分开，下面请注意
                     if(/^\s*[_\.a-zA-Z0-9\,]*$/.test(varname)){//简单变量或变量列表，只有第一个变量绑定，理论上不允许多个变量同时给同一个元素赋值
@@ -1910,6 +1867,8 @@ watch:function(wathcingtree={}){
 },
 hashhandler:function(oldhash,newhash){
     console.log("Enter Hash Handeller!");
+    console.log(oldhash);
+    console.log(newhash);
     var me=this;
     var watchingtree=me.watchingtree;
     for(var route in watchingtree){
@@ -1962,7 +1921,7 @@ God.coms("data").extendproto({
     def:function(eq=1){
         return this.arraydata(eq);
     },
-});
+});//方便对远程数据库返回的数据进行不同维度的访问
 God.coms("user").extend({
     info:{"uid":0,"uname":"请登录","nickname":"请登录","ulevel":0,"token":""},
 }).extendproto({
@@ -1974,7 +1933,7 @@ God.coms("user").extend({
     },
     getinfo:function(){},
     login:function(){},
-});
+});//方便记录修改用户信息
 God.coms("localStorage").extendproto({
     setobj:function(key,value){
         localStorage.setItem(key,JSON.stringify(value));
@@ -2007,7 +1966,7 @@ God.coms("server").extend({
             return "#";
         }
     },
-});
+});//预先记录一些ajax交互时常用的链接，方便后续修改
 God.coms("db").extend({
     _setup:{
         url:"db/proc.func/",
@@ -2058,7 +2017,7 @@ God.coms("db").extend({
         console.log(furl);
         return sm.ajax.url(furl).smpost({key:key});
     },
-});
+});//方便对远程数据库的一些常用操作
 God.coms("datavalidation").extendproto({//目的是定义数据验证相关的函数相关的函数
 check:function(datas){
     var checkpass=true;
@@ -2099,7 +2058,7 @@ define:function(defs){
     }
     return this;
 },
-});
+});//方便对页面数据校验的定义和检查
 God.coms("dialog").extendproto({//对话框
 
 show:function(content="",funcmap=function(){},title=""){
@@ -2129,7 +2088,7 @@ close:function(filter){
     return this;
 },
 
-});
+});//方便在页面顶部显示信息
 God.coms("upload").extend({
     _setup:{
         autostart:true,
@@ -2188,7 +2147,7 @@ do:function(url="",fname="file"){
     return promise;
 },
 
-});
+});//方便进行上传操作
 God.coms("event").extendproto({
     once:function(en,el,cb){
         var handler=function(e){
@@ -2241,7 +2200,49 @@ God.coms("loading").extend({
         return this;
     },
 });
+God.coms("document").extendproto({//目的是定义页面跳转，页面信息，用户界面刷新等一系列操作
+ready:function(){document.ready.apply(this,arguments);return this;},//请注意This指针无法传递到函数内部
+reload:function(newurl){
+    if(arguments[0]) {
+        window.location.href=newurl;
+    } else {
+    	location.reload();
+    }
+    return this;
+},//重新加载当前页面
+open:function(newurl){
+    window.open(newurl);
+    return this;
+},//打开一个新页面
+href:function(){
+    return window.location.href;
+},
+title:function(newtitle=""){document.title=newtitle==""?document.title:newtitle;return this;},//更改标题
+create:function(str){
+    var t=document.createElement("div");
+    t.innerHTML=str;
+    var rs=[];
+    var nodes=t.childNodes;
+    var n=nodes.length;
+    for (var i=0;i<n;i++){rs.push(nodes[i]);}
+    var n=rs.length;
+    for(var i=0;i<n;i++){document.body.prepend(rs[i]);}
+    return rs;
+},
+body:function(){
+    var t=document.querySelector("body>div.body");
+    if(t){
+        return t;
+    } else {
+        var tt=document.createElement("div");
+        tt.setAttribute("class","body");
+        document.body.appendChild(tt);
+        return sm.document.body();
+    }
+},
+});
 }
+
 //-----------------------基础组件定义:-----------------------------------------------
 
 console.log('sm.god.js已经加载完成！');

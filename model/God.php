@@ -4,7 +4,7 @@
 /*常量声明
  */
 define('WEBROOT_PATH',$_SERVER['DOCUMENT_ROOT']);//整个站点的根目录,假定是后面不带\的
-define('ENTRY_PATH',dirname($_SERVER['SCRIPT_FILENAME']).'/');//入口文件 Path,有的时候没入口文件呢?
+
 define('PATH_INFO',$_SERVER['PATH_INFO']);//截取Pathinfo信息
 define('MODEL_PATH',__DIR__.'/');//模型库目录,命名空间的顶部空间
 define('FRAMEROOT_PATH',MODEL_PATH.'../');//框架根目录

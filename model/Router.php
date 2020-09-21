@@ -106,9 +106,9 @@ class Router
             
             (self::checkrouteright($pathinfo)||self::norouteright($pathinfo))&&
             self::beforedistribute($pathinfo)&&
-            self::distriutetoview()||
+            //self::distriutetoview()||//其实根本不需要distriutetoview，因为前后台方式不同
             self::distriutetomodel()||
-            self::faildistribute();
+            self::faildistribute(); //这个其实意义也不大
             return self::$result;
            
     }

@@ -34,6 +34,7 @@
 
 <script>
     sm.view.oncominit("toolbar",function(){
+        console.log("init com: toolbar");
         this.data({
             show:true,
             left:[],
@@ -78,5 +79,6 @@
                 //alert(el.getAttribute("d-index"));
             },
         });
+        console.log("inited com: toolbar");
     });
 </script>
