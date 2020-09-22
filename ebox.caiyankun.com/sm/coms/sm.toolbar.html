@@ -1,7 +1,7 @@
 <div view-com-tpl="toolbar">
 
 <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups" set:display="($show?'1':'')">
-  <div class="btn-group" role="group" aria-label="First group" set:display="($left,$left.length)">
+  <div class="btn-group left" role="group" aria-label="First group" set:display="($left,$left.length)">
     <button type="button" class="btn btn-default" for:="(_i,_k,_v) in left" ><i set:addclass="_v.class"></i>{{_v.text}}</button>
   </div>
   <div class="btn-group path" role="group" aria-label="First group" set:display="($path,$path.length)">
@@ -24,7 +24,7 @@
             <li><a href="javascript:void(0)" class="setup">Setup</a></li>
         </ul>
   </div>
-  <div class="btn-group pull-right" role="group" aria-label="Second group" set:display="($right,$right.length)">
+  <div class="btn-group pull-right right" role="group" aria-label="Second group" set:display="($right,$right.length)">
     <button type="button" class="btn btn-default" for:="(_i,_k,_v) in right" ><i set:class="_v.class"></i>{{_v.text}}</button>
   </div>
 </div>
@@ -56,10 +56,10 @@
                 } else {
                     this.left=$$.toobjarr(arr,itemdef);
                 }
-            },
+            },//设置工具栏上都显示什么按钮，在左边还是在右边，格式
             putpath:function(pathstr){
                 this.path=pathstr.split("/");
-            },
+            },//在工具栏上显示一个地址
             getpath:function(i=""){
                 if(i==""){
                     return this.path.join("/");
@@ -69,15 +69,43 @@
                     rs=(rs?rs+"/":"")+this.path[ii];
                 }
                 return rs;
-            },
+            },//获取工具栏上显示的地址，如果为空返回整体地址，否则，显示截止到i位置的
             notpathend:function(i){
                 if(this.path.length==(i+1)) return ""
                 else return "1";
+            },//检查第i个位置是否是地址的最后一个位置
+            onclickpath:function(oldpath,newpath,e,el,ds){
+                console.log("请重写path的点击事件，onclickpath(oldpath,newpath,e,el,ds)，不仅单击时会触发，人为更改的时候，也请手动触发！");
+                console.log(oldpath);
+                console.log(newpath);
+            },
+            onclickeditbar:function(cla,text,e,el,ds){
+                console.log("请重写editbar的点击事件，onclickeditbar:function(cla,text,e,el,ds)");
+                console.log(cla);
+                console.log(text);
+            },
+            onclickleftbutton:function(cla,text,e,el,ds){
+                console.log("请重写left的点击事件，onclickleftbutton:function(cla,text,e,el,ds)");
+                 console.log(cla);
+                console.log(text);
+            },
+            onclickrightbutton:function(cla,text,e,el,ds){
+                console.log("请重写right的点击事件，onclickrightbutton:function(cla,text,e,el,ds)");
+                 console.log(cla);
+                console.log(text);
             },
         }).watchdom({
             ".path button":function(e,el,ds){
                 //alert(el.getAttribute("d-index"));
+                //console.log(e);
+                //console.log(el);
+                //console.log(ds);
+                //console.log(el.getAttribute("d-index"));
+                this.onclickpath(this.getpath(),this.getpath(el.getAttribute("d-index")),e,el,ds);
             },
+            ".btn-group.left button":function(e,el,ds){this.onclickleftbutton(el.getAttribute("class"),el.textContent,e,el,ds);      },//回调函数格式：事件对象，产生事件的元素，数据空间
+            ".btn-group.right button":function(e,el,ds){this.onclickrightbutton(el.getAttribute("class"),el.textContent,e,el,ds);},
+            ".btn-group.editbar button":function(e,el,ds){this.onclickeditbar(el.getAttribute("class"),el.textContent,e,el,ds);},
         });
         console.log("inited com: toolbar");
     });

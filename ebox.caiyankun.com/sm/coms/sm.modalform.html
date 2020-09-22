@@ -34,45 +34,27 @@
             _origindata:false,
             _finaldata:false,
         }).method({
-            getgroupdata:function(){alert(JSON.stringify(this.formdata));},
-            filterdata:function(od){
-                var rs={};
-                for(var k in od){
-                    if(!$$.isarray(od[k])&&!$$.isobj(od[k])){
-                        rs[k]=od[k];
-                    }
-                }
-                return rs;
-            },
+
             init:function(d){
-                if($$.isobj(d)){
-                    this._origindata=d
-                } else {
-                    this._origindata=$$.formobj(d,"");
-                }
-                
-                var t=this.filterdata(this._origindata);
                 var itemdef={name:"",value:"",text:""};
-                this.formdata=$$.toobjarr(t,itemdef);
+                this.formdata=$$.toobjarr(d,itemdef);
             },
-            getfinaldata:function(){
-                var t={};
-                $$.merge.apply(t,[this._origindata]);
-                $$.merge.apply(t,[this.group("obj")]);
-                this._finaldata=t;
-                return t;
+            getdata:function(){
+                return $$.groupvalue("#modalform [group]","obj");
             },
         });
     });
-    sm.dialog.modalform=function(d,cb=function(){}){
+    sm.dialog.modalform=function(t,d,cb=function(){}){
+      
         !document.body.querySelector("#modalform")&&sm.document.create('<div view-com="modalform" id="modalform"></div>');
         sm.view.init().then(function(){
             console.log("0000");
             $modalform.init(d);
             $("#modalform .modal").modal("show");
-            $modalform.watchdom({
-                "button.ok":function(){
-                    cb.apply($modalform,[$modalform.getfinaldata()]);
+            document.querySelector("#modalform .modal #myModalLabel").textContent=t;
+            $common.watchdom({
+                "#modalform button.ok":function(){
+                    //cb.apply($modalform,[$modalform.getfinaldata()]);
                     sm.dialog.modalform.close();
                 },
             });

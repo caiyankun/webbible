@@ -1,0 +1,21 @@
+
+<script src="sm/sm.god.js"></script>
+
+
+
+
+
+<div view-com="pdtable"></div>
+
+
+
+<script >
+    sm.coms.require(["jquery","bootstrap.v3","awesome","toolbar","dialog"]).then(function(){
+        sm.document.ready(function(){
+            sm.view.init();
+        });
+        sm.view.aftercominit("toolbar>toolbar1",function(){
+            this.editbar.show=true;
+        });
+    });
+</script>

@@ -192,6 +192,33 @@ isna:function(varname){return isNaN(varname);},//判断参数是否为NA
 isundefined:function(varname){return typeof(varname) == "undefined";},//判断参数是否为 undefined
 isdefined:function(varname){return !(typeof(varname) == "undefined");},//判断参数是否为defined
 isfunction:function(varname){return (typeof(varname) == "function");},// 判断参数是否为函数
+groupvalue:function(selector,which=""){
+        var rsgroup=[];
+        var items=document.querySelectorAll(selector);
+        items.forEach(function(item){
+            console.log(item.value);
+            var gstr=item.getAttribute("group");
+            var gby=gstr.split(" as ")[0];
+            var gas=((gstr==gby)?"":gstr.split(" as ").pop());
+            console.log(gstr+"--"+gby+"--"+gas);
+            if(gas==""){
+                rsgroup.push(sm.view.getattrvalue(item,gby));
+            } else if(/\[(.*)\]/.test(gas)) {
+                var t=RegExp.$1;
+                (typeof rsgroup[t]=="undefined")&&(rsgroup[t]=[]);
+                rsgroup[t].push(sm.view.getattrvalue(item,gby));
+            } else if(/([^\.]*)\.([^\.]*)/.test(gas)) {
+                var t=RegExp.$1;
+                var tt=RegExp.$2;
+                console.log(t+"--"+tt);
+                (typeof rsgroup[t]=="undefined")&&(rsgroup[t]={});
+                rsgroup[t][tt]=sm.view.getattrvalue(item,gby);
+                console.log("值:"+sm.view.getattrvalue(item,gby));
+            }
+        });
+        if(which=="") {return rsgroup;}
+        else {return rsgroup[which];}
+},
 toobj:function(arr,objdef){
     //如果传进来的是一个数组，那么遍历数组把每个元素按照顺序赋值到objdef
     //如果传进来的是一个对象，那么便利对象属性，那么把这个对象属性合并到objdef
@@ -745,6 +772,9 @@ method:{//下面是界面组件的通用方法
         var fs=ms+"."+subdataspace;
         return sm.view.find(fs);
     },//在当前变量空间下查找子空间变量
+    locatel:function(selector){
+        return this._el.querySelector(selector);
+    },//在当前组件范围内查找符合selector的元素
     data:function(mapobj){
         var me=this;
         var dataspace=me._dataspace;
@@ -836,11 +866,14 @@ method:{//下面是界面组件的通用方法
                 var tt=RegExp.$2;
                 (typeof me._group[t]=="undefined")&&(me._group[t]={});
                 me._group[t][tt]=sm.view.getattrvalue(item,gby);
+                window.aaa=item;
+                console.log(tt+"--"+gby);
+                console.log(item);
             }
         });
         if(which=="") {return this._group;}
         else {return this._group[which];}
-    },//这是干啥的？
+    },//返回该组件内的数组
     addclass:function(classes,target=false){
         !target&&(target=this._el);
         if(target){
@@ -928,6 +961,7 @@ method:{//下面是界面组件的通用方法
         }
         return rs;
     },//检测某个DOM节点是否有某个类
+    
 },//这里的函数都需要有this指针，会把当前实例需要的函数再次封装在这里
 layout:{
     get:function(){

@@ -1,0 +1,22 @@
+
+<script src="sm/sm.god.js"></script>
+
+
+
+
+
+<div view-com="panel"></div>
+
+<div view-com="modalform"></div>
+
+
+<script >
+    sm.coms.require(["jquery","bootstrap.v3","awesome","dialog"]).then(function(){
+        sm.document.ready(function(){
+            sm.view.init();
+        });
+        sm.view.aftercominit("toolbar>toolbar1",function(){
+            this.editbar.show=true;
+        });
+    });
+</script>

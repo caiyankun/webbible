@@ -2,7 +2,7 @@
     <div class="panel panel-default">
         <div class="panel-heading">{{title}}<i class="fa pull-right expandtogle" style="cursor:pointer" set:addclass="($expand?'fa-angle-double-down!fa-angle-double-left':'fa-angle-double-left!fa-angle-double-down')"></i></div>
       <div class="panel-body" set:display='($expand?"1":"")'>
-            <div view-com="table"></div>
+            
       </div>
     </div>
 </div>
@@ -23,6 +23,12 @@
             },
             fillpart:function(){
                 
+            },
+            fillcontent:function(){
+
+            },
+            clearcontent:function(){
+              return this;  
             },
         });
     });
