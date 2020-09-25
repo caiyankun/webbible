@@ -39,7 +39,7 @@ class db {
             } else{
                 $rs= is_array($paras)?$paras:split(",", $paras);
             }
-            if(!\Db::simplecall($name, $rs)){
+            if(!\Db::simplecall($procname, $rs)){
                 \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
             } else {
                 \Response::returntaskok(\Db::cubedatawithtitle());

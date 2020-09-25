@@ -2,9 +2,9 @@ sm.route.watch({
     "^\s*$":function(){
        sm.view.makeui("noname",["view/pages/index.html"]); 
     },
-    "#test.html":function(){
+    "#notes.html":function(){
         console.log("已经过来了啊!");
-        sm.view.makeui("noname",["view/pages/test.html"]); 
+        sm.view.makeui("noname",["view/pages/notes.html"]); 
     },
     "#index.html":function(){
         console.log("why!!!!!!!!!!!!!!!");

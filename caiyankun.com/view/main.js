@@ -1,6 +1,6 @@
 /**这个文件是项目自定义的文件，是对框架中默认方法，数据的重定义，会覆盖掉框架中默认的数据值，函数方法**/
 
-sm.coms.require(["jquery","bootstrap.v3","awesome","toolbar","dialog"]).then(function(){
+sm.coms.require(["layui"]).then(function(){
     console.log("组件已经加载完成？"+sm.coms.loadedlist);
     //(1)项目中所有遇到的远程url建议都定义在这里，主机地址，方便后续更改：
     sm.server.extend({
