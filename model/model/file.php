@@ -18,6 +18,8 @@ class file {
         $entrypath=ENTRY_PATH;
         $fpath=ENTRY_PATH;
         empty($path)||($fpath=$fpath.$path);
+        empty($path)&&($path="/");
+        $fpath=$path;
         //ob_start();
         //$cmdstr="cd ".$wp.";".$cmd.";";
         $rs=[];
@@ -51,5 +53,8 @@ class file {
         //system("dir");
         //$rs= ob_get_clean();
        // \Response::returntaskok($rs);
+    }
+    public function readfile($filename){
+        \Response::returntaskok(file_get_contents($filename));
     }
 }

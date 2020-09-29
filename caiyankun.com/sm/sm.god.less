@@ -1,0 +1,268 @@
+
+@border-color:#ced4da;
+@bar-color:#ddd;
+@loading-color:#ddd;
+@border-size:1px;
+@double-border-size:2px;
+@font-color:#212529;
+@button-color:#efefef;
+
+
+html {
+    font-size:16px;
+}
+body {
+    /*默认样式*/
+    box-sizing: border-box;
+    margin: 0 rem;
+    padding: 0 rem;
+    border: 0 rem;
+    width: 100%;
+    height:100%;
+    display: block;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Microsoft YaHei","微软雅黑","Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 2 rem;
+    color: @font-color;
+    text-align: left;
+    input,button,.icon {
+        position: relative;
+        box-sizing:border-box;
+        display: inline-block;
+        border:@border-size solid @border-color;
+        border-radius:.25rem;
+        min-width: 2 rem;
+        height: 2rem;
+        //padding: 0.5rem-@border-size;
+        padding: auto;
+        font-size: 1rem;
+    }
+    .icon {
+        width: 2rem;
+    }
+    input {
+        //height: calc(2rem - @double-border-size - @double-border-size);
+        //padding: 0.5rem - 4px;
+    }
+    button:hover {
+        background-color: @border-color;
+        cursor: pointer;
+    }
+    a:hover {
+        color:#00f;
+    }
+    input:focus,.has-shadow  {
+        transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    }
+    .dropdown{
+        padding-right: 1.5rem;
+    }
+    .dropdownicon {
+        width: 1rem;
+    }
+    .dropdown:hover .dropdown-menu{
+        display: block;
+    }
+    .dropdown-menu{
+        display: none;
+        position: absolute;
+        //transform: translate3d(0px, 1.9rem, 0px);
+        //margin-top: 0.5rem;
+        top: 1.9rem;
+        //top: 0px;
+        left: 0px;
+        margin: 0;
+        z-index: 1000;
+        will-change: transform;
+        background-color: #ddd;
+        border-radius: 0.3rem;
+        border: 1px solid @border-color;
+        overflow: hidden;
+        &.hidden {
+            display: none;
+        }
+        
+        .dropdown-item{
+            display: block;
+            width: 100%;
+            padding: .25rem 1.5rem;
+            clear: both;
+            font-weight: 400;
+            color: #212529;
+            text-align: left;
+            white-space: nowrap;
+            background-color: @button-color;
+            border: 0;
+            text-decoration: none;
+            &:hover {
+                background-color: @border-color;
+            }
+            &.hr {
+                height: 1px;
+                margin:0;
+                border:0;
+                padding: 0;
+                padding-left: 1rem;
+                padding-right: 1rem;
+                background-color: @border-color;
+            }
+            
+        }   
+    }
+    .dropdown:after {
+        content: " ";
+        //display:block;
+        float:right;
+        margin-left: 0.25rem;
+        position: absolute;
+        top:0.8rem;
+        width:0;
+        height:0;
+        border-top:0.5rem solid @font-color;
+        border-left:0.4rem solid transparent;
+        border-right:0.4rem solid transparent;
+        border-bottom:0;
+    }
+    .dropdown:hover:after {
+        content: " ";
+        //display:block;
+        float:right;
+        margin-left: 0.25rem;
+        position: absolute;
+        top:0.8rem;
+        width:0;
+        height:0;
+        border-top:0;
+        border-left:0.4rem solid transparent;
+        border-right:0.4rem solid transparent;
+        border-bottom:0.5rem solid @font-color;
+    }
+    .toolbar{
+        display: block;
+        width: 100%;
+        background-color: @bar-color;
+        background-color: #fff;
+        position: raletive;
+        height: 2rem;
+        input,button {
+            float:left;
+            margin-left: 0.2rem;
+        };
+        .buttons{
+            float:left;
+            position: relative;
+            margin-left: 0.2rem;
+            button,input {margin:0rem;};
+            button:not(:first-child):not(:last-child) {border-radius: 0;border-right: 0;};
+            button:first-child:not(:last-child){border-top-right-radius: 0;border-bottom-right-radius: 0;border-right: 0;};
+            button:last-child:not(:first-child){border-top-left-radius: 0;border-bottom-left-radius: 0;};
+        }
+        .linput {
+            margin:0rem;
+            border-top-right-radius: 0;border-bottom-right-radius: 0;border-right: 0;
+        }
+        .rinput {
+            margin:0rem;
+            border-top-left-radius: 0;border-bottom-left-radius: 0;
+        }
+        .midinput{
+            border-radius: 0;margin:0rem;border-right: 0;
+        }
+        .lbuttons {
+            float:left;
+            position: relative;
+            margin-left: 0.2rem;
+            button{margin:0rem;};
+            button:not(:first-child) {border-radius: 0;border-left:0;border-right: 0;};
+            button:first-child{border-top-right-radius: 0;border-bottom-right-radius: 0};
+        }
+        .rbuttons{
+            float:left;
+            position: relative;
+            margin-left: 0.2rem;
+            button{margin:0rem;};
+            button:not(:last-child) {border-radius: 0;border-left:0;border-right: 0;};
+            button:last-child{border-top-left-radius: 0;border-bottom-left-radius: 0};
+        }
+    }
+    table {
+        width: 100%;
+        background-color: #fff;
+        color: #666;
+        margin: 10px 0;
+        border-collapse: collapse;
+        border-spacing: 0;
+        display: table;
+        box-sizing: border-box;
+        border-color: grey;
+        td,th{
+            position: relative;
+            padding: 9px 15px;
+            min-height: 20px;
+            line-height: 20px;
+            font-size: 14px;
+            border-width: 1px;
+            border-style: solid;
+            border-color: #e6e6e6;
+            border-left-color: transparent;
+            border-right-color: transparent;
+            display: table-cell;
+            vertical-align: inherit;
+            &.folder {
+                font-weight:bold;
+            }
+        }
+        th{
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            text-align: left;
+            font-weight: 400;
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #f2f2f2;
+        }
+    }
+    .columns {
+        display: flex;
+        .column{
+            display: block;
+            flex-basis: 0;
+            flex-grow: 1;
+            flex-shrink: 1;
+            padding: 1rem;
+        }
+    }
+}
+
+@container:{
+    
+}
+
+.is-loading {
+ /* content: "AA";
+  border-radius: 50%;
+ animation: spin 2s linear infinite;
+  -webkit-animation:spin 2s linear infinite;
+  border: 4px solid #f00;
+  border-top: 4px solid #0f0;
+  */
+    left: 0;
+    top: calc(50% - (1em / 2));
+    position: absolute!important;
+    animation: spinAround 1s infinite linear;
+    border: 2px solid #dbdbdb;
+    border-top: 2px solid @loading-color;
+    border-right: 2px solid @loading-color;
+    border-bottom: none;
+    border-left:none;
+    border-radius: 50%;
+    display: block;
+    height: 1em;
+    width: 1em;
+}
+
+@keyframes spinAround  {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

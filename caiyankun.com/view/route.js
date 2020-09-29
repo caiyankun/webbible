@@ -2,13 +2,27 @@ sm.route.watch({
     "^\s*$":function(){
        sm.view.makeui("noname",["view/pages/index.html"]); 
     },
-    "#notes.html":function(){
+    "#test.html":function(){
         console.log("已经过来了啊!");
-        sm.view.makeui("noname",["view/pages/notes.html"]); 
+        sm.coms.require(["less"]).then(function(){
+            sm.view.makeui("noname",["view/pages/test.html"]); 
+        });
+        
+    },
+    "#notes.html":function(){
+        sm.coms.require(["layui"]).then(function(){
+            sm.view.makeui("noname",["view/pages/notes.html"]); 
+        });
+        
+    },
+    "#editor.html":function(){
+        sm.view.makeui("noname",["view/pages/editor.html"]); 
     },
     "#index.html":function(){
-        console.log("why!!!!!!!!!!!!!!!");
-       sm.view.makeui("noname",["view/pages/index.html"]); 
+       sm.coms.require(["jquery","bootstrap.v3"]).then(function(){
+            sm.view.makeui("noname",["view/pages/index.html"]); 
+        });
+       
     },
 
     /////更多的路由请插在这里之前    

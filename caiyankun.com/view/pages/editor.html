@@ -1,0 +1,64 @@
+<div class="columns" >
+    <div class="column">
+        <table class="editor files">
+            <tr  ><td class="folder" path=".." ftype="folder">..</td></tr>
+            <tr for:="(_i,_k,_v) in editor.filelist" ><td set:ftype="{{$_v[0]}}" set:class="{{$_v[0]}}" set:path="{{($editor.curpath+$_v[1])}}">{{$_v[1]}}</td></tr>
+        </table>
+    </div>
+    <div class="column">
+        <textarea id="editorarea" style="width:100%;min-height: 600px;"></textarea>
+    </div>
+</div>
+
+
+
+<script>
+sm.document.ready(function(){
+    console.log("---------------------");
+    sm.view.init().then(function(){
+        sm.ajax.url("file/glob.func").smpost({path:$common.editor.curpath}).then(function(d){
+            console.log(d);
+            $common.editor.curpath="/";
+            $common.editor.filelist=d;
+            faddevent();
+        });
+    });
+})
+
+faddevent=function(){
+    $common.watchdom({
+        "table.editor.files td@dblclick":function(e,el,ds){
+            //双击一个文件夹或文件的时候
+            path=el.getAttribute("path");
+            ftype=el.getAttribute("ftype");
+            
+            if(ftype=="folder"){
+                if(path==".."){
+                    if(path=="/"){
+                        $common.editor.curpath="/";
+                    }else {
+                        t=$common.editor.curpath.split("/");
+                        t.pop();
+                        t.pop();
+                        $common.editor.curpath=t.join("/")+"/";
+                    }
+                } else {
+                    $common.editor.curpath=path+"/";
+                }
+                console.log(ftype);
+                console.log($common.editor.curpath);
+                sm.ajax.url("file/glob.func").smpost({path:$common.editor.curpath}).then(function(d){
+                    $common.editor.filelist=d;
+                });
+            } else {
+                sm.ajax.url("file/readfile.func").smpost({filename:path}).then(function(d){
+                    document.querySelector("#editorarea").value=d;
+                });
+            }
+            
+        }
+    });
+}
+    
+    
+</script>
