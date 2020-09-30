@@ -1,6 +1,6 @@
 
 @border-color:#ced4da;
-@bar-color:#ddd;
+@bar-color:#eee;
 @loading-color:#ddd;
 @border-size:1px;
 @double-border-size:2px;
@@ -26,6 +26,9 @@ body {
     line-height: 2 rem;
     color: @font-color;
     text-align: left;
+    textarea{
+        
+    }
     input,button,.icon {
         position: relative;
         box-sizing:border-box;
@@ -82,7 +85,6 @@ body {
         &.hidden {
             display: none;
         }
-        
         .dropdown-item{
             display: block;
             width: 100%;
@@ -142,7 +144,8 @@ body {
         display: block;
         width: 100%;
         background-color: @bar-color;
-        background-color: #fff;
+        box-sizing: border-box;
+        //background-color: #fff;
         position: raletive;
         height: 2rem;
         input,button {

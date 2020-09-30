@@ -44,17 +44,30 @@ class file {
         //var_dump($rs);
         \Response::returntaskok($rs);
     }
-    public function cmd($cmd,$path="") {
-        $fpath=ENTRY_PATH;
-        empty($path)||($fpath=$fpath.$path);
-        //ob_start();
-        //$cmdstr="cd ".$wp.";".$cmd.";";
-        var_dump(glob($fpath."*"));
-        //system("dir");
-        //$rs= ob_get_clean();
-       // \Response::returntaskok($rs);
+    public function cmd($cmd,$path="/googledrive/") {
+        //$fpath=ENTRY_PATH;
+        //empty($path)||($fpath=$fpath.$path);
+        ob_start();
+        $cmdstr="cd ".$path.";".$cmd.";";
+        //var_dump(glob($fpath."*"));
+        //echo "111111";
+        $a=system($cmdstr);
+        //echo "2222";
+        //echo $a;
+        $rs= ob_get_clean();
+        \Response::returntaskok($rs);
     }
     public function readfile($filename){
         \Response::returntaskok(file_get_contents($filename));
+    }
+    public function writefile($filename,$content=""){
+        $fpath=ENTRY_PATH;
+        $t=file_put_contents($filename, $content);
+        if($t){
+            \Response::returntaskok($t);
+        } else {
+            \Response::returntaskfail("文件写入失败！");
+        }
+        
     }
 }

@@ -1,11 +1,17 @@
 <div class="columns" >
     <div class="column">
+        <div class="toolbar">
+            <button>...</button>
+        </div>
         <table class="editor files">
             <tr  ><td class="folder" path=".." ftype="folder">..</td></tr>
             <tr for:="(_i,_k,_v) in editor.filelist" ><td set:ftype="{{$_v[0]}}" set:class="{{$_v[0]}}" set:path="{{($editor.curpath+$_v[1])}}">{{$_v[1]}}</td></tr>
         </table>
     </div>
     <div class="column">
+        <div class="toolbar">
+            <button class="save">保存</button>
+        </div>
         <textarea id="editorarea" style="width:100%;min-height: 600px;"></textarea>
     </div>
 </div>
@@ -53,10 +59,20 @@ faddevent=function(){
             } else {
                 sm.ajax.url("file/readfile.func").smpost({filename:path}).then(function(d){
                     document.querySelector("#editorarea").value=d;
+                },function(d){
+                    sm.dialog.countshow(2,"文件打开失败:"+d);
                 });
             }
             
-        }
+        },
+        "button.save@click":function(e,el,ds){
+            d=document.querySelector("#editorarea").value;
+            sm.ajax.url("file/writefile.func").smpost({filename:path,content:d}).then(function(d){
+               sm.dialog.countshow(5,"写入文件成功："+d);
+            },function(d){
+                sm.dialog.countshow(5,"写入文件失败："+d);
+            });
+        },
     });
 }
     
