@@ -106,6 +106,31 @@ God.setup=function (os){
         return this;
     }
 };
+God.pooldivel=function(){
+    if(document.body.querySelector("body>#sm_pool")){
+        return document.body.querySelector("body>#sm_pool");
+    } else {
+        document.body.querySelector("#sm_pool")&&document.body.querySelector("#sm_pool").remove();
+        var tn=document.createElement('div');
+        tn.style.display="none";
+        tn.innerHTML='<div style="position:absolute;display:none!important;" id="sm_pool"></div>';
+        document.body.appendChild(tn.firstChild);
+        tn.remove();
+        return document.body.querySelector("body>#sm_pool");
+    }
+        
+}
+God.newel=function(htmlcode){
+    var tn=document.createElement('div');
+    tn.style.display="none";
+    tn.innerHTML=htmlcode;
+    var rsnode=tn.firstChild;
+    if(rsnode){
+        sm.pooldivel().appendChild(rsnode);
+    }
+    tn.remove();
+    return rsnode;
+}
 God.showme=function(){alert(this.whoami);return this;}
 God.clearstat=function(){this._stat={error:0,info:""};return this;}
 God.error=function(e,i){
@@ -184,6 +209,20 @@ window.domevent_cb=[];//这里存储所有的whatch DOM相关的回调函数
 window.domevent_listener=[];//这里存储所有的whatch DOM相关的回调函数
 
 God.coms("func").extendproto({
+matchedparentel:function(el,selector){
+    if(el&&el.matches&&el.matches("body *")){
+        while (!el.matches("body")){
+            if(el.matches(selector)){
+                return el;
+            } else {
+                el=el.parentElement;
+            }
+        }
+        if(el.matches(selector)){return el;}
+        return false;
+    } 
+    return false;
+},
 isempty:function(varname){return !varname;},//判断参数是否为空
 isnull:function(varname){return  (!varname&& typeof(varname)!="undefined" && varname!=0);},//判断参数是否为null
 isobj:function(varname){return Object.prototype.toString.call(varname) === '[object Object]'; },//判断参数是否为对象
@@ -324,6 +363,7 @@ getElementTop:function (element){
     }
     return actualTop;
     },//获取一个元素的上部定位
+random:function(length){return Math.floor((Math.random()+1)*10**(length-1)).toString();},
 dbaddstr:function(row){
     var rs="";
     for(var k in row){
@@ -388,6 +428,17 @@ fadeout:function(ele,interval=30) {
         }, interval);
     }
 },//设置某个元素动态隐藏
+addclass:function(el,cls){
+    var tc=$$.removeclass(el,cls).getAttribute("class");
+    return el.setAttribute("class",tc+" "+cls.trim());
+},
+removeclass:function(el,cls){
+    var tc=el.getAttribute("class");
+    tc=" "+tc.trim()+" ";
+    tc=tc.replace(" "+cls.trim()+" ","").trim();
+    el.setAttribute("class",tc);
+    return el;
+},
 });
 window.$$=God.$$=God.func;//方便对全局函数的引用，位置不能改
 
@@ -1571,6 +1622,16 @@ setattrvalue:function (el,attr,value){
         case 'value':
             el.value=value;
             break;
+        case 'hide':
+            //console.log("enter display:"+value);
+            //console.log(el);
+            if(!value||value=="0"||value=="undefined"||value==""){
+                el.style.display='';
+            }else{
+                el.style.display='none';
+            }
+            //console.log(el.style.display);
+            break;
         case 'display':
             //console.log("enter display:"+value);
             //console.log(el);
@@ -2094,15 +2155,96 @@ define:function(defs){
 },
 });//方便对页面数据校验的定义和检查
 God.coms("dialog").extendproto({//对话框
-
-show:function(content="",funcmap=function(){},title=""){
+modaldivel:function(){
+    if(document.body.querySelector("body>#sm_modal")){
+        return document.body.querySelector("body>#sm_modal");
+    } else {
+        document.body.querySelector("#sm_modal")&&document.body.querySelector("#sm_modal").remove();
+        var tn=sm.newel('<div id="sm_modal" class="modal" style="position:absolute;display:none;z-index:1000;"><div class="titlepart"><div class="title"></div><div class="xclosebutton"></div></div><div class="bodypart"></div><div class="buttonpart"></div></div>');
+        document.body.appendChild(tn);
+        return tn;
+    }
+},
+msg:function(str,title="",buttons=""){
+    if(document.body.querySelector("#sm_modal_msg")){
+        var msgel= document.body.querySelector("#sm_modal_msg");
+    } else {
+        var msgel= sm.newel('<div id="sm_modal_msg"></div>');
+    }
+    msgel.innerHTML=str;
+    return sm.dialog.show("#sm_modal_msg",title,buttons);
+},
+show:function(contentselector="",title="",buttons="",stylestr="",classstr="",showwhat=""){
+    /*
     code_bg='<div id="code_bg" style="position:absolute;left:0px;top:0px;background-color:#000;width:100%;filter:alpha(opacity=60);opacity:0.6;z-Index:100;"></div>'
     code_msg='<div id="code_msg" style="position:absolute;width:100%;height:30px;text-align:center;line-height: 30px;top:0px;left:0px;background-color:#ddd;filter:alpha(opacity=40);opacity:0.4;cursor:pointer;z-Index:101;">'+content+'</div>'
     sm.document.create(code_bg+code_msg);
-    
     document.querySelector("#code_bg").style.height=document.clientHeight;
-
-    return this;
+    return this;*/
+        var tmn=sm.dialog.modaldivel().querySelector(".bodypart");
+        if(tmn.hasChildNodes()&&tmn.firstElementChild){
+            sm.pooldivel().appendChild(tmn.firstElementChild);
+        }
+        tmn.innerHTML="";
+        var tn=document.querySelector(contentselector);
+        if(tn){
+            tmn.appendChild(tn);
+            tn.style.display="block";
+            tn.style.position="relative";//确保能把内容撑大
+        }
+        var tm=sm.dialog.modaldivel();
+        tm.setAttribute("style","position:absolute;display:none;z-index:1000;");
+        //tm.style.top=0;
+        //tm.style.left=0;
+        tm.setAttribute("style",tm.getAttribute("style")+stylestr);
+        if(classstr){
+            var tc=tm.getAttribute("class");
+            if(tc){
+                tc=" "+tc.trim()+" ";
+                tc=tc.replace(classstr ,"");
+                tc=tc.trim()+" "+classstr;
+            } else {tc=classstr;}
+            tm.setAttribute("class",tc);
+        }
+        tm.setAttribute("showwhat",showwhat);
+        var tn=tm.querySelector("#sm_modal>.titlepart>.title");
+        tn.innerText=title;
+        
+        var bn=tm.querySelector("#sm_modal>.buttonpart");
+        bn.innerHTML="";
+        
+        if(buttons!==""){
+            buttons=buttons.split(",");
+            for (var i in buttons){
+                var tbtn=buttons[i];
+                if(tbtn.split(".").length<2){
+                    var btncl=tbtn;
+                } else {
+                    btncl=tbtn.split(".")[1];
+                }
+                bn.appendChild(sm.newel('<button class="'+btncl+'">'+tbtn.split(".")[0]+'</button>'));
+            }
+        }
+        tm.style.display="block";
+        var top=(document.documentElement.scrollTop + (document.documentElement.clientHeight - tm.offsetHeight)/2) + "px";
+        var left=(document.documentElement.scrollLeft + (document.documentElement.clientWidth - tm.offsetWidth)/2) + "px";
+       console.log(document.documentElement.scrollTop);
+       console.log(document.documentElement.clientHeight);
+       console.log(tm.offsetHeight);
+        tm.style.top=top;
+       tm.style.left=left;
+        
+        //添加右上角的关闭事件
+        if(!tm.hasAttribute("inited")){
+            $common.watchdom({
+                "#sm_modal>.titlepart>.xclosebutton@click":function(){
+                    sm.dialog.close();
+                }
+            });
+            tm.setAttribute("inited","true");
+        }
+        
+        return this;
 },
 countshow:function(s,content,title=""){
 	if(s>0) {
@@ -2114,14 +2256,25 @@ countshow:function(s,content,title=""){
 	}
 	return this;
 },
-close:function(filter){
+close:function(){
+    /*
     try{
         document.querySelector("#code_bg").remove();
         document.querySelector("#code_msg").remove();
     }catch(e){}
+    return this;*/
+    sm.dialog.modaldivel().style.display="none";
     return this;
 },
-
+watch:function(btnevent){
+    var sl="#sm_modal .buttonpart ";//限定watch中的选择器只能是.buttonpart 中的元素
+    var nbtnevent={};
+    Object.keys(btnevent).forEach(function(k){
+        if(k.split(".").length<2){nbtnevent[sl+"."+k]=btnevent[k];}
+        else{nbtnevent[sl+k]=btnevent[k];}
+    });
+    $common.watchdom(nbtnevent);//委托给body事件机制去处理，前提必须是已经初始化Sm.view.init
+},
 });//方便在页面顶部显示信息
 God.coms("upload").extend({
     _setup:{
@@ -2274,6 +2427,291 @@ body:function(){
         return sm.document.body();
     }
 },
+});
+God.coms("menu").extendproto({
+    stopdefault:function(e) {
+        if (e && e.preventDefault) {//如果是FF下执行这个
+           e.preventDefault();
+       }else{
+           window.event.returnValue = false;//其它浏览器下执行这个
+       }
+       return false;
+    } ,//阻止系统自带的右键菜单弹出
+    menudivel:function(){
+        if(document.body.querySelector("body>#sm_menu")){
+            return document.body.querySelector("body>#sm_menu");
+        } else {
+            document.body.querySelector("#sm_menu")&&document.body.querySelector("#sm_menu").remove();
+            var tn=document.createElement('div');
+            tn.style.display="none";
+            tn.innerHTML='<div style="position:absolute;display:none;" id="sm_menu"></div>';
+            document.body.appendChild(tn.firstChild);
+            tn.remove();
+            return document.body.querySelector("body>#sm_menu");
+        }
+    },
+    rmenudivel:function(){
+        if(!document.body.querySelector("#sm_rmenu")){
+            return sm.newel('<div class="dropdown-menu"  id="sm_rmenu" style="display:block;top:0px;left:0px;"></div>');
+        } else {
+            return document.body.querySelector("#sm_rmenu");
+        }
+    },
+    lmenudivel:function(){
+        if(!document.body.querySelector("#sm_lmenu")){
+            return sm.newel('<div class="dropdown-menu"  id="sm_lmenu" style="display:block;top:0px;left:0px;"></div>');
+        } else {
+            return document.body.querySelector("#sm_lmenu");
+        }
+    },
+    makelmenu:function(str){
+        var rm=sm.menu.lmenudivel();
+        rm.innerHTML="";
+        var items=str.split(",");
+        for (var k in items){
+            if(items[k]==="hr"){
+                rm.appendChild(sm.newel('<a class="dropdown-item hr" ></a>'));
+            } else {
+                rm.appendChild(sm.newel('<a class="dropdown-item" >'+items[k]+'</a>'));
+            }
+        }
+    },
+    makermenu:function(str){
+        var rm=sm.menu.rmenudivel();
+        rm.innerHTML="";
+        var items=str.split(",");
+        for (var k in items){
+            if(items[k]==="hr"){
+                rm.appendChild(sm.newel('<a class="dropdown-item hr" ></a>'));
+            } else {
+                rm.appendChild(sm.newel('<a class="dropdown-item" >'+items[k]+'</a>'));
+            }
+        }
+    },
+    show:function(menuid,top=0,left=0,stylestr="",classstr="",showwhat="rmenu"){
+        if(sm.menu.menudivel().hasChildNodes()){
+            sm.pooldivel().appendChild(sm.menu.menudivel().firstChild);
+        }
+        var tn=document.querySelector(menuid);
+        if(tn){
+            sm.menu.menudivel().appendChild(tn);
+        }
+        var tm=sm.menu.menudivel();
+        tm.setAttribute("style","position:absolute;display:none;z-index:1000;");
+        tm.style.top=top;
+        tm.style.left=left;
+        tm.setAttribute("style",tm.getAttribute("style")+stylestr);
+        if(classstr){
+            var tc=tm.getAttribute("class");
+            if(tc){
+                tc=" "+tc.trim()+" ";
+                tc=tc.replace(classstr ,"");
+                tc=tc.trim()+" "+classstr;
+            } else {tc=classstr;}
+            tm.setAttribute("class",tc);
+        }
+        tm.setAttribute("showwhat",showwhat);
+        tm.style.display="block";
+    },
+    hide:function(){
+        sm.menu.menudivel().style.display="none";
+        while (document.body.querySelector("[showingmenuismine]"))
+        {
+            var tn=document.body.querySelector("[showingmenuismine]");
+            tn.removeAttribute("showingmenuismine");
+        }
+    },
+    initrmenu:function(){
+        sm.menu.initeventmap();
+        sm.document.ready(function(){
+            console.log('右键事件已经拦截！');
+            document.body.addEventListener("contextmenu",function(ev){
+                var el  = ev.srcElement || ev.target;
+                if(el.matches("[rmenuref]")||el.matches("[rmenu]")||el.matches("[rmenuref] *")||el.matches("[rmenu] *")){
+                    sm.menu.stopdefault(ev);//阻止鼠标的默认事件
+                    var ev = ev || event;
+                    var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                    var left = ev.clientX + "px";
+                    //当滑动滚动条时也能准确获取菜单位置
+                    var top = ev.clientY + scrollTop + "px";
+                    
+                    
+                    var tgt="#sm_error_nocontextmenu";
+                    var menuel=$$.matchedparentel(el,"[rmenuref]")||$$.matchedparentel(el,"[rmenu]");
+                    
+                    if(menuel.hasAttribute("rmenuref")&&document.body.querySelector(menuel.getAttribute("rmenuref"))){
+                        tgt=menuel.getAttribute("rmenuref");
+                    } else {
+                        var items=menuel.getAttribute("rmenu")||"";
+                        sm.menu.makermenu(items);
+                        tgt="#sm_rmenu";
+                    }
+                    el.setAttribute("showingmenuismine","rmenu");
+                    sm.menu.show(tgt,top,left,"","","rmenu");
+                    return false;
+                }
+            });
+            document.body.addEventListener("click",function(ev){
+                var tm=sm.menu.menudivel();
+                if((tm.style.display!=="none")&&(tm.getAttribute("showwhat")==="rmenu")){
+                        sm.menu.hide();
+                } 
+            });
+        });
+    },
+    initlmenu:function(){
+        sm.menu.initeventmap();
+        sm.document.ready(function(){
+            console.log('右键单击事件已经拦截！');
+            document.body.addEventListener("click",function(ev){
+                var tm=sm.menu.menudivel();
+                if((tm.style.display!=="none")&&(tm.getAttribute("showwhat")==="lmenu")){
+                        sm.menu.hide();
+                } else {
+                    //判断是否要显示左键菜单
+                    var el  = ev.srcElement || ev.target;
+                    if(el.hasAttribute("lmenuref")||el.hasAttribute("lmenu")){
+                        var ev = ev || event;
+                        var scrollTop = el.scrollTop+el.scrollHeight;
+                        var left = $$.getElementLeft(el) + "px";
+                        //当滑动滚动条时也能准确获取菜单位置
+                        var top = $$.getElementTop(el)+el.scrollHeight;
+                        el.setAttribute("showingmenuismine","lmenu");
+                            
+                        var tgt="#sm_error_nocontextmenu";
+                        if(el.hasAttribute("lmenuref")&&document.body.querySelector(el.getAttribute("lmenuref"))){
+                            tgt=el.getAttribute("lmenuref");
+                        } else {
+                            var items=el.getAttribute("lmenu")||"";
+                            sm.menu.makelmenu(items);
+                            tgt="#sm_lmenu";
+                        }
+                        el.setAttribute("showingmenuismine","lmenu");
+                        sm.menu.show(tgt,top,left,"","","lmenu");
+                        return false;
+                    }
+                }
+            });
+        });
+    },
+    initeventmap:function(){
+        if(!$$.isdefined(sm.menu.eventmap)){
+            sm.menu.eventmap={};
+            document.body.addEventListener("click",function(ev){
+                var el  = ev.srcElement || ev.target;
+                if(el.matches("body>#sm_menu a")){
+                    var ownerel=document.body.querySelector("[showingmenuismine]");
+                    Object.keys(sm.menu.eventmap).forEach(function(k){
+                        var ak=k.split("/")[0];
+                        if(ak===""){ak="*";}
+                        ownerel.matches(ak+" *") && (ownerel=$$.matchedparentel(ownerel ,ak));
+                        if(ownerel.matches(ak)){
+                            var cb=sm.menu.eventmap[k];
+                            cb(ownerel,el,el.textContent);
+                        }
+                    });
+                    //console.log(ownerel);
+                    //console.log(el.textContent);
+                }
+            });
+        }
+    },
+    addclickevent:function(eventmap){
+      if(!$$.isdefined(sm.menu.eventmap)){sm.menu.eventmap={};}
+      $$.merge.apply(sm.menu.eventmap,[eventmap]);
+    },
+});
+God.coms("tabs").extendproto({
+    to:function(tgt){
+       if(typeof tgt==="string"){tgt=document.body.querySelector(tgt);}
+       sm.tabs._curel=$$.matchedparentel(tgt,"div.tabs");
+       this.makesureinited();
+       return this;
+    },
+    el:function(){
+        if(!sm.tabs._curel) {sm.tabs._curel= document.body.querySelector("div.tabs");}
+        this.makesureinited();
+        return sm.tabs._curel;
+    },
+    titlesel:function(){return this.el().querySelector("div.tabs>div.tabs_titles")},
+    bodysel:function(){return this.el().querySelector("div.tabs>div.tabs_bodys")},
+    activetitleel:function(){return this.el().querySelector("div.tabs>div.tabs_titles>div.tabs_title.active");},
+    activebodyel:function(){return this.el().querySelector("div.tabs>div.tabs_bodys>div.tabs_body.active");},
+    activetab:function(id){
+        this.deactiveall();
+        $$.addclass(this.titlesel().querySelector('[tabid="'+id+'"]'),"active");
+        $$.addclass(this.bodysel().querySelector('[tabid="'+id+'"]'),"active");
+        return this;
+    },
+    addtab:function(title,body){
+        var id=$$.random(10);
+        var tel=sm.newel('<div class="tabs_title"><button>'+title+'</button></div>');
+        var bel=sm.newel('<div class="tabs_body"></div>');
+        body&&bel.appendChild(body);
+        tel.setAttribute("tabid",id);
+        bel.setAttribute("tabid",id);
+        this.titlesel().appendChild(tel);
+        this.bodysel().appendChild(bel);
+        this.activetab(id);
+        return this;
+    },
+    deletetab:function(id){
+        this.titlesel().querySelector('[tabid="'+id+'"]').remove();
+        this.bodysel().querySelector('[tabid="'+id+'"]').remove();
+        return this;
+    },
+    init:function(){
+        var tabs=document.body.querySelectorAll("div.tabs");
+        var maxnum=tabs.length;
+        for (var i=0;i<maxnum;i++){
+            sm.tabs.to(tabs[i]);
+        }
+        $common.watchdom({
+            "div.tabs>div.tabs_titles>div.tabs_title@click":function(e,el,ds){
+                sm.tabs.to(el);
+                var id=$$.matchedparentel(el,"div.tabs>div.tabs_titles>div.tabs_title").getAttribute("tabid");
+                sm.tabs.activetab(id);
+            },
+        });
+    },
+    deactiveall:function(){
+        var titles=this.titlesel().querySelectorAll("div.tabs_titles>.tabs_title.active");
+        var bodys=this.bodysel().querySelectorAll("div.tabs_bodys>.tabs_body.active");
+        if(!titles){return this;}
+        var totalnum=titles.length;
+        for (var i =0;i<totalnum;i++){
+            $$.removeclass(titles[i],"active");
+            $$.removeclass(bodys[i],"active");
+        }
+        return this;
+    },
+    deleteall:function(){
+        var titles=this.titlesel().querySelectorAll("div.tabs_titles>.tabs_title");
+        var bodys=this.bodysel().querySelectorAll("div.tabs_bodys>.tabs_body");
+        if(!titles){return this;}
+        var totalnum=titles.length;
+        for (var i =0;i<totalnum;i++){
+            titles[i].remove();
+            bodys[i].remove();
+        }
+        return this;
+    },
+    //内部使用
+      makesureinited:function(){
+        var el=this._curel;
+        if(!el){return this;}
+        if(el.hasAttribute("inited")){return this;}
+        var titles=el.querySelectorAll("div.tabs_titles>.tabs_title");
+        var bodys=el.querySelectorAll("div.tabs_bodys>.tabs_body");
+        var totalnum=titles.length;
+        for (var i =0;i<totalnum;i++){
+            var randomid=$$.random(10);
+            titles[i].setAttribute("tabid",randomid);
+            bodys[i].setAttribute("tabid",randomid);
+        }
+        el.setAttribute("inited","true")
+        return this;
+    },
 });
 }
 

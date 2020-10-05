@@ -20,6 +20,11 @@ sm.route.watch({
             sm.view.makeui("noname",["view/pages/editor.html"]); 
         });
     },
+    "#task.html":function(){
+        sm.coms.require(["less","calendar"]).then(function(){
+            sm.view.makeui("noname",["view/pages/task.html"]); 
+        });
+    },
     "#index.html":function(){
        sm.coms.require(["jquery","bootstrap.v3"]).then(function(){
             sm.view.makeui("noname",["view/pages/index.html"]); 

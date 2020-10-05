@@ -1,0 +1,27 @@
+<div view-com-tpl="tabs" class="tabs">
+    <div class="tabs_titles">
+       <div class="tabs_title"><button>sampletitle</button></div>
+   </div>
+   <div class="tabs_bodys">
+       <div class="tabs_body">samplebody</div>
+   </div>
+</div>
+
+
+<script>
+    sm.view.oncominit("tabs",function(){
+        console.log("init com: tabs");
+        this.data({
+            show:true,
+        }).method({
+            putpath:function(pathstr){
+                this.path=pathstr.split("/");
+            },//在工具栏上显示一个地址
+        }).watchdom({
+            ".path button":function(e,el,ds){
+                //alert(el.getAttribute("d-index"));
+            },
+        });
+        console.log("inited com: tabs");
+    });
+</script>

@@ -1,0 +1,111 @@
+<div class="columns">
+    <div class="column">
+        <div  class="tabs">
+            <div class="tabs_titles">
+               <div class="tabs_title active"><button>任务</button></div>
+               <div class="tabs_title"><button>周期任务</button></div>
+           </div>
+           <div class="tabs_bodys">
+               <div class="tabs_body active" rmenu="新建任务,刷新列表">
+                   <table id="task">
+                       <tr set:hide="{{$tasklist}}"><td>天哪，您没有任何任务哦！！！</td></tr>
+                       <tr for:="(_i,_k,_v) in tasklist" class="taskitem" rmenu="复制任务,删除任务,hr,推迟到明天,任务失效,任务完成" set:display="{{$tasklist}}" set:taskid="{{$_v.id}}"><td>{{$_v.name}}</td></tr>
+                   </table>
+               </div>
+               <div class="tabs_body "  rmenu="新建任务树,刷新列表">
+                   <table id="taskplant">
+                       <tr set:hide="{{$taskplantlist}}" ><td>天哪，您还没有创建任何周期任务哦！！！</td></tr>
+                        <tr for:="(_i,_k,_v) in taskplantlist" class="taskplantitem"  rmenu="复制任务树,删除任务树,hr,任务失效" set:display="{{$taskplantlist}}" set:taskplantid="{{$_v.id}}"><td>{{$_v.name}}</td></tr>
+                   </table>
+               </div>
+           </div>
+        </div>
+    </div>
+    <div class="column">
+        <div  class="tabs">
+            <div class="tabs_titles">
+               <div class="tabs_title active"><button>任务指导</button></div>
+               <div class="tabs_title"><button>处理日志</button></div>
+           </div>
+           <div class="tabs_bodys">
+               <div class="tabs_body active">我是指导</div>
+               <div class="tabs_body ">我是日志</div>
+           </div>
+        </div>        
+    </div>
+</div>
+
+
+
+<div class="form formodal" id="taskform">
+    <label>ID</label><input set:value="taskform.id" placeholder="任务保存后自动生成..." disabled/>
+    <label>类别</label><input get:set:value="taskform.categry"/>
+    <label>任务名称</label><input get:set:value="taskform.taskname"/>
+    <label>激活日期</label><input get:set:value="taskform.activedate" placeholder="今天.."/>
+    <label>失效日期</label><input get:set:value="taskform.deactivedate" placeholder="无失效日期.."/>
+    <div class="clearboth"></div>
+</div>
+
+<div class="form formodal" id="taskplantform">
+    <label>ID</label><input set:value="taskplantform.id"  placeholder="任务树保存后自动生成..." disabled/>
+    <label>类别</label><input get:set:value="taskplantform.categry"/>
+    <label>任务名称</label><input get:set:value="taskplantform.taskplantname"/>
+    <label>激活日期</label><input get:set:value="taskplantform.activedate" placeholder="今天.."/>
+    <label>规则</label><textarea wrap="off" get:set:value="taskplantform.rule" placeholder="常用变量：cdate,Calendar,返回值paras=[1,2];标题格式是{$0}{$1},
+举例：
+//if(cdate.getDay()==1){validdate=true;}/*每周一*/
+//if(cdate.getDate()==1){validdate=true;}/*每月1号*/
+//if(cdate.getDay()==1 && cdate.getDate()<7){validdate=true;}/*每个月第一个周一*/
+//if(cdate.getDay()==6 && timediff(cdate,lastdateofmonth(cdate))<7){validdate=true;}/*每个月最后一个周六*/
+//paras=[cdate.getMonth()+1,cdate.getDate,cdate.getDay];//把当前的月份，日期，周递传递给标题进行显示
+"></textarea>
+    <div class="clearboth"></div>
+</div>
+
+<script>
+sm.document.ready(function(){//等文档加载完成后再执行下面的代码
+    sm.view.init().then(function(){//优先进行视图类机制的初始化，各子部件的初始化可能需要依赖这个
+        sm.tabs.init();//初始化标签控件
+        $common.watchdom({
+            "table#task tr[taskid]":function(e,el,ds){
+                //说明点击了一个task，需要在右边展示其指导
+                console.log(el.getAttribute("taskid"));
+            },
+            "table#taskplant tr[taskplantid]":function(e,el,ds){
+                //说明点击了一个task，需要在右边展示其指导
+                console.log(el.getAttribute("taskplantid"));
+            },
+        });
+        sm.menu.initrmenu();
+        sm.menu.addclickevent({
+            "tr.taskitem/注释":function(ownerel,el,text){
+
+            },
+            ".tabs_bodys .tabs_body":function(ownerel,el,text){
+                if(text==="新建任务"){
+                    sm.dialog.show("#taskform","新建任务","新建.btn_addtask,放弃");
+                } else if(text==="刷新列表"){
+                    console.log("dddddd");
+                } else if (text==="新建任务树") {
+                    sm.dialog.show("#taskplantform","新建任务树","新建.btn_addtaskplant,放弃");
+                }
+            },
+        });
+        sm.dialog.watch({
+            "放弃":function(){sm.dialog.close();},
+            ".btn_addtask":function(){
+                Calendar.newtask($common.taskform.categry,$common.taskform.taskname,$common.taskform.activedate,$common.taskform.deactivedate);
+                $common.tasklist=[];
+                $common.tasklist=Calendar.tasklist;//这个怎么办，好像不会自动触发变动....
+                sm.dialog.close();
+            },
+            ".btn_addtaskplant":function(){
+                Calendar.newtaskplant($common.taskplantform.categry,$common.taskplantform.taskplantname,$common.taskplantform.rule,$common.taskplantform.activedate);
+                $common.taskplantlist=[];
+                $common.taskplantlist=Calendar.taskplantlist;//这个怎么办，好像不会自动触发变动....
+                sm.dialog.close();
+            },
+        });
+    });
+});
+</script>

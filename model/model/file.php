@@ -55,7 +55,12 @@ class file {
         //echo "2222";
         //echo $a;
         $rs= ob_get_clean();
-        \Response::returntaskok($rs);
+        if($a) {
+            \Response::returntaskok($rs);
+        } else {
+            \Response::returntaskfail($a);
+        }
+        
     }
     public function readfile($filename){
         \Response::returntaskok(file_get_contents($filename));

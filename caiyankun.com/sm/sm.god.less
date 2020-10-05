@@ -99,6 +99,7 @@ body {
             text-decoration: none;
             &:hover {
                 background-color: @border-color;
+                cursor: default;
             }
             &.hr {
                 height: 1px;
@@ -236,6 +237,166 @@ body {
             padding: 1rem;
         }
     }
+}
+
+.tabs {
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 2px;
+    box-shadow: 0 2px 5px 0 #0000001a;
+    margin: 10px 0;
+    text-align: left!important;
+    border-color: #e6e6e6;
+    .tabs_titles {
+        width: 100%;
+        position: relative;
+        height:2rem;
+        box-sizing: border-box;
+        display: block;
+        background-color: #f2f2f2;
+        .tabs_title{
+            height: 2rem;
+            box-sizing: border-box;
+            float:left;
+            button {
+                border-top-right-radius:0.2rem;
+                border-top-left-radius:0.2rem;
+                border-bottom-left-radius:0 ;
+                border-bottom-right-radius:0 ;
+                border-left: 0;
+                border-top:0;
+            }
+            &.active {
+                button{
+                    background-color:  #fff;
+                    border-bottom-color: #fff;
+                }
+            }
+        }
+    }
+    .tabs_bodys {
+        width:100%;
+        .tabs_body{
+            width:100%;
+            min-height: 300px;
+            background-color: #fff;;
+            display:none;
+            padding-top: 1rem;
+            &.active {
+                display:block;
+            }
+        }
+    }
+}
+
+#sm_modal {
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 0.2rem;
+    box-shadow: 0 0.15rem 0.3rem 0 #0000001a;
+    border-color: #e6e6e6;
+    background-color: #fff;
+    .titlepart{
+        width:100%;
+        height:2rem;
+        position:relative;
+        display:block;
+        box-sizing: border-box;
+        background-color: #f2f2f2;
+        .title{
+            padding-left: 1rem;
+            float: left;
+            height:2rem;
+            line-height: 2rem;
+            box-sizing: border-box;
+        }
+        .xclosebutton{
+            box-sizing: border-box;
+            position: absolute;
+            display: block;
+            border-radius: 50%;
+            border: 0px solid;
+            background-color: #bbb;
+            width: 1rem;
+            height: 1rem;
+            //background-color: #ddd;
+            //margin-top:0.5 rem;
+            top:0.5rem;
+            right:0.5rem;
+            &:hover {
+                background-color: #666;
+            }
+        }
+    }
+    .bodypart{
+        text-align: center;
+        width:100%;
+        position:relative;
+        min-height: 6rem;
+        min-width: 20rem;
+        padding-top: 1rem;
+        //padding: 1rem;
+        div#sm_modal_msg{
+        }
+    }
+    .buttonpart{
+        width: 100%;
+        height:3rem;
+        position:relative;
+        display:block;
+        box-sizing: border-box;
+        button {
+            box-sizing: border-box;
+            float:right;
+            margin-top: 0.5rem;
+            margin-left: 1rem;
+            margin-right: 1rem;
+            margin-bottom: 0.5rem;
+        }
+    }
+}
+
+div.form,form {
+    label {
+        min-width: 8rem;
+        float:left;
+        clear:left;
+        text-align: right;
+        height: 2rem;
+        line-height: 2rem;
+        padding: 0rem 1rem;
+        margin: 0.5rem 0rem;
+    }
+    input {
+        float:left;
+        min-width: 25rem;
+        text-align: left;
+        height: 2rem;
+        line-height: 2rem;
+        padding: 0rem 1rem;
+        margin: 0.5rem 0rem;
+        margin-right: 4rem;
+    }
+    textarea {
+        
+        box-sizing: border-box;
+        float:left;
+        min-width: 25rem;
+        text-align: left;
+        min-height: 10rem;
+        padding: 0rem 1rem;
+        margin: 0.5rem 0rem;
+        margin-right: 4rem;
+    }
+    .clearboth{
+        display:block;
+        clear:both;
+    }
+}
+
+.formodal{
+    display: none;
+    position:absolute;
 }
 
 @container:{
