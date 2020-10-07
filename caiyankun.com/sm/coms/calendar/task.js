@@ -63,29 +63,29 @@ Calendar={
     } ,
     
     
-    task:function(category,name,activedate="",deactivedate=""){
+    
+    task:function(category,name,activedate="",deactivedate="",id=""){
         ///////
-
         var tstr=Calendar.curdate10();
-
-        //锟斤拷
         var bid=Calendar.random8();
-        ///////
-        this.id=bid+tstr;
+        if(id===""){
+            
+            this.id=bid+tstr;
+        } else {
+            this.id=id;
+        }
         this.category=category;
         this.name=name;
         this.createdate=tstr;
         this.activedate=(activedate==="")?this.createdate:activedate;
-        this.deactivedate=deactivedate;
-        this,completedate="";
-        this.info="";
+        (deactivedate==="")&&(deactivedate="2100/01/01");
+        this.deactivedate=deactivedate;//这个字段不能为空，规则：给服务器一个日期，返回的是：deactivedate>=该日期；activedate<=该日期的列表
+        this.result="";//可选的结果：空(on-going)，complete，giveup，NA
+        this.touchdate="";//如果这个日期在当前日期的前一天，属于正常，每早一天说明又多一天没有碰（严重，变红）；如果日期为空或者跟当前时间一样，说明今天处理过了，但还没处理完（持续）；如果日期比今天大，说明推迟处理了（变灰）
     },
     taskplant:function(category,name,rule,activedate){
         ///////
-
         var tstr=Calendar.curdate10();
-
-
         var bid=Calendar.random8();
         ///////
       this.id=bid+tstr;
@@ -94,38 +94,111 @@ Calendar={
       this.createdate=tstr;
       this.activedate=(activedate==="")?this.createdate:activedate;
       this.rule=rule;
+      this.fruiteddate="";
     },
     tasklog:function(id,guide,logs){
         this.id=id;
         this.guide=guide;
         this.logs=logs;
     },
+    findtask:function(id){
+        for(var i in Calendar.tasklist){
+            if(Calendar.tasklist[i].id===id){return Calendar.tasklist[i];}
+        }
+    },
+    deletetask:function(id="",startdate=""){
+        if(id===""){Calendar.tasklist=[]; return this;}
+        var maxnum=Calendar.tasklist.length;
+        for(var i=maxnum-1;i>=0;i--){
+            if(Calendar.tasklist[i].id.substr(0,18)===id){
+                if(startdate===""){
+                    Calendar.tasklist.splice(i,1);
+                } else {
+                    if(Calendar.tasklist[i].activedate>=startdate){
+                        Calendar.tasklist.splice(i,1);
+                    }
+                }
+                
+            }
+        }
+    },
+    deletetaskplant:function(id="",startdate=""){
+        if(id===""){Calendar.taskplantlist=[]; return this;}
+        var maxnum=Calendar.taskplantlist.length;
+        for(var i=maxnum-1;i>=0;i--){
+            if(Calendar.taskplantlist[i].id===id){
+                if(startdate===""){
+                    Calendar.taskplantlist.splice(i,1);
+                } else {
+                    if(Calendar.taskplantlist[i].activedate>=startdate){
+                        Calendar.taskplantlist.splice(i,1);
+                    }
+                }
+                
+            }
+        }
+    },
+    findtaskplant:function(id){
+        for(var i in Calendar.taskplantlist){
+            if(Calendar.taskplantlist[i].id===id){return Calendar.taskplantlist[i];}
+        }
+    },
+    findlog:function(id){
+        id=id.substr(0,18);
+        for(var i in Calendar.taskloglist){
+            if(Calendar.taskloglist[i].id===id){return Calendar.taskloglist[i];}
+        }
+    },
+    updatetask:function(o){
+        for(var i in Calendar.tasklist){
+            if(Calendar.tasklist[i].id===o.id){
+                var tn=Calendar.tasklist[i];
+                $$.safemerge.apply(tn,[o]);
+                Calendar.tasklist.splice(i,1,tn);
+            }
+        }
+    },
+     updatetaskplant:function(o){
+        for(var i in Calendar.taskplantlist){
+            if(Calendar.taskplantlist[i].id===o.id){
+                console.log(o);
+                console.log(Calendar.taskplantlist[i]);
+                $$.safemerge.apply(Calendar.taskplantlist[i],[o]);
+            }
+        }
+    },
     
-    newtask:function(category,name,activedate="",deactivedate="",guide=""){
-        var nt=new this.task(category,name,activedate,deactivedate);
+    newtask:function(category,name,activedate="",deactivedate="",guide="",id=""){
+        var nt=new this.task(category,name,activedate,deactivedate,id);
         this.tasklist.push(nt);
         //if(guide==="reuseguide"){return nt;}
-        var ntl=new this.tasklog(nt.id,guide,this.curdate10()+":鍒涘缓浠诲姟");
+        var ntl=new this.tasklog(nt.id.substr(0,18),guide,this.curdate10()+":创建任务");
         this.taskloglist.push(ntl);
         return nt;
     },
     newtaskplant:function(category,name,rule="",activedate="",guide=""){
         var ntp=new this.taskplant(category,name,rule,activedate);
         this.taskplantlist.push(ntp);
-        var ntpl=new this.tasklog(ntp.id,guide,this.curdate10()+":鍒涘缓浠诲姟鏍�");
+        var ntpl=new this.tasklog(ntp.id.substr(0,18),guide,this.curdate10()+":创建任务树");
         this.taskloglist.push(ntpl);
         return ntp;
     },
     fruiting:function(){
+        var rs=[];
         for (var k in this.taskplantlist){
-            this.fruitingbytp(this.taskplantlist[k]);
+            rs=rs.concat(this.fruitingbytp(this.taskplantlist[k]));
         }
+        return rs;
     },
     fruitingbytp:function(tp){
         //sdate=new Date(tp.activedate);
+        var fruiteddate=new Date(tp.fruiteddate);
         var rules=tp.rule;
         var cdate=new Date();
-        var sdate=new Date("2020/10/01");
+        var sdate=new Date();
+        
+        if(fruiteddate.getFullYear()>=sdate.getFullYear()){return [];}//如果已经执行过了，就不用重复执行了！
+        
         var edate=new Date(sdate.getFullYear()+"/12/31");
         var days=(edate-sdate)/1000/60/60/24;
         var haserror=false;
@@ -158,12 +231,13 @@ Calendar={
                 adjusttitle.push(this.updatetaskplantname(taskname,paras));
             }
         }
-        //锟斤拷匹锟斤拷锟斤拷锟斤拷锟斤拷锟�
+        //具体执行新增
         console.log(matcheddate);
+        var rs=[];
         for (var k in matcheddate){
-            var tt=this.newtask(tp.category,adjusttitle[k],matcheddate[k],'');
-            tt.id=tp.id+matcheddate[k];
+            rs.push(this.newtask(tp.category,adjusttitle[k],matcheddate[k],"","",tp.id+matcheddate[k]));
         }
+        return rs;
     },
     updatetaskplantname:function(tpname,paras){
         var rstitle=tpname;
@@ -173,11 +247,12 @@ Calendar={
         return rstitle;
     },
     updatelog:function(tid,guide,log){
+        tid=tid.substr(0,18);
         var alreadyhave=false;
         for (var k in this.taskloglist){
-            if(this.taskloglist[k]===tid){
+            if(this.taskloglist[k].id===tid){
                 this.taskloglist[k].guide=guide;
-                this.taskloglist[k].log=this.taskloglist[k].log+log;
+                this.taskloglist[k].logs=Calendar.curdate10()+":"+log+"\r\n"+ this.taskloglist[k].logs;
                 alreadyhave=true;
             }
         }

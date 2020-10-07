@@ -237,15 +237,14 @@ class Db {
             //exit(0);
             
             self::clear();
-
+          
+            
             try{
 
             	if(!empty($initvars)){ //初始化变量，如果有的话
             		$pdostate=$conn->query($sqlstr_init,PDO::FETCH_ASSOC);
                 	$pdostate->columnCount()&&($pdostate->fetchAll());
             	}
-                
-                
                 //$pdostate=$conn->query($sqlstr_proc,PDO::FETCH_NUM);
                 
                 $pdostate=$conn->query($sqlstr_proc,PDO::FETCH_ASSOC);
@@ -269,7 +268,7 @@ class Db {
                 }
             } catch (PDOException $e) { 
                 self::$error=$e->getCode();
-                self::$info=$e->getMessage();
+                self::$info=$e->getMessage().$sqlstr_proc;
                 //echo self::$error.":".self::$info;
                 return false;
             }

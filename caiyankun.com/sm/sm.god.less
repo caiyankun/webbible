@@ -26,9 +26,6 @@ body {
     line-height: 2 rem;
     color: @font-color;
     text-align: left;
-    textarea{
-        
-    }
     input,button,.icon {
         position: relative;
         box-sizing:border-box;
@@ -66,6 +63,23 @@ body {
     }
     .dropdown:hover .dropdown-menu{
         display: block;
+    }
+    textarea {
+        box-sizing: border-box;
+        border-color: #e6e6e6;
+        border-width: 1px;
+        border-style: solid;
+        background-color: #fff;
+        border-radius: 0.2rem;
+        margin: auto;
+        &.fullwidth {
+            width: 100%;
+            border-left: 0;
+            border-right:0;
+            padding: 0.5rem;
+            border-radius: 0rem;
+            background-color: #f4f4f4;
+        }
     }
     .dropdown-menu{
         display: none;
@@ -378,7 +392,6 @@ div.form,form {
         margin-right: 4rem;
     }
     textarea {
-        
         box-sizing: border-box;
         float:left;
         min-width: 25rem;

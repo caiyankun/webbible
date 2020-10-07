@@ -9,14 +9,15 @@
                <div class="tabs_body active" rmenu="新建任务,刷新列表">
                    <table id="task">
                        <tr set:hide="{{$tasklist}}"><td>天哪，您没有任何任务哦！！！</td></tr>
-                       <tr for:="(_i,_k,_v) in tasklist" class="taskitem" rmenu="复制任务,删除任务,hr,推迟到明天,任务失效,任务完成" set:display="{{$tasklist}}" set:taskid="{{$_v.id}}"><td>{{$_v.name}}</td></tr>
+                       <tr for:="(_i,_k,_v) in tasklist" class="taskitem" rmenu="编辑任务,删除任务" set:display="{{$tasklist}}" set:taskid="{{$_v.id}}"><td>{{$_v.name}}</td></tr>
                    </table>
                </div>
                <div class="tabs_body "  rmenu="新建任务树,刷新列表">
                    <table id="taskplant">
                        <tr set:hide="{{$taskplantlist}}" ><td>天哪，您还没有创建任何周期任务哦！！！</td></tr>
-                        <tr for:="(_i,_k,_v) in taskplantlist" class="taskplantitem"  rmenu="复制任务树,删除任务树,hr,任务失效" set:display="{{$taskplantlist}}" set:taskplantid="{{$_v.id}}"><td>{{$_v.name}}</td></tr>
+                        <tr for:="(_i,_k,_v) in taskplantlist" class="taskplantitem"  rmenu="编辑任务树,删除任务树" set:display="{{$taskplantlist}}" set:taskplantid="{{$_v.id}}"><td>{{$_v.name}}</td></tr>
                    </table>
+                   <button class="btn_fruiting" style="display:none;">任务树收获</button>
                </div>
            </div>
         </div>
@@ -28,8 +29,15 @@
                <div class="tabs_title"><button>处理日志</button></div>
            </div>
            <div class="tabs_bodys">
-               <div class="tabs_body active">我是指导</div>
-               <div class="tabs_body ">我是日志</div>
+               <div class="tabs_body active" >
+                   <div class="form">
+                   <textarea class="fullwidth" wrap="off" set:theid="guide.id" get:set:value="guide.guide" style="min-height: 16rem;" placeholder="任务怎么做,写点指导吧..."></textarea>
+                   <button>完成任务</button><button>任务失效</button><button>明天继续</button><button style="float:right" class="btn_savelogs">更新进展</button>
+                   <textarea class="fullwidth" wrap="off" get:set:value="guide.process" style="min-height: 8rem;" placeholder="说两句吧..."></textarea>
+                   <div class="clearboth" ></div>
+                   </div>
+               </div>
+               <div class="tabs_body " set:text="guide.logs"></div>
            </div>
         </div>        
     </div>
@@ -39,26 +47,19 @@
 
 <div class="form formodal" id="taskform">
     <label>ID</label><input set:value="taskform.id" placeholder="任务保存后自动生成..." disabled/>
-    <label>类别</label><input get:set:value="taskform.categry"/>
-    <label>任务名称</label><input get:set:value="taskform.taskname"/>
+    <label>类别</label><input get:set:value="taskform.category"/>
+    <label>任务名称</label><input get:set:value="taskform.name"/>
     <label>激活日期</label><input get:set:value="taskform.activedate" placeholder="今天.."/>
-    <label>失效日期</label><input get:set:value="taskform.deactivedate" placeholder="无失效日期.."/>
+    <label>失效日期</label><input get:set:value="taskform.deactivedate" placeholder="2100/01/01"/>
     <div class="clearboth"></div>
 </div>
 
 <div class="form formodal" id="taskplantform">
     <label>ID</label><input set:value="taskplantform.id"  placeholder="任务树保存后自动生成..." disabled/>
-    <label>类别</label><input get:set:value="taskplantform.categry"/>
-    <label>任务名称</label><input get:set:value="taskplantform.taskplantname"/>
+    <label>类别</label><input get:set:value="taskplantform.category"/>
+    <label>任务名称</label><input get:set:value="taskplantform.name"/>
     <label>激活日期</label><input get:set:value="taskplantform.activedate" placeholder="今天.."/>
-    <label>规则</label><textarea wrap="off" get:set:value="taskplantform.rule" placeholder="常用变量：cdate,Calendar,返回值paras=[1,2];标题格式是{$0}{$1},
-举例：
-//if(cdate.getDay()==1){validdate=true;}/*每周一*/
-//if(cdate.getDate()==1){validdate=true;}/*每月1号*/
-//if(cdate.getDay()==1 && cdate.getDate()<7){validdate=true;}/*每个月第一个周一*/
-//if(cdate.getDay()==6 && timediff(cdate,lastdateofmonth(cdate))<7){validdate=true;}/*每个月最后一个周六*/
-//paras=[cdate.getMonth()+1,cdate.getDate,cdate.getDay];//把当前的月份，日期，周递传递给标题进行显示
-"></textarea>
+    <label>规则</label><textarea wrap="off" get:set:value="taskplantform.rule" placeholder="常用变量：cdate,Calendar,返回值paras=[1,2];标题格式是{$0}{$1},"> </textarea>
     <div class="clearboth"></div>
 </div>
 
@@ -66,27 +67,126 @@
 sm.document.ready(function(){//等文档加载完成后再执行下面的代码
     sm.view.init().then(function(){//优先进行视图类机制的初始化，各子部件的初始化可能需要依赖这个
         sm.tabs.init();//初始化标签控件
+        Calendar.ruletips="//常用变量：cdate,Calendar,返回值paras=[1,2];标题格式是{$0}{$1},\r\n//举例：\r\n//if(cdate.getDay()==1){validdate=true;}/*每周一*/\r\n//if(cdate.getDate()==1){validdate=true;}/*每月1号*/\r\n//if(cdate.getDay()==1 && cdate.getDate()<7){validdate=true;}/*每个月第一个周一*/\r\n//if(cdate.getDay()==6 && timediff(cdate,lastdateofmonth(cdate))<7){validdate=true;}/*每个月最后一个周六*/\r\n//paras=[cdate.getMonth()+1,cdate.getDate,cdate.getDay];//把当前的月份，日期，周递传递给标题进行显示\r\n ";
+        $common.method({
+            dofruiting:function(){
+                var taskbackup=Calendar.tasklist;
+                var ntls=Calendar.fruiting();
+                Calendar.tasklist=taskbackup;
+                var multiparas=[];
+                if(ntls.length<1){return false;}
+                ntls&&ntls.forEach(function(o){
+                    var id=o.id;
+                    var paras=sm.db.toparastr(o,{id:"",name:"",category:"",createdate:"",activedate:"",deactivedate:""});
+                    multiparas.push([id,paras]);
+                });
+                sm.ajax.url("db/callproc.func").multicallproc("caiyankun.task_update",multiparas).then(function(d){
+                    alert("添加任务成功:"+d);
+                    //当任务添加成功后，要将taskplant的fruiteddate设置为当前时间
+                    sm.ajax.url("db/callproc.func").callproc("caiyankun.taskplant_setfruitdate",[Calendar.curdate10()]).then(function(d){
+                        $common.pullpagedata();
+                    });
+                },function(d){
+                    alert("添加任务失败:"+d);
+                });
+                return true;
+            },
+            pullpagedata:function(){
+               //开始从远程查找并初始化Task，TaskPlant列表: 
+               //过程：先获取Taskplantlist，执行Fruiting，然后获取Tasklist
+               sm.ajax.url("db/callproc.func").callproc("caiyankun.taskplant_list").then(function(d){
+                    //Calendar.taskplantlist=sm.data.smdata(d).objarray();
+                    Calendar.taskplantlist=sm.data.smdata(d).tabledata();
+                    if(!$common.dofruiting()){
+                        $common.taskplantlist=[];
+                        $common.taskplantlist=Calendar.taskplantlist;//刷新任务树显示
+                        sm.ajax.url("db/callproc.func").callproc("caiyankun.task_list",[Calendar.curdate10()]).then(function(d){
+                            //Calendar.tasklist=sm.data.smdata(d).objarray();
+                            Calendar.tasklist=sm.data.smdata(d).tabledata();
+                            $common.tasklist=[];
+                            $common.tasklist=Calendar.tasklist;//刷新任务显示
+                        });
+                    }
+                });
+            },
+        });
         $common.watchdom({
             "table#task tr[taskid]":function(e,el,ds){
                 //说明点击了一个task，需要在右边展示其指导
                 console.log(el.getAttribute("taskid"));
+                console.log(Calendar.findlog(el.getAttribute("taskid")));
+                $$.safemerge.apply($common.guide,[Calendar.findlog(el.getAttribute("taskid"))]);
+                //console.log(el.getAttribute("taskid"));
             },
             "table#taskplant tr[taskplantid]":function(e,el,ds){
-                //说明点击了一个task，需要在右边展示其指导
-                console.log(el.getAttribute("taskplantid"));
+                //说明点击了一个taskplant，需要在右边展示其指导
+                $$.safemerge.apply($common.guide,[Calendar.findlog(el.getAttribute("taskplantid"))]);
+            },
+            ".btn_savelogs":function(e,el,ds){
+                Calendar.updatelog($common.guide.id,$common.guide.guide,$common.guide.process?$common.guide.process:"更新了指导");
+                $common.guide.process="";
+                $$.safemerge.apply($common.guide,[Calendar.findlog($common.guide.id)]);
+            },
+            ".btn_fruiting":function(e,el,ds){
+                $common.dofruiting();
             },
         });
         sm.menu.initrmenu();
         sm.menu.addclickevent({
             "tr.taskitem/注释":function(ownerel,el,text){
-
+                if (text==="编辑任务"){
+                    var taskid=ownerel.getAttribute("taskid");
+                    var curtask=Calendar.findtask(taskid);
+                    /*$common.taskform.id=curtask.id;
+                    $common.taskform.category=curtask.category;
+                    $common.taskform.name=curtask.name;
+                    $common.taskform.activedate=curtask.activedate;
+                    $common.taskform.deactivedate=curtask.deactivedate;*/
+                    $$.safemerge.apply($common.taskform,[curtask]);
+                    sm.dialog.show("#taskform","编辑任务","保存.btn_savetask,放弃");
+                    
+                } else if(text==="删除任务"){
+                    var taskid=ownerel.getAttribute("taskid");
+                    sm.ajax.url("db/callproc.func").callproc("caiyankun.task_delete",[taskid]).then(function(d){
+                        Calendar.deletetask(taskid);
+                        $common.tasklist=[];
+                        $common.tasklist=Calendar.tasklist;
+                    },function(d){
+                        alert("删除任务失败:"+d);
+                    });
+                }
+            },
+            "tr.taskplantitem/注释":function(ownerel,el,text){
+                if (text==="编辑任务树"){
+                    var taskplantid=ownerel.getAttribute("taskplantid");
+                    var curtaskplant=Calendar.findtaskplant(taskplantid);
+                    /*$common.taskplantform.id=curtaskplant.id;
+                    $common.taskplantform.category=curtaskplant.category;
+                    $common.taskplantform.name=curtaskplant.name;
+                    $common.taskplantform.activedate=curtaskplant.activedate;
+                    $common.taskplantform.rule=curtaskplant.rule;*/
+                    $$.safemerge.apply($common.taskplantform,[curtaskplant]);
+                    sm.dialog.show("#taskplantform","编辑任务树","保存.btn_savetaskplant,放弃");
+                }  else if(text==="删除任务树"){
+                    var taskid=ownerel.getAttribute("taskplantid");
+                    sm.ajax.url("db/callproc.func").callproc("taskplant_delete",[taskid]).then(function(d){
+                        Calendar.deletetaskplant(taskid);
+                        $common.taskplantlist=[];
+                        $common.taskplantlist=Calendar.taskplantlist;
+                        $common.pullpagedata();//如果有更新任务，会自动刷新列表的
+                    },function(d){
+                        alert("删除任务树失败:"+d);
+                    });
+                }
             },
             ".tabs_bodys .tabs_body":function(ownerel,el,text){
                 if(text==="新建任务"){
+                    $$.safemerge.apply($common.taskform,[{id:"",name:"",category:"",activedate:"",deactivedate:""}]);
                     sm.dialog.show("#taskform","新建任务","新建.btn_addtask,放弃");
                 } else if(text==="刷新列表"){
                     console.log("dddddd");
                 } else if (text==="新建任务树") {
+                    $$.safemerge.apply($common.taskplantform,[{id:"",name:"",category:"",activedate:"",rule:Calendar.ruletips}]);
                     sm.dialog.show("#taskplantform","新建任务树","新建.btn_addtaskplant,放弃");
                 }
             },
@@ -94,18 +194,66 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
         sm.dialog.watch({
             "放弃":function(){sm.dialog.close();},
             ".btn_addtask":function(){
-                Calendar.newtask($common.taskform.categry,$common.taskform.taskname,$common.taskform.activedate,$common.taskform.deactivedate);
-                $common.tasklist=[];
-                $common.tasklist=Calendar.tasklist;//这个怎么办，好像不会自动触发变动....
-                sm.dialog.close();
+                //先进行远程的更新，成功了再进行本地的更新
+                var nt= Calendar.newtask($common.taskform.category,$common.taskform.name,$common.taskform.activedate,$common.taskform.deactivedate);
+                var id=nt.id;
+                var paras=sm.db.toparastr(nt,{id:"",category:"",name:"",createdate:nt.createdate,activedate:"",deactivedate:""});
+                sm.ajax.callproc("caiyankun.task_update",[id,paras]).then(function(d){
+                    $common.tasklist=[];
+                    $common.tasklist=Calendar.tasklist;//这个怎么办，好像不会自动触发变动....
+                    sm.dialog.close();
+                    $$.safemerge.apply($common.taskform,[{id:"",name:"",category:"",activedate:"",deactivedate:""}]);
+                },function(d){
+                    alert("有错误发生"+d);
+                });
             },
             ".btn_addtaskplant":function(){
-                Calendar.newtaskplant($common.taskplantform.categry,$common.taskplantform.taskplantname,$common.taskplantform.rule,$common.taskplantform.activedate);
-                $common.taskplantlist=[];
-                $common.taskplantlist=Calendar.taskplantlist;//这个怎么办，好像不会自动触发变动....
-                sm.dialog.close();
+                var nt=Calendar.newtaskplant($common.taskplantform.category,$common.taskplantform.name,$common.taskplantform.rule,$common.taskplantform.activedate);
+                var id=nt.id;
+                var paras=sm.db.toparastr(nt,{id:"",category:"",name:"",createdate:nt.createdate,activedate:"",rule:""});
+                sm.ajax.callproc("caiyankun.taskplant_update",[id,paras]).then(function(d){
+                    $common.taskplantlist=[];
+                    $common.taskplantlist=Calendar.taskplantlist;//这个怎么办，好像不会自动触发变动....
+                    sm.dialog.close();
+                    $$.safemerge.apply($common.taskplantform,[{id:"",name:"",category:"",activedate:"",rule:""}]);
+                    $common.pullpagedata();//如果有更新任务，会自动刷新列表的
+                },function(d){
+                    alert("有错误发生"+d);
+                });  
+            },
+            ".btn_savetask":function(){
+                //先进行远程的更新，成功了再进行本地的更新
+                var id=$common.taskform.id;
+                var paras=sm.db.toparastr($common.taskform,{id:"",category:"",name:"",activedate:"",deactivedate:""});
+                sm.ajax.callproc("caiyankun.task_update",[id,paras]).then(function(d){
+                    Calendar.updatetask($common.taskform);
+                    $common.tasklist=[];
+                    $common.tasklist=Calendar.tasklist;//这个怎么办，好像不会自动触发变动....
+                    sm.dialog.close();
+                    $$.safemerge.apply($common.taskform,[{id:"",name:"",category:"",activedate:"",deactivedate:""}]);
+                },function(d){
+                    sm.dialog.msg("有错误发生！！！"+d);
+                });
+                
+            },
+            ".btn_savetaskplant":function(){
+                var id=$common.taskplantform.id;//当执行任务树的更改时的时候确保把friuteddate清空
+                var paras=sm.db.toparastr($common.taskplantform,{id:"",category:"",name:"",activedate:"",rule:"",fruiteddate:""});
+                sm.ajax.callproc("caiyankun.taskplant_update",[id,paras]).then(function(d){
+                    Calendar.updatetaskplant($common.taskplantform);
+                    $common.taskplantlist=[];
+                    $common.taskplantlist=Calendar.taskplantlist;//这个怎么办，好像不会自动触发变动....
+                    sm.dialog.close();
+                    $$.safemerge.apply($common.taskplantform,[{id:"",name:"",category:"",activedate:"",rule:""}]);
+                    $common.pullpagedata();//如果有更新任务，会自动刷新列表的
+                },function(d){
+                    sm.dialog.msg("有错误发生！！！"+d);
+                });
             },
         });
+        
+        //开始从远程查找并初始化Task，TaskPlant列表；
+        $common.pullpagedata();
     });
 });
 </script>

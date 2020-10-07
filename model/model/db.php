@@ -12,6 +12,7 @@ class db {
         }
         return $p;
     }
+    
     public function proc($procname,$paras=[],$id=0,$contents="",$witch="",$filterinfo="",$orderinfo="",$page=1,$length=100,$smproc=true,$key='',$value='',$option='',$multiset="",$type="jsonarray"){
         //校验权限，后续扩展为权限表形式
         //\User::checkright(800)||\Response::returntaskfail("您还未登录，请先登录！！",2,"您还未登录，请先登录！");
@@ -46,14 +47,55 @@ class db {
             }
         } 
     }
-    public function test($name,$paras=[]){
+    public function test($procname,$paras=[]){
+        $rs=json_decode($paras);
+        
+        var_dump(json_decode($paras));
         if(empty($paras)){
             $rs=[];
         } else{
+            
             $rs= is_array($paras)?$paras:explode(",", $paras);
+            
         }
-        $arr= explode(",", $paras);
-        var_dump($arr);
+        //$arr= explode(",", $paras);
+        
+        
+    }
+    public function callproc($procname,$paras=[]){
+        $parasarray=json_decode($paras);
+        if(is_array($parasarray)){
+        } else{
+            $parasarray= explode(",", $paras);
+        }
+        
+        if(!\Db::simplecall($procname, $parasarray)){
+            \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
+        } else {
+            \Response::returntaskok(\Db::cubedatawithtitle());
+        }
+    }
+    public function manycallproc($procname,$paras=[]){
+        $parasarray=json_decode($paras);
+        if(is_array($parasarray)){
+        } else{
+            $parasarray= [explode(",", $paras)];
+        }
+        $error=false;
+        $totalinfo="";
+        $ii=1;
+        foreach($parasarray as $k => $v){
+            if(!\Db::simplecall($procname, $v)){
+                $error=true;
+            } 
+            $totalinfo=$ii.$totalinfo.\Db::$info;
+            $ii++;
+        }
+        if($error){
+            \Response::returntaskfail("存储过程调用失败！",\Db::$error,$totalinfo);
+        } else {
+            \Response::returntaskok(\Db::cubedatawithtitle());
+        }
     }
     public function detail($procname,$id,$witch="",$option=""){
         if(\Db::simplecall($procname, [$id,$witch, \User::uid(),$option])){

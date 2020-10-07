@@ -168,7 +168,31 @@ God.safemerge=function(o){for (x in o) {this.hasOwnProperty(x)&&(this[x]=o[x]);}
 }
 //----------------God.js Core 结束：sm及原型定义，链式操作--------------------
 if (true){
-
+if (!Array.prototype.forEach) {
+	Array.prototype.forEach = function(callback, thisArg) {
+		var T, k;
+		if (this == null) {
+			throw new TypeError(" this is null or not defined");
+		}
+		var O = Object(this);
+		var len = O.length >>> 0; // Hack to convert O.length to a UInt32
+		if ({}.toString.call(callback) != "[object Function]") {
+			throw new TypeError(callback + " is not a function");
+		}
+		if (thisArg) {
+			T = thisArg;
+		}
+		k = 0;
+		while (k < len) {
+			var kValue;
+			if (k in O) {
+				kValue = O[k];
+				callback.call(T, kValue, k, O);
+			}
+			k++;
+		}
+	};
+}//让IE拥有js数组的forEach功能
 (function () {
     var ie = !!(window.attachEvent && !window.opera);
     var wk = /webkit\/(\d+)/i.test(navigator.userAgent) && (RegExp.$1 < 525);
@@ -466,6 +490,29 @@ smpost:function(data,url,async){
     arguments.length>1&&(this.url(url));
     arguments.length>0&&(this.data(data));
     return this.type("POST").clearstat().doxhr({},true);
+},//这个POST的返回值是对返回的值按照交互的规则进行解析，直接解析出有用的数据！
+callproc:function(procname,paras=[]){
+    console.log(JSON.stringify(paras));
+    return this.smpost({procname:procname,paras:JSON.stringify(paras)});
+},//这个POST的返回值是对返回的值按照交互的规则进行解析，直接解析出有用的数据！
+multicallproc:function(procname,paras=[[]],count=0){
+    var me=this;
+    if(paras.length===0){
+            return new Promise(function(resolve,reject){return resolve("Perfect:"+count+"个循环执行了！");});
+    } else {
+        var realparas=paras.shift();
+        return new Promise(function(resolve,reject){
+           sm.ajax.url("db/callproc.func").callproc(procname,realparas).then(function(d){
+               me.multicallproc(procname,paras,++count).then(function(d){
+                   return resolve(d);
+               },function(d){
+                   return reject(d);
+               })
+           },function(d){
+               return reject(d);
+           })
+        });
+    }
 },//这个POST的返回值是对返回的值按照交互的规则进行解析，直接解析出有用的数据！
 doxhr:function(paraobj,smfcheck=false){
     var me=this;
@@ -1609,6 +1656,9 @@ getattrvalue:function (el,attr){
         case 'removewhen':
             //无意义
             break;
+        case 'text':
+            return el.innerText;
+            break;
         case '':
             break;
         default:
@@ -1621,6 +1671,9 @@ setattrvalue:function (el,attr,value){
     switch(attr){
         case 'value':
             el.value=value;
+            break;
+        case 'text':
+            el.innerText=value;
             break;
         case 'hide':
             //console.log("enter display:"+value);
@@ -2010,6 +2063,19 @@ God.coms("data").extendproto({
     arraydata:function(eq=0){
         return this.setup().d[eq][0];
     },
+    objarray:function(){
+        var vs=this.tabledata();
+        var ks=this.def();
+        var rs=[];
+        for(var i in vs){
+            var item={};
+            for (var k in ks){
+                item[ks[k]]=vs[i][k];
+            }
+            rs.push(item);
+        }
+        return rs;
+    },//这个只适合只有一组表格返回的情况，作用是将一个不含表头的二维表转化为一个对象数组
     vardata:function(eq=0){
         return this.setup().d[eq][0][0];
     },
@@ -2106,6 +2172,22 @@ God.coms("db").extend({
         var furl=this.setup().url+this.setup().db+"."+this.setup().tb+"_set";
         console.log(furl);
         return sm.ajax.url(furl).smpost({key:key,value:value});
+    },
+    toparastr:function(obj,modelobj=""){
+        var rs="";
+        if(modelobj===""){
+            modelobj=obj;
+        } else {
+            $$.safemerge.apply(modelobj,[obj]);
+        }
+        Object.keys(modelobj).forEach(function(k){
+            if(rs===""){
+                rs=k+'="'+modelobj[k]+'"'
+            } else {
+                rs=rs+","+k+'="'+modelobj[k]+'"';
+            }
+        });
+        return rs;
     },
     get:function(key){
         var furl=this.setup().url+this.setup().db+"."+this.setup().tb+"_get";
