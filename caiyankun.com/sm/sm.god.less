@@ -369,7 +369,27 @@ body {
         }
     }
 }
-
+#task {
+    tr.taskitem {
+        color:blue;
+        &.finished {
+            color:#999;
+            text-decoration:line-through;
+        }
+        &.delayed {
+            color:red;
+        }
+        &.postponed {
+            color:#bbb;
+        }
+        &.missed {
+            color: #ddd;
+        }
+        &.touching {
+            color: #888;
+        }
+    }
+}
 div.form,form {
     label {
         min-width: 8rem;
