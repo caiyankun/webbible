@@ -32,7 +32,7 @@
                <div class="tabs_body active" >
                    <div class="form">
                    <textarea class="fullwidth" wrap="off" set:theid="guide.id" get:set:value="guide.guide" style="min-height: 16rem;" placeholder="任务怎么做,写点指导吧..."></textarea>
-                   <button>完成任务</button><button>任务失效</button><button>明天继续</button><button style="float:right" class="btn_savelogs">更新进展</button>
+                   <button class="btn_finishtask">完成任务</button><button class="btn_misstask">任务失效</button><button class="btn_postpone">明天继续</button><button style="float:right" class="btn_savelogs">更新进展</button>
                    <textarea class="fullwidth" wrap="off" get:set:value="guide.process" style="min-height: 8rem;" placeholder="说两句吧..."></textarea>
                    <div class="clearboth" ></div>
                    </div>
@@ -113,19 +113,71 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
         $common.watchdom({
             "table#task tr[taskid]":function(e,el,ds){
                 //说明点击了一个task，需要在右边展示其指导
-                console.log(el.getAttribute("taskid"));
-                console.log(Calendar.findlog(el.getAttribute("taskid")));
-                $$.safemerge.apply($common.guide,[Calendar.findlog(el.getAttribute("taskid"))]);
+                var tid=el.getAttribute("taskid");
+                $common.guide.id=tid;
+                sm.ajax.url("db/callproc.func").callproc("caiyankun.tasklog_detail",[tid]).then(function(d){
+                    var thelog=sm.data.smdata(d).tabledata()[0];
+                    console.log(thelog);
+                    if(thelog&&thelog.id){
+                        Calendar.updatelog(thelog.id,thelog.guide,thelog.logs,false);
+                        $$.safemerge.apply($common.guide,[Calendar.findlog(tid)]);
+                    }
+                },function(d){
+                    alert("获取任务指导失败！");
+                });
                 //console.log(el.getAttribute("taskid"));
             },
             "table#taskplant tr[taskplantid]":function(e,el,ds){
                 //说明点击了一个taskplant，需要在右边展示其指导
-                $$.safemerge.apply($common.guide,[Calendar.findlog(el.getAttribute("taskplantid"))]);
+                var tid=el.getAttribute("taskplantid");
+                $common.guide.id=tid;
+                sm.ajax.url("db/callproc.func").callproc("caiyankun.tasklog_detail",[tid]).then(function(d){
+                    var thelog=sm.data.smdata(d).tabledata()[0];
+                    if(thelog&&thelog.id){
+                        Calendar.updatelog(thelog.id,thelog.guide,thelog.logs,false);
+                        $$.safemerge.apply($common.guide,[Calendar.findlog(tid)]);
+                    }
+                },function(d){
+                    alert("获取任务指导失败！"+d);
+                });
             },
             ".btn_savelogs":function(e,el,ds){
-                Calendar.updatelog($common.guide.id,$common.guide.guide,$common.guide.process?$common.guide.process:"更新了指导");
-                $common.guide.process="";
-                $$.safemerge.apply($common.guide,[Calendar.findlog($common.guide.id)]);
+                sm.ajax.url("db/callproc.func").callproc("caiyankun.tasklog_update",[$common.guide.id,$common.guide.guide,$common.guide.process?$common.guide.process:"更新了指导"]).then(function(d){
+                   Calendar.updatelog($common.guide.id,$common.guide.guide,$common.guide.process?$common.guide.process:"更新了指导");
+                    $common.guide.process="";
+                    $$.safemerge.apply($common.guide,[Calendar.findlog($common.guide.id)]);
+                },function(d){
+                    alert("保存任务指导失败！"+d);
+                });
+                
+            },
+            ".btn_finishtask":function(e,el,ds){
+                sm.ajax.url("db/callproc.func").callproc("caiyankun.tasklog_update",[$common.guide.id,$common.guide.guide,$common.guide.process?$common.guide.process:"更新了指导"]).then(function(d){
+                   Calendar.updatelog($common.guide.id,$common.guide.guide,$common.guide.process?$common.guide.process:"更新了指导");
+                    $common.guide.process="";
+                    $$.safemerge.apply($common.guide,[Calendar.findlog($common.guide.id)]);
+                    sm.ajax.url("db/callproc.func").callproc("caiyankun.task_close",[$common.guide.id,'finished']).then(function(d){
+                        alert("恭喜您完成了一个任务！");
+                    },function(d){
+                        alert("啊哦，似乎任务不太想让你关闭呢！"+d);
+                    });
+                },function(d){
+                    alert("保存任务指导失败！");
+                });
+            },
+            ".btn_misstask":function(e,el,ds){
+                sm.ajax.url("db/callproc.func").callproc("caiyankun.task_close",[$common.guide.id,'missed']).then(function(d){
+                    alert("太遗憾了，您错过了一个任务！");
+                },function(d){
+                    alert("啊哦，似乎任务不太想让你错过呢！"+d);
+                });
+            },
+            ".btn_postpone":function(e,el,ds){
+                sm.ajax.url("db/callproc.func").callproc("caiyankun.task_postpone",[$common.guide.id,'']).then(function(d){
+                    alert("兄弟，明日复明日明日何其多啊！");
+                },function(d){
+                    alert("啊哦，似乎任务不太想让你推迟呢！");
+                });
             },
             ".btn_fruiting":function(e,el,ds){
                 $common.dofruiting();

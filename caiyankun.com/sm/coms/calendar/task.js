@@ -246,13 +246,18 @@ Calendar={
         }
         return rstitle;
     },
-    updatelog:function(tid,guide,log){
+    updatelog:function(tid,guide,log,addon=true){
         tid=tid.substr(0,18);
         var alreadyhave=false;
         for (var k in this.taskloglist){
             if(this.taskloglist[k].id===tid){
                 this.taskloglist[k].guide=guide;
-                this.taskloglist[k].logs=Calendar.curdate10()+":"+log+"\r\n"+ this.taskloglist[k].logs;
+                if(addon){
+                    this.taskloglist[k].logs=Calendar.curdate10()+":"+log+"\r\n"+ this.taskloglist[k].logs;
+                } else {
+                    this.taskloglist[k].logs=log;
+                }
+                
                 alreadyhave=true;
             }
         }
