@@ -242,7 +242,7 @@ Calendar={
     updatetaskplantname:function(tpname,paras){
         var rstitle=tpname;
         for(var k in paras) {
-            rstitle=rstitle.replace("{$"+k+"}",paras[k]);
+            rstitle=rstitle.replace("--"+k+"--",paras[k]);
         }
         return rstitle;
     },

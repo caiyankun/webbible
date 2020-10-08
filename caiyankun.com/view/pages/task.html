@@ -67,7 +67,7 @@
 sm.document.ready(function(){//等文档加载完成后再执行下面的代码
     sm.view.init().then(function(){//优先进行视图类机制的初始化，各子部件的初始化可能需要依赖这个
         sm.tabs.init();//初始化标签控件
-        Calendar.ruletips="//常用变量：cdate,Calendar,返回值paras=[1,2];标题格式是{$0}{$1},\r\n//举例：\r\n//if(cdate.getDay()==1){validdate=true;}/*每周一*/\r\n//if(cdate.getDate()==1){validdate=true;}/*每月1号*/\r\n//if(cdate.getDay()==1 && cdate.getDate()<7){validdate=true;}/*每个月第一个周一*/\r\n//if(cdate.getDay()==6 && timediff(cdate,lastdateofmonth(cdate))<7){validdate=true;}/*每个月最后一个周六*/\r\n//paras=[cdate.getMonth()+1,cdate.getDate,cdate.getDay];//把当前的月份，日期，周递传递给标题进行显示\r\n ";
+        Calendar.ruletips="//常用变量：cdate,Calendar,返回值paras=[1,2];标题格式是--0-- --1--,\r\n//举例：\r\n//if(cdate.getDay()==1){validdate=true;}/*每周一*/\r\n//if(cdate.getDate()==1){validdate=true;}/*每月1号*/\r\n//if(cdate.getDay()==1 && cdate.getDate()<7){validdate=true;}/*每个月第一个周一*/\r\n//if(cdate.getDay()==6 && timediff(cdate,lastdateofmonth(cdate))<7){validdate=true;}/*每个月最后一个周六*/\r\n//paras=[cdate.getMonth()+1,cdate.getDate,cdate.getDay];//把当前的月份，日期，周递传递给标题进行显示\r\n ";
         $common.method({
             refreshtasklistclass:function(){
                 var tls=document.querySelectorAll("#task tr.taskitem[taskid]");
@@ -329,6 +329,8 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
             ".btn_savetaskplant":function(){
                 var id=$common.taskplantform.id;//当执行任务树的更改时的时候确保把friuteddate清空
                 var paras=sm.db.toparastr($common.taskplantform,{id:"",category:"",name:"",activedate:"",rule:"",fruiteddate:""});
+                console.log($common.taskplantform.id);
+                console.log("------"+paras+"------");
                 sm.ajax.callproc("caiyankun.taskplant_update",[id,paras]).then(function(d){
                     Calendar.updatetaskplant($common.taskplantform);
                     $common.taskplantlist=[];
