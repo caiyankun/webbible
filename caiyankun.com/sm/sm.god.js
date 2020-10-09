@@ -388,6 +388,14 @@ getElementTop:function (element){
     return actualTop;
     },//获取一个元素的上部定位
 random:function(length){return Math.floor((Math.random()+1)*10**(length-1)).toString();},
+codequot:function(str){
+    var rs=str.replace(/\"/g,"#quot;");
+    rs=rs.replace(/\'/g,"#quot;");
+    return rs;
+},
+decodequot:function(str){
+    return str.replace(/#quot;/g,'"');
+},
 dbaddstr:function(row){
     var rs="";
     for(var k in row){
@@ -492,7 +500,7 @@ smpost:function(data,url,async){
     return this.type("POST").clearstat().doxhr({},true);
 },//这个POST的返回值是对返回的值按照交互的规则进行解析，直接解析出有用的数据！
 callproc:function(procname,paras=[]){
-    console.log(JSON.stringify(paras));
+    //console.log(JSON.stringify(paras));
     return this.smpost({procname:procname,paras:JSON.stringify(paras)});
 },//这个POST的返回值是对返回的值按照交互的规则进行解析，直接解析出有用的数据！
 multicallproc:function(procname,paras=[[]],count=0){
@@ -554,7 +562,7 @@ doxhr:function(paraobj,smfcheck=false){
         xhr.open(me.setup().type,me.setup().url,me.setup().async);    //建立连接，参数一：发送方式，二：请求地址，三：是否异步，true为异步
         xhr.setRequestHeader('Content-type','application/x-www-form-urlencoded');    //可有可无
         //post参数要转换格式啊-_-!!!
-        console.log(me.formatdata(data));
+        //console.log(me.formatdata(data));
         //console.log(me.setup());
       
         xhr.send(me.formatdata(data)); 
@@ -965,8 +973,8 @@ method:{//下面是界面组件的通用方法
                 (typeof me._group[t]=="undefined")&&(me._group[t]={});
                 me._group[t][tt]=sm.view.getattrvalue(item,gby);
                 window.aaa=item;
-                console.log(tt+"--"+gby);
-                console.log(item);
+                //console.log(tt+"--"+gby);
+                //console.log(item);
             }
         });
         if(which=="") {return this._group;}

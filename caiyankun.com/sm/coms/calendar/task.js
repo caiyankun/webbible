@@ -161,8 +161,8 @@ Calendar={
      updatetaskplant:function(o){
         for(var i in Calendar.taskplantlist){
             if(Calendar.taskplantlist[i].id===o.id){
-                console.log(o);
-                console.log(Calendar.taskplantlist[i]);
+                //console.log(o);
+                //console.log(Calendar.taskplantlist[i]);
                 $$.safemerge.apply(Calendar.taskplantlist[i],[o]);
             }
         }
@@ -232,7 +232,7 @@ Calendar={
             }
         }
         //具体执行新增
-        console.log(matcheddate);
+        //console.log(matcheddate);
         var rs=[];
         for (var k in matcheddate){
             rs.push(this.newtask(tp.category,adjusttitle[k],matcheddate[k],"","",tp.id+matcheddate[k]));

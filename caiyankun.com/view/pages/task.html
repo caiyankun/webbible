@@ -29,13 +29,17 @@
                <div class="tabs_title"><button>处理日志</button></div>
            </div>
            <div class="tabs_bodys">
-               <div class="tabs_body active" >
-                   <div class="form">
+               <div class="tabs_body active" style="padding-bottom: 0rem;" >
+                   <div class="form" style="padding-bottom: 0rem;">
                    <textarea class="fullwidth" wrap="off" set:theid="guide.id" get:set:value="guide.guide" style="min-height: 16rem;" placeholder="任务怎么做,写点指导吧..."></textarea>
                    <button class="btn_finishtask">完成任务</button><button class="btn_misstask">任务失效</button><button class="btn_postpone">明天继续</button><button style="float:right" class="btn_savelogs">更新进展</button>
                    <textarea class="fullwidth" wrap="off" get:set:value="guide.process" style="min-height: 8rem;" placeholder="说两句吧..."></textarea>
+                   <div class="clearboth" ></div> 
+                         
                    <div class="clearboth" ></div>
                    </div>
+                    <div class="toolbar"><button class="btn_addpretask">添加预制</button><button class="btn_addrelatedtask">添加关联</button><div class="buttons"><button class="btn_addfollowtask">添加善后</button><input type="text"  class="rinput ipt_followupdays" id="ipt_followupdays" value="1" style="width: 3rem;" /></div></div>
+    
                </div>
                <div class="tabs_body " set:text="guide.logs"></div>
            </div>
@@ -73,7 +77,7 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
                 var tls=document.querySelectorAll("#task tr.taskitem[taskid]");
                 tls.forEach(function(t){
                     var thetask=Calendar.findtask(t.getAttribute("taskid"));
-                    console.log(t.getAttribute("taskid")+":"+$common.taskclass(thetask));
+                    //console.log(t.getAttribute("taskid")+":"+$common.taskclass(thetask));
                     t.setAttribute("class",$common.taskclass(thetask)+" taskitem");
                 });
             },
@@ -125,6 +129,11 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
                sm.ajax.url("db/callproc.func").callproc("caiyankun.taskplant_list").then(function(d){
                     //Calendar.taskplantlist=sm.data.smdata(d).objarray();
                     Calendar.taskplantlist=sm.data.smdata(d).tabledata();
+                    //在这里转义引号-------
+                    Calendar.taskplantlist.forEach(function(tp){
+                        tp.rule=$$.decodequot(tp.rule);
+                    });
+                    //在这里转义引号-------
                     if(!$common.dofruiting()){
                         $common.taskplantlist=[];
                         $common.taskplantlist=Calendar.taskplantlist;//刷新任务树显示
@@ -146,7 +155,7 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
                 $common.guide.id=tid;
                 sm.ajax.url("db/callproc.func").callproc("caiyankun.tasklog_detail",[tid]).then(function(d){
                     var thelog=sm.data.smdata(d).tabledata()[0];
-                    console.log(thelog);
+                    //console.log(thelog);
                     if(thelog&&thelog.id){
                         Calendar.updatelog(tid,thelog.guide,thelog.logs,false);
                         $$.safemerge.apply($common.guide,[Calendar.findlog(tid)]);
@@ -196,6 +205,57 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
                     });
                 },function(d){
                     alert("保存任务指导失败！");
+                });
+            },
+            ".btn_addrelatedtask":function(e,el,ds){
+                //先进行远程的更新，成功了再进行本地的更新
+                var curtask=Calendar.findtask($common.guide.id);
+                var nt= Calendar.newtask(curtask.category,$common.guide.process,Calendar.curdate10(),"2100/01/01","",curtask.id+Calendar.random8());
+                var id=nt.id;
+                var paras=sm.db.toparastr(nt,{id:"",category:"",name:"",createdate:nt.createdate,activedate:"",deactivedate:""});
+                sm.ajax.callproc("caiyankun.task_update",[id,paras]).then(function(d){
+                    $common.tasklist=[];
+                    $common.tasklist=Calendar.tasklist;//这个怎么办，好像不会自动触发变动....
+                    $common.pullpagedata();
+                    $common.guide.process="";
+                    alert("创建关联任务成功！");
+                },function(d){
+                    alert("创建关联任务有错误发生"+d);
+                });
+            },
+            ".btn_addfollowtask":function(e,el,ds){
+                //先进行远程的更新，成功了再进行本地的更新
+                var curtask=Calendar.findtask($common.guide.id);
+                var fd=document.body.querySelector("#ipt_followupdays").value;
+                var ad=Calendar.curdate10(Calendar.timeadd(new Date(),fd));
+                var nt= Calendar.newtask(curtask.category,$common.guide.process,ad,"2100/01/01","",curtask.id+"f");
+                var id=nt.id;
+                var paras=sm.db.toparastr(nt,{id:"",category:"",name:"",createdate:nt.createdate,activedate:"",deactivedate:""});
+                sm.ajax.callproc("caiyankun.task_update",[id,paras]).then(function(d){
+                    $common.tasklist=[];
+                    $common.tasklist=Calendar.tasklist;//这个怎么办，好像不会自动触发变动....
+                    //$common.pullpagedata();
+                    document.body.querySelector(".btn_finishtask").click();
+                    //$common.guide.process="";
+                    alert("创建善后任务成功！");
+                },function(d){
+                    alert("创建善后任务有错误发生"+d);
+                });
+            },
+            ".btn_addpretask":function(e,el,ds){
+                //先进行远程的更新，成功了再进行本地的更新
+                var curtask=Calendar.findtask($common.guide.id);
+                var nt= Calendar.newtask(curtask.category,$common.guide.process,Calendar.curdate10(),"2100/01/01","",curtask.id+"pre");
+                var id=nt.id;
+                var paras=sm.db.toparastr(nt,{id:"",category:"",name:"",createdate:nt.createdate,activedate:"",deactivedate:""});
+                sm.ajax.callproc("caiyankun.task_update",[id,paras]).then(function(d){
+                    $common.tasklist=[];
+                    $common.tasklist=Calendar.tasklist;//这个怎么办，好像不会自动触发变动....
+                    $common.pullpagedata();
+                    $common.guide.process="";
+                    alert("创建pretask成功！");
+                },function(d){
+                    alert("创建pretask有错误发生"+d);
                 });
             },
             ".btn_misstask":function(e,el,ds){
@@ -270,9 +330,9 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
             ".tabs_bodys .tabs_body":function(ownerel,el,text){
                 if(text==="新建任务"){
                     $$.safemerge.apply($common.taskform,[{id:"",name:"",category:"",activedate:"",deactivedate:""}]);
-                    sm.dialog.show("#taskform","新建任务","新建.btn_addtask,放弃");
+                    sm.dialog.show("#taskform","新建任务","新建321.btn_addtask321,新建213.btn_addtask213,新建.btn_addtask,放弃");
                 } else if(text==="刷新列表"){
-                    console.log("dddddd");
+                   // console.log("dddddd");
                 } else if (text==="新建任务树") {
                     $$.safemerge.apply($common.taskplantform,[{id:"",name:"",category:"",activedate:"",rule:Calendar.ruletips}]);
                     sm.dialog.show("#taskplantform","新建任务树","新建.btn_addtaskplant,放弃");
@@ -296,11 +356,85 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
                     alert("有错误发生"+d);
                 });
             },
+            ".btn_addtask321":function(){
+                //先进行远程的更新，成功了再进行本地的更新
+                var nt= Calendar.newtask($common.taskform.category,$common.taskform.name,$common.taskform.activedate,$common.taskform.deactivedate);
+                var id=nt.id;
+                var baseid=id;
+                var paras=sm.db.toparastr(nt,{id:"",category:"",name:"",createdate:nt.createdate,activedate:"",deactivedate:""});
+                var parasarray=[];
+                parasarray.push([id,paras]);
+                var yesterday=Calendar.curdate10(Calendar.timeadd(new Date(nt.activedate),-1));
+                nt= Calendar.newtask(nt.category,"明天:"+nt.name,yesterday,nt.deactivedate,"",baseid+"2");
+                id=nt.id;
+                paras=sm.db.toparastr(nt,{id:"",category:"",name:"",createdate:nt.createdate,activedate:"",deactivedate:""});
+                parasarray.push([id,paras]);
+                yesterday=Calendar.curdate10(Calendar.timeadd(new Date(nt.activedate),-1));
+                nt= Calendar.newtask(nt.category,"后天:"+nt.name.replace(/^明天:/,""),yesterday,nt.deactivedate,"",baseid+"3");
+                id=nt.id;
+                paras=sm.db.toparastr(nt,{id:"",category:"",name:"",createdate:nt.createdate,activedate:"",deactivedate:""});
+                parasarray.push([id,paras]);
+                
+                sm.ajax.multicallproc("caiyankun.task_update",parasarray).then(function(d){
+                    $common.tasklist=[];
+                    $common.tasklist=Calendar.tasklist;//这个怎么办，好像不会自动触发变动....
+                    sm.dialog.close();
+                    $$.safemerge.apply($common.taskform,[{id:"",name:"",category:"",activedate:"",deactivedate:""}]);
+                    $common.pullpagedata();
+                },function(d){
+                    alert("有错误发生"+d);
+                });
+            },
+            ".btn_addtask213":function(){
+                //先进行远程的更新，成功了再进行本地的更新
+                var nt= Calendar.newtask($common.taskform.category,$common.taskform.name,$common.taskform.activedate,$common.taskform.deactivedate);
+                var id=nt.id;
+                var baseid=id;
+                var paras=sm.db.toparastr(nt,{id:"",category:"",name:"",createdate:nt.createdate,activedate:"",deactivedate:""});
+                var parasarray=[];
+                parasarray.push([id,paras]);
+                var yesterday=Calendar.curdate10(Calendar.timeadd(new Date(nt.activedate),-1));
+                nt= Calendar.newtask(nt.category,"明天:"+nt.name,yesterday,nt.deactivedate,"",baseid+"2");
+                id=nt.id;
+                paras=sm.db.toparastr(nt,{id:"",category:"",name:"",createdate:nt.createdate,activedate:"",deactivedate:""});
+                parasarray.push([id,paras]);
+                yesterday=Calendar.curdate10(Calendar.timeadd(new Date(nt.activedate),-1));
+                nt= Calendar.newtask(nt.category,"后天:"+nt.name.replace(/^明天:/,""),yesterday,nt.deactivedate,"",baseid+"3");
+                id=nt.id;
+                paras=sm.db.toparastr(nt,{id:"",category:"",name:"",createdate:nt.createdate,activedate:"",deactivedate:""});
+                parasarray.push([id,paras]);
+                yesterday=Calendar.curdate10(Calendar.timeadd(new Date(nt.activedate),-5));
+                nt= Calendar.newtask(nt.category,"下周:"+nt.name.replace(/^后天:/,""),yesterday,nt.deactivedate,"",baseid+"7");
+                id=nt.id;
+                paras=sm.db.toparastr(nt,{id:"",category:"",name:"",createdate:nt.createdate,activedate:"",deactivedate:""});
+                parasarray.push([id,paras]);
+                yesterday=Calendar.curdate10(Calendar.timeadd(new Date(nt.activedate),-7));
+                nt= Calendar.newtask(nt.category,"两周后:"+nt.name.replace(/^下周:/,""),yesterday,nt.deactivedate,"",baseid+"14");
+                id=nt.id;
+                paras=sm.db.toparastr(nt,{id:"",category:"",name:"",createdate:nt.createdate,activedate:"",deactivedate:""});
+                parasarray.push([id,paras]);
+                sm.ajax.multicallproc("caiyankun.task_update",parasarray).then(function(d){
+                    $common.tasklist=[];
+                    $common.tasklist=Calendar.tasklist;//这个怎么办，好像不会自动触发变动....
+                    sm.dialog.close();
+                    $$.safemerge.apply($common.taskform,[{id:"",name:"",category:"",activedate:"",deactivedate:""}]);
+                    $common.pullpagedata();
+                },function(d){
+                    alert("有错误发生"+d);
+                });
+            },
             ".btn_addtaskplant":function(){
                 var nt=Calendar.newtaskplant($common.taskplantform.category,$common.taskplantform.name,$common.taskplantform.rule,$common.taskplantform.activedate);
                 var id=nt.id;
+                //在这里转义引号
+                console.log(id);
+                nt.rule=$$.codequot(nt.rule);
+                console.log(nt.rule);
                 var paras=sm.db.toparastr(nt,{id:"",category:"",name:"",createdate:nt.createdate,activedate:"",rule:""});
-                sm.ajax.callproc("caiyankun.taskplant_update",[id,paras]).then(function(d){
+                console.log(paras);
+                nt.rule=$$.decodequot(nt.rule);
+                //在这里转义引号
+                sm.ajax.url("db/callproc.func").callproc("caiyankun.taskplant_update",[id,paras]).then(function(d){
                     $common.taskplantlist=[];
                     $common.taskplantlist=Calendar.taskplantlist;//这个怎么办，好像不会自动触发变动....
                     sm.dialog.close();
@@ -328,9 +462,10 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
             },
             ".btn_savetaskplant":function(){
                 var id=$common.taskplantform.id;//当执行任务树的更改时的时候确保把friuteddate清空
+                //在这里转义引号
+                $common.taskplantform.rule=$$.codequot($common.taskplantform.rule);
                 var paras=sm.db.toparastr($common.taskplantform,{id:"",category:"",name:"",activedate:"",rule:"",fruiteddate:""});
-                console.log($common.taskplantform.id);
-                console.log("------"+paras+"------");
+
                 sm.ajax.callproc("caiyankun.taskplant_update",[id,paras]).then(function(d){
                     Calendar.updatetaskplant($common.taskplantform);
                     $common.taskplantlist=[];
@@ -339,6 +474,7 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
                     $$.safemerge.apply($common.taskplantform,[{id:"",name:"",category:"",activedate:"",rule:""}]);
                     $common.pullpagedata();//如果有更新任务，会自动刷新列表的
                 },function(d){
+                    $common.taskplantform.rule=$$.decodequot($common.taskplantform.rule);
                     sm.dialog.msg("有错误发生！！！"+d);
                 });
             },

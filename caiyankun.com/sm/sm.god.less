@@ -32,7 +32,7 @@ body {
         display: inline-block;
         border:@border-size solid @border-color;
         border-radius:.25rem;
-        min-width: 2 rem;
+        min-width: 20 rem;
         height: 2rem;
         //padding: 0.5rem-@border-size;
         padding: auto;
@@ -294,7 +294,7 @@ body {
         width:100%;
         .tabs_body{
             width:100%;
-            min-height: 300px;
+            min-height: 31.5rem;
             background-color: #fff;;
             display:none;
             padding-top: 1rem;
@@ -349,7 +349,7 @@ body {
         width:100%;
         position:relative;
         min-height: 6rem;
-        min-width: 16rem;
+        min-width: 20rem;
         padding-top: 1rem;
         //padding: 1rem;
         div#sm_modal_msg{
@@ -467,4 +467,19 @@ div.form,form {
 @keyframes spinAround  {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+
+
+@media all  and (max-width: 768px) {
+    #sm_modal {
+        .bodypart{
+            width: 21.5rem;
+        }
+    }
+    div.form,form {
+        label {
+            text-align: left;
+        }
+    }
 }

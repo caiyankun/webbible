@@ -63,9 +63,9 @@ class db {
         
     }
     public function callproc($procname,$paras=[]){
-        if($procname=="caiyankun.taskplant_update"){
-            \Response::returntaskfail("存储过程调用失败！",\Db::$error,$paras);
-        }
+        //if(strcmp($procname,"caiyankun.taskplant_update")==0){
+           // \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
+        //}
         
         $parasarray=json_decode($paras);
         if(is_array($parasarray)){
