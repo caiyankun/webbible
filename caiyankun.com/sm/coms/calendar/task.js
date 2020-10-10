@@ -105,6 +105,13 @@ Calendar={
         for(var i in Calendar.tasklist){
             if(Calendar.tasklist[i].id===id){return Calendar.tasklist[i];}
         }
+        return false;
+    },
+    haspretask:function(t){
+        for(var i in Calendar.tasklist){
+            if(Calendar.tasklist[i].id.match(new RegExp("^"+t.id+"pre")) && Calendar.tasklist[i].deactivedate>Calendar.curdate10()){return true;}
+        }
+        return false;
     },
     deletetask:function(id="",startdate=""){
         if(id===""){Calendar.tasklist=[]; return this;}

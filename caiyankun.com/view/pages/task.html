@@ -83,6 +83,10 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
             },
             taskclass:function(t){
                 //if (!t||!t.deactivedate||!t.result||!t.touchdate){return "error";}
+                if(Calendar.haspretask(t)){
+                   //如果存在预置任务并且预置任务没有完成，那么就不显示主任务
+                    return "hide";
+                } else  
                 var td=Calendar.curdate10();
                 if(t.deactivedate<=td) {return t.result;}
                 var touches=t.touchdate&&(t.touchdate.split(","));
@@ -245,7 +249,7 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
             ".btn_addpretask":function(e,el,ds){
                 //先进行远程的更新，成功了再进行本地的更新
                 var curtask=Calendar.findtask($common.guide.id);
-                var nt= Calendar.newtask(curtask.category,$common.guide.process,Calendar.curdate10(),"2100/01/01","",curtask.id+"pre");
+                var nt= Calendar.newtask(curtask.category,$common.guide.process,Calendar.curdate10(),"2100/01/01","",curtask.id+"pre"+Calendar.random8());
                 var id=nt.id;
                 var paras=sm.db.toparastr(nt,{id:"",category:"",name:"",createdate:nt.createdate,activedate:"",deactivedate:""});
                 sm.ajax.callproc("caiyankun.task_update",[id,paras]).then(function(d){
@@ -448,6 +452,7 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
                 //先进行远程的更新，成功了再进行本地的更新
                 var id=$common.taskform.id;
                 var paras=sm.db.toparastr($common.taskform,{id:"",category:"",name:"",activedate:"",deactivedate:""});
+                console.log(paras);
                 sm.ajax.callproc("caiyankun.task_update",[id,paras]).then(function(d){
                     Calendar.updatetask($common.taskform);
                     $common.tasklist=[];
