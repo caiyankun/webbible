@@ -92,8 +92,8 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
                 var touches=t.touchdate&&(t.touchdate.split(","));
                 var maxtouch=touches&&touches.pop();
                 if (!maxtouch){
-                    //如果Touch day是空，说明你创建了以后一直没处理过，maxtouchday应该是创建日期
-                    maxtouch=t.activedate;
+                    //如果Touch day是空，说明你创建了以后一直没处理过，maxtouchday应该是创建日期-1
+                    maxtouch=Calendar.curdate10(Calendar.timeadd(new Date(t.activedate),-1));
                 }
                 if(maxtouch>td){
                     //说明你把它推迟了
