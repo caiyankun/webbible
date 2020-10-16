@@ -11,7 +11,7 @@
 html {
     font-size:16px;
 }
-body {
+body,textArea {
     /*默认样式*/
     box-sizing: border-box;
     margin: 0 rem;
@@ -253,6 +253,18 @@ body {
         }
     }
 }
+textArea{
+    font-size: 0.8rem;
+}
+.flex-container{
+    display: flex;
+    div {
+        display: block;
+        flex-basis: 0;
+        flex-grow: 0;
+        flex-shrink: 0;
+    }
+}
 
 .tabs {
     border-width: 1px;
@@ -439,6 +451,7 @@ div.form,form {
     display: none;
     position:absolute;
 }
+
 
 @container:{
     

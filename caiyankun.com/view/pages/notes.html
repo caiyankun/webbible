@@ -1,25 +1,26 @@
-<div class="layui-row layui-col-space1">
-        <div class="layui-col-xs12 layui-col-md6">
-            <div class="">
-                <div class="layui-row">
-                    <input type="text" class="layui-input" placeholder="请输入关键词.." id="keyword"  >
-
-                        <div class="layui-btn-group " style="float:right;margin-top: -39px">
-                            <button type="button" class="layui-btn right"  onclick="readlist();">查询</button>
-                            <button type="button" class="layui-btn right "  onclick="savecontent();">保存</button>
-                            <button type="button" class="layui-btn right"  onclick="deleteitem();">删除</button>
-                        </div>
-
-                </div>
-                
-                
-                <div view-com="table" ></div>
+<div class="columns">
+    <div class="column" style="min-width:20rem;min-height: 16rem;">
+        <div class="flex-container control">
+            <div style="flex-grow: 1;">
+                <input class="linput" placeholder="请输入关键词.." id="keyword" style="width:100%;box-sizing: border-box;"/>
+            </div>
+            <div style="flex:none;">
+                <button onclick="readlist();" class="" style="margin-left:0.5rem">查询</button>
+                <button onclick="savecontent();" class="">保存</button>
             </div>
         </div>
-        <div class="layui-col-xs12 layui-col-md6">
-            <textarea class="form-control" rows="40" id="contentediter" style="width:100%"></textarea>
-        </div>
+        <table id="notelist">
+           <tr set:hide="{{$notelist}}"><td>请输入关键字进行搜索！！！</td></tr>
+           <tr for:="(_i,_k,_v) in notelist" class="noteitem" rmenu="删除任务" set:display="{{$notelist}}" set:noteid="{{$_v.id}}"><td>{{$_v.title}}</td></tr>
+       </table>
+    </div>
+    <div class="column" style="min-width:20rem;min-height: 16rem;">
+        <textarea rows="40" id="contentediter" style="width:100%"></textarea>
+    </div>
 </div>
+
+
+
 <style>
 </style>
 <script>
@@ -27,7 +28,8 @@
         var keyword=document.getElementById("keyword").value;
         sm.db.db("caiyankun").tb("ebox").list({filterinfo:keyword}).then(function(d){
             console.log(d);
-            $table.clear().write(d.data);
+            $common.notelist=d.data;
+            //$table.clear().write(d.data);
             //document.getElementById("diaryediter").value=d.data[4][1];
         });
     }
@@ -60,15 +62,28 @@
         
 
     }
-     sm.view.aftercominit("table",function(){
-        this.onclickcell=function(td){
-            console.log(this.getkey(td).value);
-            sm.db.db("caiyankun").tb("ebox").detail({id:this.getkey(td).value}).then(function(d){
-                console.log(d);
-                document.getElementById("contentediter").value=d.data[0][1]+"-"+d.data[4][1]+"-"+d.data[6][1]+"\n|=====|\n"+d.data[7][1];
-            });
-         }
-     });
+    sm.document.ready(function(){
+        sm.menu.initrmenu();
+        sm.menu.addclickevent({
+            "tr.noteitem":function(ownerel,el,text){
+                var theid=ownerel.getAttribute("noteid");
+                sm.db.db("caiyankun").tb("ebox").delete({id:theid}).then(function(d){
+                    readlist();
+                    //document.getElementById("diaryediter").value=d.data[4][1];
+                });
+            },
+        });
+        $common.watchdom({
+            ".noteitem@click":function(e,el,ds){
+                var theid=el.getAttribute("noteid");
+                sm.db.db("caiyankun").tb("ebox").detail({id:theid}).then(function(d){
+                    console.log(d);
+                    document.getElementById("contentediter").value=d.data[0][1]+"-"+d.data[4][1]+"-"+d.data[6][1]+"\n|=====|\n"+d.data[7][1];
+                });
+            },
+        });
+    });
+
     
     
 </script>

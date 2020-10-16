@@ -9,8 +9,14 @@ sm.route.watch({
         });
         
     },
+    "#newnotes.html":function(){
+        sm.coms.require(["less"]).then(function(){
+            sm.view.makeui("noname",["view/pages/newnotes.html"]); 
+        });
+        
+    },
     "#notes.html":function(){
-        sm.coms.require(["layui"]).then(function(){
+        sm.coms.require(["less"]).then(function(){
             sm.view.makeui("noname",["view/pages/notes.html"]); 
         });
         
