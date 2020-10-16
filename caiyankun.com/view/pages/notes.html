@@ -56,6 +56,8 @@
         sm.db.db("caiyankun").tb("ebox").update({id:fields[0],contents:'domain="'+fields[1]+'",title="'+fields[2]+'",content="'+realcontent+'"'}).then(function(d){
             sm.dialog.msg("已保存！");
             console.log(d);
+        },function(d){
+            sm.dialog("保存出错："+d);
         });
         console.log(contents.split("\n|=====|\n")[0]);
         //console.log(contents.split("\r\n|=====|\r\n")[1]);
