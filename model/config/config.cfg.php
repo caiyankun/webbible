@@ -7,7 +7,7 @@ return [
 	'ROUTERULE_DOMAIN'=>"routerule",//路由权限规则表在配置中的哪个domain
 	'DEFAULT_MODELRIGHT'=>1,//默认的继承自Model类的类执行所需要的用户权限
         'REQUEST_LIMIT'=>false,//配置全局的是否限制只响应POST请求
-	'GUESTUSER'=>["uid"=>0,"uname"=>"请登录","nickname"=>"请登录","role"=>0],//当用户未登录时查询用户信息所显示的内容
+	'GUESTUSER'=>["uid"=>0,"uname"=>"请登录","nickname"=>"请登录","ulevel"=>0],//当用户未登录时查询用户信息所显示的内容
 	//'MODELFAIL_BASEPATH'=>ENTRY_PATH,丢弃
 	//'ROUTEFAIL_BASEPATH'=>ENTRY_PATH,丢弃
 	'NOROUTERIGHT_PAGE'=>"pages/norouteright.page.php",//没有路由权限时显示的页面

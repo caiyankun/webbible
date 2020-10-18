@@ -13,7 +13,7 @@ namespace model;
  *
  * @author Kevin
  */
-class img {
+class img extends \Model{
     public $logfile=ENTRY_PATH."img.log";
     public function uploadimg($cat,$folder,$name=""){
         $log="enter uploading";

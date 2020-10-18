@@ -45,8 +45,8 @@ function object_to_array($obj) {
 
 class User
 {
-    public static $guestuser=["uid"=>0,"uname"=>"请登录","nickname"=>"请登录","role"=>0];
-    public static $curuser=["uid"=>5,"uname"=>"cai_yankun@qq.com","nickname"=>"蔡艳坤","role"=>5];
+    public static $guestuser=["uid"=>0,"uname"=>"请登录","nickname"=>"请登录","ulevel"=>0];
+    public static $curuser=["uid"=>5,"uname"=>"cai_yankun@qq.com","nickname"=>"蔡艳坤","ulevel"=>5];
     public static $data=null;
     public static $error=0;
     public static $info="";

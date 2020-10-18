@@ -2100,6 +2100,19 @@ God.coms("user").extend({
         if((!sm.user.info.ulevel)||(sm.user.info.ulevel<right)){sm.user.error(1,"您没有权限！");}
         return sm.user;
     },
+    islogin:function(level=100){
+        return new Promise(function(resolve,reject){
+            sm.ajax.url("user/getcurrentuser.func").smpost().then(function(d){
+                if(d.ulevel && d.ulevel>=level){
+                    return resolve("权限足够！");
+                } else {
+                    return reject("权限不足！");
+                }
+            },function(d){
+                return reject("程序执行出错！");
+            });
+        });
+    },
     getinfo:function(){},
     login:function(){},
 });//方便记录修改用户信息

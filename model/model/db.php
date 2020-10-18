@@ -2,7 +2,7 @@
 
 namespace model;
 
-class db {
+class db extends \Model {
     public function attempjson($p) {
         try { 
             $rs=json_decode($p);

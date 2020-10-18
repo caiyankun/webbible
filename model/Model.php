@@ -19,8 +19,11 @@ class Model
     public static $failcode=null;
     public static $result=null;
     function __construct() {
+        
 	is_null($this->accesslevel)&&($this->accesslevel=DEFAULT_MODELRIGHT);
-	User::checkright($this->accesslevel)||$this->noright();
+        //\Response::returntaskok(\User::info());
+        //exit(0);
+	\User::checkright($this->accesslevel)||$this->noright();
    }
 
    public function noright(){

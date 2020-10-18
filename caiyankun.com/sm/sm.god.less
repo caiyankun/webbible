@@ -256,13 +256,50 @@ body,textArea {
 textArea{
     font-size: 0.8rem;
 }
+
 .flex-container{
     display: flex;
+    width: 100%;
+    height: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    min-width: 20rem;
     div {
         display: block;
         flex-basis: 0;
         flex-grow: 0;
         flex-shrink: 0;
+    }
+    div.fluid{
+        flex-grow: 1;
+    }
+    &.control{
+        height: 2rem;
+    }
+    div.block {
+        display:block;
+        margin: 0.5rem;
+        border-radius: 0.5rem;
+        height: 8rem;
+        min-width: 8rem;
+        background-color: #f0f0f0;
+        flex-basis: 0;
+        flex-grow: 1;
+        flex-shrink: 0;
+        line-height: 8rem;
+        text-align: center;
+        &:hover {
+            background-color: #e0e0e0;
+            color: blue;
+            cursor: pointer;
+        }
+        &.disabled{
+            background-color: #fcfcfc;
+            color:gray;
+            &:hover{
+                color:gray;
+            }
+        }
     }
 }
 
@@ -451,6 +488,7 @@ div.form,form {
     display: none;
     position:absolute;
 }
+
 
 
 @container:{

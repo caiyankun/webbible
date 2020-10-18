@@ -27,7 +27,7 @@
     function readlist(){
         var keyword=document.getElementById("keyword").value;
         sm.db.db("caiyankun").tb("ebox").list({filterinfo:keyword}).then(function(d){
-            console.log(d);
+            //console.log(d);
             $common.notelist=d.data;
             //$table.clear().write(d.data);
             //document.getElementById("diaryediter").value=d.data[4][1];

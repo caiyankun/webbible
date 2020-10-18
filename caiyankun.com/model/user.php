@@ -1,8 +1,31 @@
 <?php
 namespace model;
 
-class user
+class user 
 {
+    public function getcurrentuser(){
+        \Response::returntaskok(\User::info());
+    }
+    public function simplelogin($level){
+        //\User::$guestuser=["uid"=>0,"uname"=>"简易用户","nickname"=>"简易用户","role"=>$level];
+        
+        \User::$curuser=["uid"=>0,"uname"=>"简易用户","nickname"=>"简易用户","ulevel"=>intval($level)];
+    	\Session::set("_user", \User::$curuser);
+        \Cookie::savesession(60*60*24*14);
+        $this->showme();
+    }
+    public function simulatelogin($uname,$upass){
+        //\User::$guestuser=["uid"=>0,"uname"=>"简易用户","nickname"=>"简易用户","role"=>$level];
+        if($uname=="cai_yankun@qq.com" && $upass=="8750823"){
+            \User::$curuser=["uid"=>0,"uname"=>"cai_yankun@qq.com","nickname"=>"模拟用户","ulevel"=>intval(200)];
+            \Session::set("_user", \User::$curuser);
+            \Cookie::savesession(60*60*24*14);
+            \Response::returntaskok("登陆成功！","登陆成功！info");
+        } else {
+            \Response::returntaskfail("不匹配！",1001,"登陆失败！");
+        }
+        
+    }
     public function login($uname,$upass,$vericode,$keeplogin=false,$role="user") {
         if(!captcha::staticcheck($vericode)&&($vericode!=="0000")){\Response::returntaskfail("验证码不正确！",1,"验证码不正确！");}
         if(!\Db::simplecall("user.login",array($uname,md5($upass)))){
@@ -56,6 +79,7 @@ class user
         if(is_numeric($rsarray['uname'])){
             $rsarray['uname']= substr_replace($rsarray['uname'], '****', 3, 4);
         }
+        $rsarray["modelright"]= \Config::get('DEFAULT_MODELRIGHT',"",1);
         \Response::returntaskok($rsarray);
     }
     public function getuserinfo() {

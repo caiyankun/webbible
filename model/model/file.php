@@ -13,7 +13,7 @@ namespace model;
  *
  * @author Kevin
  */
-class file {
+class file extends \Model{
     public function glob($path="",$filefilter="*",$folderfilter="*") {
         $entrypath=ENTRY_PATH;
         $fpath=ENTRY_PATH;

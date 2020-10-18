@@ -1,41 +1,53 @@
 sm.route.watch({
     "^\s*$":function(){
-       sm.view.makeui("noname",["view/pages/index.html"]); 
+       sm.coms.require(["less"]).then(function(){
+            sm.view.makeui("noname",["view/pages/index.html"]); 
+        });
     },
     "#test.html":function(){
         console.log("已经过来了啊!");
         sm.coms.require(["less"]).then(function(){
             sm.view.makeui("noname",["view/pages/test.html"]); 
         });
-        
     },
-    "#newnotes.html":function(){
+    "#user.html":function(){
+        console.log("已经过来了啊!");
         sm.coms.require(["less"]).then(function(){
-            sm.view.makeui("noname",["view/pages/newnotes.html"]); 
+            sm.view.makeui("noname",["view/pages/user.html"]); 
         });
         
     },
     "#notes.html":function(){
-        sm.coms.require(["less"]).then(function(){
-            sm.view.makeui("noname",["view/pages/notes.html"]); 
+        sm.coms.require(["less","calendar"]).then(function(){
+            sm.user.islogin(100).then(function(){
+                sm.view.makeui("noname",["view/pages/notes.html"]); 
+            },function(){
+                sm.view.makeui("noname",["view/pages/user.html"]); 
+            });
         });
-        
     },
     "#editor.html":function(){
-        sm.coms.require(["less"]).then(function(){
-            sm.view.makeui("noname",["view/pages/editor.html"]); 
+        sm.coms.require(["less","calendar"]).then(function(){
+            sm.user.islogin(100).then(function(){
+                sm.view.makeui("noname",["view/pages/editor.html"]); 
+            },function(){
+                sm.view.makeui("noname",["view/pages/user.html"]); 
+            });
         });
     },
     "#task.html":function(){
         sm.coms.require(["less","calendar"]).then(function(){
-            sm.view.makeui("noname",["view/pages/task.html"]); 
+            sm.user.islogin(100).then(function(){
+                sm.view.makeui("noname",["view/pages/task.html"]); 
+            },function(){
+                sm.view.makeui("noname",["view/pages/user.html"]); 
+            });
         });
     },
     "#index.html":function(){
-       sm.coms.require(["jquery","bootstrap.v3"]).then(function(){
+       sm.coms.require(["less"]).then(function(){
             sm.view.makeui("noname",["view/pages/index.html"]); 
         });
-       
     },
 
     /////更多的路由请插在这里之前    
