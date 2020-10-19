@@ -305,9 +305,9 @@ textArea{
 table.calendar.month {
     td {
         min-width: 2rem;
-        height:2rem;
+        height:4rem;
         background-color: #eee;
-        line-height: 2rem;
+        line-height: 4rem;
         font-size: 1.5rem;
         border-radius: 0.5rem;
         border-color: transparent;
@@ -315,11 +315,32 @@ table.calendar.month {
         color:#aaa;
         cursor: default;
         position: relative;
+        padding:0;
+        box-sizing: borderbox;
         div {
-            position: absolute;
-            top: 0;
-            left:0;
-            font-size:0.8rem;
+            &.left.top{
+                position: absolute;
+                display: block;
+                top: 0.2rem;
+                left:0.2rem;
+                
+                font-size:0.3rem;
+                line-height: 0.7rem;
+            }
+            &.bottom.right {
+                position: absolute;
+                display: block;
+                bottom: 0.2rem;
+                right:0.2rem;
+                height: 0.7rem;
+                min-width: 1rem;
+                font-size:0.3rem;
+                border-radius: 0.2rem;
+                background-color: rgba(255,0,0,0.5);;
+                color: rgba(255,255,255,0.5);
+                padding: 0.05rem;
+                line-height: 0.7rem;
+            }
         }
         &:hover {
             background-color: #bbb;

@@ -2,12 +2,17 @@
 
 <div view-com-tpl="calendar" class="calendar">
     <div class="toolbar ">
-        <div class="buttons flex-container control" style="min-width: 28rem;">
+        <div class="buttons flex-container control" style="margin-left: 0;">
             <button class="btn_today">回到今天</button><button class="btn_lastyear"><<</button><button class="btn_lastmonth"><</button><div class="fluid"><input set:get:value="sdate" class="midinput ipt_date" style="width:100%;text-align: center;" /></div><button class="btn_nextmonth">></button><button class="btn_nextyear">>></button>
         </div>
     </div>
     <table class="calendar month" >
+        
+      
+        
         <tr><td class="disabled">一</td><td class="disabled">二</td><td class="disabled">三</td><td class="disabled">四</td><td class="disabled">五</td><td class="disabled">六</td><td class="disabled">日</td></tr>
+
+
         <tr><td>1</td><td>31</td><td></td><td></td><td></td><td></td><td></td></tr>
         <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
         <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
@@ -25,7 +30,14 @@
             _tbel:el.querySelector("table"),
             sdate:Calendar.curdate10(),
         }).method({
+            dealdatetdel:function(tdel,thedate){
+                
+            },
+            onsetdate:function(date){
+                
+            },
             setdate:function(date){
+                this.onsetdate(date);
                 if(!date){date=this.sdate;}
                 //if(date===this.sdate){} else {this.sdate=}
                 var el=this._tbel;
@@ -41,12 +53,14 @@
                     var thedate=Calendar.timeadd(oms,i-rd);
                     //console.log(thedate.getDate());
                     tdel.innerHTML=thedate.getDate();
-                    var tlunar=sm.newel("<div></div>");
+                    //tdel.innerHTML="";
+                    var tlunar=sm.newel("<div class='left top'></div>");
                     var lunarmontharray=["正月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","腊月"];
                     var lunararry=["初一","初二","初三","初四","初五","初六","初七","初八","初九","初十","十一","十二","十三","十四","十五","十六","十七","十八","十九","廿十","廿一","廿二","廿三","廿四","廿五","廿六","廿七","廿八","廿九","三十"];
                     tlunar.innerHTML=lunararry[Calendar.Lunar(thedate).day-1];
                     if(Calendar.Lunar(thedate).day===1){tlunar.innerHTML=lunarmontharray[Calendar.Lunar(thedate).month-1];}
                     tdel.appendChild(tlunar);
+                    
                     if(thedate.getMonth()===od.getMonth()){
                         if(thedate.getDate()===od.getDate()){
                             tdel.setAttribute("class","date focus selected");
@@ -60,6 +74,7 @@
                         tdel.setAttribute("style","color:red");
                     } 
                     tdel.setAttribute("date",Calendar.curdate10(thedate));
+                    this.dealdatetdel(tdel,thedate);
                 }
             }
         }).watchdom({
