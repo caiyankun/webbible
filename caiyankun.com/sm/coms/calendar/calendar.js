@@ -28,9 +28,13 @@ Calendar={
             if(value>0){
                 ny=oy+Math.floor((om+value)/12);
                 nm=(om+value)%12+1;
+                
             } else {
                 ny=oy+Math.floor((om+value)/12);
-                nm=12+(om+value)%12+1;
+                nm=(om+value)%12+1;
+                if(nm===0){nm=12};
+                if(nm<0){nm=12+nm;}
+                
             }
         } else if (bywhat==="year"){
             ny=oy+value;

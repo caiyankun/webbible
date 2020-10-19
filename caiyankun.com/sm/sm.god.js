@@ -1202,6 +1202,8 @@ init:function (com="body",deepinit=1,pdataspace=""){
     //console.log(sm.view.data.common);
     var comname=$el.getAttribute("com:");
     var needinit=$el.getAttribute("oncominit");
+    //console.log($el.outerHTML);
+    //console.log("-----看看这个前面！！");
     //首先确保该组件下没有尚未实例化的组件引用，没有的话开始进行初始化
     var promise=new Promise(function(resolve,reject){
         me.comrefinit($el,dataspace).then(function(d){
@@ -1210,8 +1212,15 @@ init:function (com="body",deepinit=1,pdataspace=""){
             view._el=$el;
             //console.log("init el"+$el);
             //console.log($el);
-            if(comname&&needinit){sm.view.dooncominit(comname,view,$el,ods,pdataspace);}
-            $el.removeAttribute("oncominit");
+            //console.log(comname);
+            //console.log(needinit);
+            if(comname&&needinit){
+            //if(comname){
+                //console.log("满足初始化条件");
+                sm.view.dooncominit(comname,view,$el,ods,pdataspace);
+                //console.log("初始化完了啊");
+                //$el.removeAttribute("oncominit");
+            }
             me.comset($el,dataspace,deepinit);
             me.comget($el,dataspace,deepinit);
             me.watchdata(dataspace);

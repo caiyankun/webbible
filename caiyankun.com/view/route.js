@@ -10,6 +10,12 @@ sm.route.watch({
             sm.view.makeui("noname",["view/pages/test.html"]); 
         });
     },
+    "#date.html":function(){
+
+        sm.coms.require(["less"]).then(function(){
+            sm.view.makeui("noname",["view/pages/date.html"]); 
+        });
+    },
     "#user.html":function(){
         console.log("已经过来了啊!");
         sm.coms.require(["less"]).then(function(){

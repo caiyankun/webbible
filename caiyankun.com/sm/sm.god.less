@@ -302,6 +302,56 @@ textArea{
         }
     }
 }
+table.calendar.month {
+    td {
+        min-width: 2rem;
+        height:2rem;
+        background-color: #eee;
+        line-height: 2rem;
+        font-size: 1.5rem;
+        border-radius: 0.5rem;
+        border-color: transparent;
+        text-align: center;
+        color:#aaa;
+        cursor: default;
+        position: relative;
+        div {
+            position: absolute;
+            top: 0;
+            left:0;
+            font-size:0.8rem;
+        }
+        &:hover {
+            background-color: #bbb;
+        }
+        &.focus {
+            background-color: #d9d9d9;
+            color:#333;
+            &.selected {
+                background-color: #bbb;
+            }
+            &:hover {
+                background-color: #bbb;
+            }
+        }
+        &.disabled {
+            background-color: #eee;
+            &:hover {
+                background-color: #eee;
+            }
+        }
+    }
+    tr {
+        background-color: #fff;
+        border-color: transparent;
+        &:hover{
+            background-color: #fff;
+        }
+        &.focus {
+            
+        }
+    }
+}
 
 .tabs {
     border-width: 1px;

@@ -4,6 +4,7 @@
             <div class="tabs_titles">
                <div class="tabs_title active"><button>任务</button></div>
                <div class="tabs_title"><button>周期任务</button></div>
+               <div class="tabs_title"><button>日历</button></div>
            </div>
            <div class="tabs_bodys">
                <div class="tabs_body active" rmenu="新建任务,刷新列表">
@@ -18,6 +19,9 @@
                         <tr for:="(_i,_k,_v) in taskplantlist"  class="taskplantitem"  rmenu="编辑任务树,删除任务树" set:display="{{$taskplantlist}}" set:taskplantid="{{$_v.id}}"><td>{{$_v.name}}</td></tr>
                    </table>
                    <button class="btn_fruiting" style="display:none;">任务树收获</button>
+               </div>
+               <div class="tabs_body "  >
+                   <div view-com="calendar"></div>
                </div>
            </div>
         </div>
