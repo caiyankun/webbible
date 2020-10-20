@@ -193,6 +193,20 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
                 });
             },
             ".btn_savelogs":function(e,el,ds){
+                //对指导参数进行了预先分批次上传到cache的功能
+                sm.ajax.uploadtocache($common.guide.guide).then(function(d){
+                    sm.ajax.url("db/callprochascache.func").callproc("caiyankun.tasklog_update",[$common.guide.id,"cache..cache",$common.guide.process?$common.guide.process:"更新了指导"]).then(function(d){
+                       Calendar.updatelog($common.guide.id,$common.guide.guide,$common.guide.process?$common.guide.process:"更新了指导");
+                        $common.guide.process="";
+                        $$.safemerge.apply($common.guide,[Calendar.findlog($common.guide.id)]);
+                        $common.pullpagedata();
+                    },function(d){
+                        alert("保存任务指导失败！"+d);
+                    });
+                },function(d){
+                    alert("保存任务指导cache失败！"+d);
+                });
+                /*
                 sm.ajax.url("db/callproc.func").callproc("caiyankun.tasklog_update",[$common.guide.id,$common.guide.guide,$common.guide.process?$common.guide.process:"更新了指导"]).then(function(d){
                    Calendar.updatelog($common.guide.id,$common.guide.guide,$common.guide.process?$common.guide.process:"更新了指导");
                     $common.guide.process="";
@@ -201,6 +215,7 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
                 },function(d){
                     alert("保存任务指导失败！"+d);
                 });
+                */
                 
             },
             ".btn_finishtask":function(e,el,ds){
