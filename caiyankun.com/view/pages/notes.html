@@ -53,13 +53,28 @@
             if(fields.length==2) {fields=[0].concat(fields);}
             var realcontent=contentarr[1];
         }
+        
+        //当文字超过500字节的时候有问题，需要分成500字节分开进行
+        sm.ajax.uploadtocache(realcontent).then(function(d){
+            var strcontent='domain="'+fields[1]+'",title="'+fields[2]+'",content="cache..cache"';
+            sm.ajax.url("db/callprochascache.func").callproc("ebox_update",[fields[0],strcontent,"","",""]).then(function(d){
+                sm.dialog.msg("已保存！");
+                console.log(d);
+            },function(d){
+                sm.dialog.msg("保存出错："+d);
+            });
+        },function(d){
+            sm.dialog.msg("cache保存出错："+d);
+        });
+        /*
         sm.db.db("caiyankun").tb("ebox").update({id:fields[0],contents:'domain="'+fields[1]+'",title="'+fields[2]+'",content="'+realcontent+'"'}).then(function(d){
             sm.dialog.msg("已保存！");
             console.log(d);
         },function(d){
             sm.dialog.msg("保存出错："+d);
         });
-        console.log(contents.split("\n|=====|\n")[0]);
+         */
+        //console.log(contents.split("\n|=====|\n")[0]);
         //console.log(contents.split("\r\n|=====|\r\n")[1]);
         
 
@@ -69,6 +84,7 @@
         sm.menu.addclickevent({
             "tr.noteitem":function(ownerel,el,text){
                 var theid=ownerel.getAttribute("noteid");
+                console.log("为什么呢");
                 sm.db.db("caiyankun").tb("ebox").delete({id:theid}).then(function(d){
                     readlist();
                     //document.getElementById("diaryediter").value=d.data[4][1];

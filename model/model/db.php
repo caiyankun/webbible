@@ -62,6 +62,33 @@ class db extends \Model {
         
         
     }
+    public function callprochascache($procname,$paras=[]){
+        //if(strcmp($procname,"caiyankun.taskplant_update")==0){
+           // \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
+        //}
+        
+        $parasarray=json_decode($paras);
+        $newpara=array();
+        if(is_array($parasarray)){
+        } else{
+            $parasarray= explode(",", $paras);
+        }
+       $cache=\File::getsessioncache();
+       
+       //$i=0;
+       foreach($parasarray as $k => $v){
+           $nv= str_replace("cache..cache", $cache, $v);
+           //array_push($newpara,array($k=>$nv));
+           array_push($newpara,$nv);
+           //array_splice($parasarray, $i,1,array($k => $nv));
+           //$i++;
+        }
+        if(!\Db::simplecall($procname, $newpara)){
+            \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);
+        } else {
+            \Response::returntaskok(\Db::cubedatawithtitle());
+        }
+    }
     public function callproc($procname,$paras=[]){
         //if(strcmp($procname,"caiyankun.taskplant_update")==0){
            // \Response::returntaskfail("存储过程调用失败！",\Db::$error,\Db::$info);

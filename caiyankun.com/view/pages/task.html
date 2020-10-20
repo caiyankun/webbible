@@ -491,9 +491,32 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
                 });
             },
         });
-        
         //开始从远程查找并初始化Task，TaskPlant列表；
         $common.pullpagedata();
+        
+        //初始化月程
+        //获取起始时间和终止时间
+
+        $calendar.method({
+            dealdatetdel:function(tdel,thedate){
+                var tc=this.taskcount(Calendar.curdate10(thedate));
+                var ti=this.taskinfo(Calendar.curdate10(thedate));
+                if (tc===0){
+                    //tdel.appendChild(sm.newel("<div class='bottom right'>"+this.taskcount()+"</div>"));
+                } else {
+                    tdel.appendChild(sm.newel("<div class='bottom right'>"+tc+"</div>"));
+                    tdel.setAttribute("jstooltip",ti);
+                }
+            },
+            refreshtask:function(){
+                sm.ajax.url("db/callproc.func").callproc("task_monthlist",[$calendar.firstdate(),$calendar.enddate()]).then(function(d){
+                    $calendar.tasklist=sm.data.smdata(d).tabledata();
+                    $calendar.setdate();
+                });
+            }
+        });
+        
+        $calendar.refreshtask();
     });
 });
 </script>

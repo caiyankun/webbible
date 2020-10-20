@@ -36,6 +36,39 @@
             onsetdate:function(date){
                 
             },
+            firstdate:function(){
+                var tbel=this._tbel;
+                return tbel.querySelectorAll("tr")[1].querySelectorAll("td")[0].getAttribute("date");
+            },
+            enddate:function(){
+                var tbel=this._tbel;
+                return tbel.querySelectorAll("tr")[6].querySelectorAll("td")[6].getAttribute("date");
+            },
+            taskcount:function(thedate){
+                var rs=0;
+                $calendar.tasklist||($calendar.tasklist=[]);
+                $calendar.tasklist.forEach(function(item){
+                    if(item.activedate===thedate){
+                        rs++;
+                    }
+                });
+                return rs;
+            },
+            taskinfo:function(thedate){
+                var rs="";
+                $calendar.tasklist||($calendar.tasklist=[]);
+                $calendar.tasklist.forEach(function(item){
+                    if(item.activedate===thedate){
+                        if(rs===""){
+                            rs=item.name;
+                        } else {
+                            rs=rs+"<br>"+item.name;
+                        }
+                    }
+                });
+                return rs;
+            },
+            refreshtask:function(){},
             setdate:function(date){
                 this.onsetdate(date);
                 if(!date){date=this.sdate;}
@@ -80,6 +113,7 @@
         }).watchdom({
             "input.ipt_date@change":function(e,el,ds){
                 this.setdate();
+                this.refreshtask();
             },
             "td.date@click":function(e,el,ds){
                 //alert(el.getAttribute("date"));
@@ -88,6 +122,7 @@
                 //$$.removeclass(tbel.querySelector("td.selected"),"selected");
                 this.sdate=el.getAttribute("date");
                 this.setdate();
+                this.refreshtask();
             },
             "button.btn_lastyear@click":function(e,el,ds){
                 if(this.sdate===""){this.sdate=Calendar.curdate10(new Date());}
@@ -95,6 +130,7 @@
                 var tdate=Calendar.timeadd(cdate,-1,"year");
                 this.sdate=Calendar.curdate10(tdate);
                 this.setdate();
+                this.refreshtask();
             },
             "button.btn_nextyear@click":function(e,el,ds){
                 if(this.sdate===""){this.sdate=Calendar.curdate10(new Date());}
@@ -102,6 +138,7 @@
                 var tdate=Calendar.timeadd(cdate,1,"year");
                 this.sdate=Calendar.curdate10(tdate);
                 this.setdate();
+                this.refreshtask();
             },
             "button.btn_lastmonth@click":function(e,el,ds){
                 if(this.sdate===""){this.sdate=Calendar.curdate10(new Date());}
@@ -111,6 +148,7 @@
                 console.log(tdate);
                 this.sdate=Calendar.curdate10(tdate);
                 this.setdate();
+                this.refreshtask();
             },
             "button.btn_nextmonth@click":function(e,el,ds){
                 if(this.sdate===""){this.sdate=Calendar.curdate10(new Date());}
@@ -118,14 +156,17 @@
                 var tdate=Calendar.timeadd(cdate,1,"month");
                 this.sdate=Calendar.curdate10(tdate);
                 this.setdate();
+                this.refreshtask();
             },
             "button.btn_today@click":function(e,el,ds){
                 this.sdate=Calendar.curdate10(new Date());
                 this.setdate();
+                this.refreshtask();
             },
         });
         console.log("inited com: calendar");
         el.removeAttribute("oncominit");
         this.setdate();
+        this.refreshtask();
     });
 </script>

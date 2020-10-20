@@ -233,6 +233,17 @@ window.domevent_cb=[];//这里存储所有的whatch DOM相关的回调函数
 window.domevent_listener=[];//这里存储所有的whatch DOM相关的回调函数
 
 God.coms("func").extendproto({
+utf8len:function(str){
+    /*
+    0000 - 007F 0xxxxxxx （1字节）
+    0080 - 07FF 110xxxxx 10xxxxxx （2字节）
+    0800 - FFFF 1110xxxx 10xxxxxx 10xxxxxx （3字节）
+    */
+    str=str.replace(/[\u0000-\u007F]/g,"a");
+    str=str.replace(/[\u0080-\u07FF]/g,"bb");
+    str=str.replace(/[\u0800-\uFFFF]/g,"ccc");
+    return str.length;
+},
 matchedparentel:function(el,selector){
     if(el&&el.matches&&el.matches("body *")){
         while (!el.matches("body")){
@@ -482,6 +493,36 @@ God.coms("ajax").extend({
         url:"#",
     },   
 }).extendproto({
+uploadtocache:function(data,prefix="",totalsize=0){
+    if(data===""){return new Promise(function(resolve,reject){return resolve(totalsize);});}
+    if(data.length<400){
+        return new Promise(function(resolve,reject){
+            sm.ajax.url("file/cache.func").smpost({content:data,start:totalsize,prefix:prefix}).then(function(d){
+                if(d){return resolve(totalsize+d);} else {return reject(-2);}
+            },function(d){
+                return reject(-1);
+            });
+        });
+    } else {
+        var cdata=data.substr(0,400);
+        data=data.substr(400);
+        return new Promise(function(resolve,reject){
+            sm.ajax.url("file/cache.func").smpost({content:cdata,start:totalsize,prefix:prefix}).then(function(d){
+                if(d){
+                    sm.ajax.uploadtocache(data,prefix,totalsize+d).then(function(d){
+                        return resolve(d);
+                    },function(d){
+                        return reject(d);
+                    });
+                } else {
+                    return reject(-2);
+                }
+            },function(d){
+                return reject(-1);
+            });
+        });
+    }
+},
 type:function(newtype){this.setup({type:newtype});return this;},//设置POST的Type：POST，GET
 data:function(newdata){this.setup({data:newdata});return this;},//设置POST的数据
 url:function(newurl){this.setup({url:newurl});return this;},//设置POST的网址
@@ -2576,6 +2617,13 @@ God.coms("menu").extendproto({
             return document.body.querySelector("#sm_lmenu");
         }
     },
+    tooltipdivel:function(){
+        if(!document.body.querySelector("#sm_tooltip")){
+            return sm.newel('<div class="tooltip"  id="sm_tooltip" style="display:block;top:0px;left:0px;"></div>');
+        } else {
+            return document.body.querySelector("#sm_tooltip");
+        }
+    },
     makelmenu:function(str){
         var rm=sm.menu.lmenudivel();
         rm.innerHTML="";
@@ -2610,8 +2658,8 @@ God.coms("menu").extendproto({
         }
         var tm=sm.menu.menudivel();
         tm.setAttribute("style","position:absolute;display:none;z-index:1000;");
-        tm.style.top=top;
-        tm.style.left=left;
+        tm.style.top=top+ "px";
+        tm.style.left=left+"px";
         tm.setAttribute("style",tm.getAttribute("style")+stylestr);
         if(classstr){
             var tc=tm.getAttribute("class");
@@ -2643,9 +2691,9 @@ God.coms("menu").extendproto({
                     sm.menu.stopdefault(ev);//阻止鼠标的默认事件
                     var ev = ev || event;
                     var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-                    var left = ev.clientX + "px";
+                    var left = ev.clientX ;
                     //当滑动滚动条时也能准确获取菜单位置
-                    var top = ev.clientY + scrollTop + "px";
+                    var top = ev.clientY + scrollTop ;
                     
                     
                     var tgt="#sm_error_nocontextmenu";
@@ -2671,6 +2719,54 @@ God.coms("menu").extendproto({
             });
         });
     },
+    inittooltip:function(){
+        sm.document.ready(function(){
+            document.body.addEventListener("mouseover",function(ev){
+                var el  = ev.srcElement || ev.target;
+                if(el.matches("[jstooltip]")||el.matches("[jstooltip] *")){
+                    var ev = ev || event;
+                    if(!el.matches("[jstooltip]")){el=$$.matchedparentel(el,"[jstooltip]");}
+                    //console.log("mouse in!");
+                        var left = $$.getElementLeft(el);
+                        var top = $$.getElementTop(el)+el.scrollHeight;
+                        var msg=el.getAttribute("jstooltip").split("@")[0];
+                        sm.menu.tooltipdivel().innerHTML=msg;
+                        el.setAttribute("showingmenuismine","tooltip");
+                        var tgt="#sm_tooltip";
+                        var direction=(msg===el.getAttribute("jstooltip")?"auto":el.getAttribute("jstooltip").split("@")[1]);
+                        //console.log(direction);
+                        sm.menu.show(tgt,top,left,"","","tooltip");
+                        var selfheight=sm.menu.tooltipdivel().scrollHeight;
+                        var selfwidth=sm.menu.tooltipdivel().scrollWidth;
+                        if(direction==="left"){
+                            top=top-el.scrollHeight;
+                            left=left-selfwidth;
+                        } else if(direction==="right"){
+                            top=top-el.scrollHeight;
+                            left=left+el.scrollWidth;
+                        } else if (direction==="top"){
+                            top=top-selfheight-el.scrollHeight;
+                        } else {
+                            
+                        }
+                        sm.menu.show(tgt,top,left,"","","tooltip");
+                    return false;
+                }
+            });
+            document.body.addEventListener("mouseout",function(ev){
+                var el  = ev.srcElement || ev.target;
+                if(el.matches("[jstooltip]")||el.matches("[jstooltip] *")){
+                    var ev = ev || event;
+                    //console.log("mouse out!");
+                    var tm=sm.menu.menudivel();
+                    if((tm.style.display!=="none")&&(tm.getAttribute("showwhat")==="tooltip")){
+                            sm.menu.hide();
+                    } 
+                    return false;
+                }
+            });
+        });
+    },
     initlmenu:function(){
         sm.menu.initeventmap();
         sm.document.ready(function(){
@@ -2685,7 +2781,7 @@ God.coms("menu").extendproto({
                     if(el.hasAttribute("lmenuref")||el.hasAttribute("lmenu")){
                         var ev = ev || event;
                         var scrollTop = el.scrollTop+el.scrollHeight;
-                        var left = $$.getElementLeft(el) + "px";
+                        var left = $$.getElementLeft(el);
                         //当滑动滚动条时也能准确获取菜单位置
                         var top = $$.getElementTop(el)+el.scrollHeight;
                         el.setAttribute("showingmenuismine","lmenu");

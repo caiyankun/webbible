@@ -35,4 +35,33 @@ class File {
          */
         return mkdir($path,"0777",true);
     }
+    public static function cachefilepath($prefix=""){
+        $fp=CACHE_PATH.\Session::id().".cache".$prefix;
+        if(!File::isdir(CACHE_PATH)){
+            self::mkdir(CACHE_PATH);
+        }
+        return $fp;
+    }
+    public static function putsessioncache($str,$prefix=""){
+        $fp=self::cachefilepath($prefix);
+        $t=file_put_contents($fp, $str);
+        return $t;
+    }
+    public static function getsessioncache($prefix=""){
+        $fp=self::cachefilepath($prefix);
+        return file_get_contents($fp);
+    }
+    public static function appendsessioncache($str,$prefix=""){
+        $fp=self::cachefilepath($prefix);
+        $t=file_put_contents($fp, $str,FILE_APPEND );
+        return $t;
+    }
+    public static function deletesessioncache($prefix=""){
+        $fp=self::cachefilepath($prefix);
+        $t=file_put_contents($fp, "");
+        return true;
+    }
+    public static function savecacheas($path,$prefix=""){
+        return rename(self::cachefilepath($prefix), $path);
+    }
 }

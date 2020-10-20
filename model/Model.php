@@ -63,7 +63,7 @@ class Model
 	
         if (!empty($obj)&&$obj->isInstantiable()) {
             if($obj->hasMethod ($funcname)) {
-                //存在这个方法，就开始执行这个方法
+                //
                 
             } else {
                 return false;

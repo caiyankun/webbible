@@ -75,4 +75,19 @@ class file extends \Model{
         }
         
     }
+    public function cache($content,$start="",$prefix=""){
+       // \Response::returntaskok(\File::cachefilepath());
+        //exit(0);
+        if(empty($start)){
+            \Response::returntaskok(\File::putsessioncache($content,$prefix));
+        } else {
+            \Response::returntaskok(\File::appendsessioncache($content,$prefix));
+        }
+    }
+    public function readcache($prefix=""){
+        \Response::returntaskok(\File::getsessioncache($prefix));
+    }
+    public function cachesaveas($path,$prefix=""){
+        \Response::returntaskok(\File::savecacheas($path,$prefix));
+    }
 }
