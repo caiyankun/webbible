@@ -33,6 +33,7 @@
             dealdatetdel:function(tdel,thedate){
                 
             },
+            onclickdate:function(date){},
             onsetdate:function(date){
                 
             },
@@ -123,6 +124,7 @@
                 this.sdate=el.getAttribute("date");
                 this.setdate();
                 this.refreshtask();
+                this.onclickdate(this.sdate);
             },
             "button.btn_lastyear@click":function(e,el,ds){
                 if(this.sdate===""){this.sdate=Calendar.curdate10(new Date());}

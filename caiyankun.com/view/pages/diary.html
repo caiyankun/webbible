@@ -1,0 +1,96 @@
+<div class="columns">
+    <div class="column">
+        <div class="panel">
+            <div view-com="calendar"></div>
+        </div>
+    </div>
+    <div class="column">
+        <div  class="tabs">
+            <div class="tabs_titles">
+               <div class="tabs_title active"><button>KPI</button></div>
+               <div class="tabs_title"><button>日记</button></div>
+           </div>
+           <div class="tabs_bodys">
+               <div class="tabs_body active" style="padding-bottom: 0rem;" >
+                   <div class="form" style="padding-bottom: 0rem;">
+                        <label>体重</label><input set:get:value="diary.weight"  placeholder="请记录体重..." />
+                        <label>形象</label><input set:get:value="diary.xingxiang"  placeholder="洗脸，刷牙，头发，胡子，衣服..."/>
+                        <label>作息</label><input set:get:value="diary.zuoxi"  placeholder="早睡早起..."/>
+                        <label>心情</label><input set:get:value="diary.xinqing"  placeholder="有没有自卑..."/>
+                        <div class="clearboth"></div>
+                   <div class="clearboth" ></div>
+                   </div>
+                   <button class="btn_savekpi" style="margin: 0.5rem;float: right;">保存KPI</button>
+    
+               </div>
+               <div class="tabs_body " >
+                   <p set:hide="diary.hasdiary">不能编辑将来的日记哦！！！</p>
+                   <textarea style="min-height: 28rem;margin-top: -0.3rem;" set:get:value="diary.content" set:display="diary.hasdiary" set:enable="diary.cansavediary"></textarea>
+                   <button class="btn_savediary" style="margin: 0.5rem;float: right;" set:display="diary.cansavediary">保存日记</button>
+               </div>
+           </div>
+        </div>        
+    </div>
+</div>
+
+
+
+
+<script>
+sm.document.ready(function(){//等文档加载完成后再执行下面的代码
+    sm.view.init().then(function(){//优先进行视图类机制的初始化，各子部件的初始化可能需要依赖这个
+        sm.tabs.init();//初始化标签控件
+        $calendar.method({
+            onclickdate:function(date){
+                //alert(date);
+                this.refreshtask();
+                //如果点击的日期是今天，那么允许更新日记
+                if(date===Calendar.curdate10()){
+                    $common.diary.cansavediary=true;
+                } else {$common.diary.cansavediary=false;}
+                //如果点击的日期是明天及之后的日期，那么隐藏日记编辑框
+                if(date>Calendar.curdate10()){
+                    $common.diary.hasdiary=false;
+                } else {$common.diary.hasdiary=true;}
+                
+                sm.ajax.url("db/callproc.func").callproc("diary_detail",[date]).then(function(d){
+                    var item=sm.data.smdata(d).tabledata()[0];
+                    console.log(item);
+                    $common.diary.content=item.content;
+                    //console.log($calendar.diarystatlist);
+                });
+            },
+            dealdatetdel:function(tdel,thedate){
+                this.diarystatlist||(this.diarystatlist=[]);
+                this.diarystatlist.forEach(function(item){
+                    //console.log(item.date);
+                    //console.log(Calendar.curdate10(thedate));
+                    if(item.date===Calendar.curdate10(thedate)){
+                        tdel.appendChild(sm.newel("<div class='bottom right'>1</div>"));
+                    }
+                });
+            },
+            refreshtask:function(){
+                //$calendar.tasklist=[];
+                sm.ajax.url("db/callproc.func").callproc("diary_statlist",[$calendar.firstdate(),$calendar.enddate()]).then(function(d){
+                    $calendar.diarystatlist=sm.data.smdata(d).tabledata();
+                    $calendar.setdate();
+                    //console.log($calendar.diarystatlist);
+                });
+            }
+        });
+        $common.watchdom({
+            ".btn_savediary":function(e,el,ds){
+                sm.ajax.url("db/callproc.func").callproc("diary_update",[$common.diary.content]).then(function(d){
+                    alert("日记保存成功！"+d);
+                    //console.log($calendar.diarystatlist);
+                },function(d){
+                    alert("日记保存出错："+d);
+                });
+            },
+        });
+        $calendar.refreshtask();
+        
+    });
+});
+</script>

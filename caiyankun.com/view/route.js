@@ -32,6 +32,15 @@ sm.route.watch({
             });
         });
     },
+    "#diary.html":function(){
+        sm.coms.require(["less","calendar"]).then(function(){
+            sm.user.islogin(100).then(function(){
+                sm.view.makeui("noname",["view/pages/diary.html"]); 
+            },function(){
+                sm.view.makeui("noname",["view/pages/user.html"]); 
+            });
+        });
+    },
     "#editor.html":function(){
         sm.coms.require(["less","calendar"]).then(function(){
             sm.user.islogin(100).then(function(){
