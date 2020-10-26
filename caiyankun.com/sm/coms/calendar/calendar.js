@@ -59,6 +59,12 @@ Calendar={
         var tstr=t.getFullYear()+"/"+tm+"/"+td;
         return tstr;
     },
+    curdate5:function(datevar){
+        return this.curdate10(datevar).substr(5);
+    },
+    curlunardate5:function(datevar){
+        return this.Lunar(this.curdate10(datevar)).date10.substr(5);
+    },
     random8:function(){
         var bid=10000000;
         bid=bid*Math.random()+bid;
@@ -169,7 +175,7 @@ Calendar={
             }
         }
     },
-     updatetaskplant:function(o){
+    updatetaskplant:function(o){
         for(var i in Calendar.taskplantlist){
             if(Calendar.taskplantlist[i].id===o.id){
                 //console.log(o);
@@ -367,3 +373,11 @@ Calendar={
 };
 
  
+
+
+
+
+
+
+
+
