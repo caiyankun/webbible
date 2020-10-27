@@ -523,6 +523,16 @@ sm.document.ready(function(){//等文档加载完成后再执行下面的代码
                     tdel.setAttribute("jstooltip",ti);
                 }
             },
+            taskcount:function(thedate){
+                var rs=0;
+                $calendar.tasklist||($calendar.tasklist=[]);
+                $calendar.tasklist.forEach(function(item){
+                    if(item.activedate===thedate){
+                        if(item.name.substr(0,2)!=="[]"){rs++;}
+                    }
+                });
+                return rs;
+            },
             refreshtask:function(){
                 sm.ajax.url("db/callproc.func").callproc("task_monthlist",[$calendar.firstdate(),$calendar.enddate()]).then(function(d){
                     $calendar.tasklist=sm.data.smdata(d).tabledata();
