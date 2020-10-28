@@ -1,4 +1,26 @@
+<div class="floaticon" lmenu="主页.navtohome,日程表.navtocalendar,记事本.navtonotes,编辑器.navtoeditor,日记本.navtodairy"></div>
 <div layout="noname" class="layui-row">
 </div>
 
-
+<script>
+    sm.document.ready(function(){
+        sm.menu.initlmenu();
+        sm.menu.addevent({
+            ".navtocalendar@.floaticon":function(){
+                location.hash='task.html';
+            },
+            ".navtohome@.floaticon":function(){
+                location.hash='index.html';
+            },
+            ".navtonotes@.floaticon":function(){
+                location.hash='notes.html';
+            },
+            ".navtoeditor@.floaticon":function(){
+                location.hash='editor.html';
+            },
+            ".navtodairy@.floaticon":function(){
+                location.hash='diary.html';
+            },
+        });
+    });
+</script>

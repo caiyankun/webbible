@@ -1,7 +1,10 @@
 sm.route.watch({
     "^\s*$":function(){
        sm.coms.require(["less"]).then(function(){
-            sm.view.makeui("noname",["view/pages/index.html"]); 
+            sm.view.makeui("noname",["view/pages/index.html"]).then(function(){
+                sm.document.title("网络工具!");
+                //sm.menu.initlmenu();
+            }); 
         });
     },
     "#test.html":function(){
@@ -11,7 +14,6 @@ sm.route.watch({
         });
     },
     "#date.html":function(){
-
         sm.coms.require(["less"]).then(function(){
             sm.view.makeui("noname",["view/pages/date.html"]); 
         });
@@ -19,49 +21,70 @@ sm.route.watch({
     "#user.html":function(){
         console.log("已经过来了啊!");
         sm.coms.require(["less"]).then(function(){
-            sm.view.makeui("noname",["view/pages/user.html"]); 
+            sm.view.makeui("noname",["view/pages/user.html"]).then(function(){
+                sm.document.title("用户注册/登陆!");
+            }); 
         });
-        
     },
     "#notes.html":function(){
         sm.coms.require(["less","calendar"]).then(function(){
             sm.user.islogin(100).then(function(){
-                sm.view.makeui("noname",["view/pages/notes.html"]); 
+                sm.view.makeui("noname",["view/pages/notes.html"]).then(function(){
+                    sm.document.title("网络记事本!");
+                    //sm.menu.initlmenu();
+                }); 
             },function(){
                 sm.view.makeui("noname",["view/pages/user.html"]); 
+                sm.document.title("用户注册/登陆!");
             });
         });
     },
     "#diary.html":function(){
         sm.coms.require(["less","calendar"]).then(function(){
             sm.user.islogin(100).then(function(){
-                sm.view.makeui("noname",["view/pages/diary.html"]); 
+                sm.view.makeui("noname",["view/pages/diary.html"]).then(function(){
+                    sm.document.title("日记!");
+                    //sm.menu.initlmenu();
+                }); 
             },function(){
                 sm.view.makeui("noname",["view/pages/user.html"]); 
+                sm.document.title("用户注册/登陆!");
             });
         });
     },
     "#editor.html":function(){
         sm.coms.require(["less","calendar"]).then(function(){
             sm.user.islogin(100).then(function(){
-                sm.view.makeui("noname",["view/pages/editor.html"]); 
+                sm.view.makeui("noname",["view/pages/editor.html"]).then(function(){
+                    sm.document.title("网络编辑器!");
+                    //sm.menu.initlmenu();
+                }); 
             },function(){
                 sm.view.makeui("noname",["view/pages/user.html"]); 
+                sm.document.title("用户注册/登陆!");
             });
         });
     },
     "#task.html":function(){
         sm.coms.require(["less","calendar"]).then(function(){
             sm.user.islogin(100).then(function(){
-                sm.view.makeui("noname",["view/pages/task.html"]); 
+                sm.view.makeui("noname",["view/pages/task.html"]).then(function(){
+                    sm.document.title("日程管理!");
+                    //sm.menu.initlmenu();
+                }); 
             },function(){
-                sm.view.makeui("noname",["view/pages/user.html"]); 
+                sm.view.makeui("noname",["view/pages/user.html"]).then(function(){
+                    sm.document.title("用户注册/登陆!");
+                }); 
             });
         });
     },
     "#index.html":function(){
        sm.coms.require(["less"]).then(function(){
-            sm.view.makeui("noname",["view/pages/index.html"]); 
+            sm.view.makeui("noname",["view/pages/index.html"]).then(function(){
+                sm.document.title("网络工具!");
+                //sm.menu.initlmenu();
+            }); 
         });
     },
 

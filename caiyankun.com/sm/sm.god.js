@@ -2649,7 +2649,9 @@ God.coms("menu").extendproto({
             if(items[k]==="hr"){
                 rm.appendChild(sm.newel('<a class="dropdown-item hr" ></a>'));
             } else {
-                rm.appendChild(sm.newel('<a class="dropdown-item" >'+items[k]+'</a>'));
+                var txt=items[k].split(".")[0];
+                var cls=(txt===items[k])?txt:items[k].split(".")[1];
+                rm.appendChild(sm.newel('<a class="dropdown-item '+cls+'" >'+txt+'</a>'));
             }
         }
     },
@@ -2661,7 +2663,9 @@ God.coms("menu").extendproto({
             if(items[k]==="hr"){
                 rm.appendChild(sm.newel('<a class="dropdown-item hr" ></a>'));
             } else {
-                rm.appendChild(sm.newel('<a class="dropdown-item" >'+items[k]+'</a>'));
+                var txt=items[k].split(".")[0];
+                var cls=(txt===items[k])?txt:items[k].split(".")[1];
+                rm.appendChild(sm.newel('<a class="dropdown-item '+cls+'" >'+txt+'</a>'));
             }
         }
     },
@@ -2699,7 +2703,9 @@ God.coms("menu").extendproto({
         }
     },
     initrmenu:function(){
-        sm.menu.initeventmap();
+        //sm.menu.initeventmap();
+        this.addclickevent({});
+        this.addevent({});
         sm.document.ready(function(){
             console.log('右键事件已经拦截！');
             document.body.addEventListener("contextmenu",function(ev){
@@ -2735,8 +2741,10 @@ God.coms("menu").extendproto({
                 } 
             });
         });
-    },
+    },//这些函数决定了点哪个元素的时候会显示菜单
     inittooltip:function(){
+        //this.addevent({});
+        //this.addclickevent({});
         sm.document.ready(function(){
             document.body.addEventListener("mouseover",function(ev){
                 var el  = ev.srcElement || ev.target;
@@ -2785,9 +2793,11 @@ God.coms("menu").extendproto({
         });
     },
     initlmenu:function(){
-        sm.menu.initeventmap();
+        //sm.menu.initeventmap();
+        this.addclickevent({});
+        this.addevent({});
         sm.document.ready(function(){
-            console.log('右键单击事件已经拦截！');
+            console.log('单击事件已经拦截！');
             document.body.addEventListener("click",function(ev){
                 var tm=sm.menu.menudivel();
                 if((tm.style.display!=="none")&&(tm.getAttribute("showwhat")==="lmenu")){
@@ -2824,8 +2834,8 @@ God.coms("menu").extendproto({
             sm.menu.eventmap={};
             document.body.addEventListener("click",function(ev){
                 var el  = ev.srcElement || ev.target;
-                if(el.matches("body>#sm_menu a")){
-                    var ownerel=document.body.querySelector("[showingmenuismine]");
+                if(el.matches("body>#sm_menu a")){//说明单击的确实是菜单的条目
+                    var ownerel=document.body.querySelector("[showingmenuismine]");//这个是单击的有[rmenu] [lmenu]的元素的子元素
                     Object.keys(sm.menu.eventmap).forEach(function(k){
                         var ak=k.split("/")[0];
                         if(ak===""){ak="*";}
@@ -2840,11 +2850,41 @@ God.coms("menu").extendproto({
                 }
             });
         }
-    },
+    },//
+    initneweventmap:function(){
+        if(!$$.isdefined(sm.menu.neweventmap)){
+            sm.menu.neweventmap={};
+            document.body.addEventListener("click",function(ev){
+                var el  = ev.srcElement || ev.target;
+                if(el.matches("body>#sm_menu a")){//说明单击的确实是菜单的条目
+                    var ownerel=document.body.querySelector("[showingmenuismine]");//这个是单击的有[rmenu] [lmenu]的元素的子元素
+                    Object.keys(sm.menu.neweventmap).forEach(function(k){
+                        var slts=k.split("/")[0];
+                        var slt=slts.split("@")[0];
+                        var ak=slts.split("@")[1]||"";
+                        if(ak===""){ak="*";}
+                        ownerel.matches(ak+" *") && (ownerel=$$.matchedparentel(ownerel ,ak));
+                        if(ownerel.matches(ak) && el.matches(slt)){
+                            var cb=sm.menu.neweventmap[k];
+                            cb(ownerel,el,el.textContent);
+                        }
+                    });
+                    //console.log(ownerel);
+                    //console.log(el.textContent);
+                }
+            });
+        }
+    },//
     addclickevent:function(eventmap){
+      this.initeventmap();
       if(!$$.isdefined(sm.menu.eventmap)){sm.menu.eventmap={};}
       $$.merge.apply(sm.menu.eventmap,[eventmap]);
-    },
+    },//这个其实是定义的所单击的那个元素的的事件，而不是单击的菜单的条目，有点乱，准备放弃
+    addevent:function(eventmap){
+        this.initneweventmap();
+        $$.merge.apply(sm.menu.neweventmap,[eventmap]);
+    },//后续准备扶植这个函数，格式：所单击的 菜单条目的selector@菜单拥有元素的selector
+    
 });
 God.coms("tabs").extendproto({
     to:function(tgt){
